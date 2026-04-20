@@ -281,9 +281,15 @@ async function generateMaster(preset, key) {
 }
 
 async function deriveSizes(masterPath, key) {
+  // Three breakpoints to support responsive srcset:
+  //   -1600 → desktop 2x-retina (up to 800px display)
+  //   -800  → tablet / desktop 1x (up to 600px display, mobile 2x-retina up to 400)
+  //   -400  → phone 1x (up to 400px), thumbnails, card-in-cart
+  // WebP already handles quality well; we keep q between 78–82.
   const variants = [
     { suffix: "-1600", width: 1600, quality: 82 },
-    { suffix: "-800", width: 800, quality: 80 },
+    { suffix: "-800",  width: 800,  quality: 80 },
+    { suffix: "-400",  width: 400,  quality: 78 }
   ];
   for (const v of variants) {
     const outPath = path.resolve(OUT_DIR, `${key}${v.suffix}.webp`);

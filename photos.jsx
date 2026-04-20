@@ -1,8 +1,25 @@
 // Photography map — locally generated via scripts/generate-image.mjs (Gemini 3.1 Flash Image)
-// Masters live in /images as .webp. Use -800 / -1600 suffixes for derived sizes.
+// Masters live in /images as .webp. Suffixes -400 / -800 / -1600 are derived sizes
+// generated locally via sharp from the 2K master. Browser picks via srcset below.
 // Bump IMG_V whenever you re-run gen:image so browsers drop cached copies.
-const IMG_V = '3';
+const IMG_V = '4';
 const L = (key, size) => `./images/${key}${size ? `-${size}` : ""}.webp?v=${IMG_V}`;
+
+// Given any src we produce (either -400/-800/-1600/master), return a srcset
+// string with all three breakpoints so <img> can pick the right one by DPR + viewport.
+// Returns null if the src doesn't match our generated-image pattern (e.g. external URL).
+window.photoSrcSet = (src) => {
+  if (typeof src !== 'string') return null;
+  const m = src.match(/\.\/images\/([^?]+?)(?:-\d+)?\.webp(\?[^ ]*)?$/);
+  if (!m) return null;
+  const key = m[1];
+  const q = m[2] || '';
+  return [
+    `./images/${key}-400.webp${q} 400w`,
+    `./images/${key}-800.webp${q} 800w`,
+    `./images/${key}-1600.webp${q} 1600w`
+  ].join(', ');
+};
 window.PHOTOS = {
   lagoon:     L("hero-lagoon", "1600"),
   lagoonBoat: L("sailboat-bacalar", "1600"),
@@ -109,15 +126,29 @@ window.tourGallery = (tour) => {
   return shots;
 };
 
-// Photo component — real image with gradient scrim + mono caption
+// Photo component — real image with gradient scrim + mono caption.
+// Automatically generates srcset so the browser picks the smallest image that
+// still satisfies the display width + device pixel ratio.
+//   - `sizes` prop (optional) tells the browser the rendered width at each breakpoint.
+//     Default is conservative: phone 90vw, tablet 50vw, desktop 33vw.
+//   - Pass an explicit `sizes` when the element renders at a known size (e.g. thumbs).
 window.Photo = (props) => {
   var src = props.src, label = props.label, style = props.style, children = props.children;
   var overlay = props.overlay !== false;
+  var sizes = props.sizes || '(max-width: 640px) 90vw, (max-width: 960px) 50vw, 33vw';
+  var srcSet = window.photoSrcSet ? window.photoSrcSet(src) : null;
+  var imgAttrs = {
+    src: src,
+    alt: '',
+    loading: 'lazy',
+    decoding: 'async',
+    style: { position:'absolute', inset: 0, width:'100%', height:'100%', objectFit:'cover' },
+    onError: function(e){ e.target.style.display = 'none'; }
+  };
+  if (srcSet) { imgAttrs.srcSet = srcSet; imgAttrs.sizes = sizes; }
   return React.createElement('div',
     { style: Object.assign({ position:'relative', overflow:'hidden', background:'var(--lagoon-deep)' }, style||{}) },
-    React.createElement('img', { src: src, alt: '', loading: 'lazy',
-      style: { position:'absolute', inset: 0, width:'100%', height:'100%', objectFit:'cover' },
-      onError: function(e){ e.target.style.display = 'none'; } }),
+    React.createElement('img', imgAttrs),
     overlay && React.createElement('div', { style: { position:'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(12,42,46,0) 40%, rgba(12,42,46,0.6) 100%)' } }),
     label && React.createElement('span', { className: 'ph-label', style: { position:'absolute', left: 12, bottom: 12 } }, label),
     children
