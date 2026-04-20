@@ -1,0 +1,292 @@
+// Tour detail page — gallery, specs, reviews, booking panel
+const TourDetail = ({ tourId, prefill }) => {
+  const { t, lang, navigate, addToCart, openLightbox } = useT();
+  const tour = window.TOURS.find(x => x.id === tourId) || window.TOURS[0];
+  const [adults, setAdults] = useState(2);
+  const [kids, setKids] = useState(0);
+  const [selDate, setSelDate] = useState(prefill?.prefillDate || null);
+  const [selTime, setSelTime] = useState(
+    prefill?.prefillTime && tour.times && tour.times.includes(prefill.prefillTime)
+      ? prefill.prefillTime
+      : null
+  );
+  const [galleryIdx, setGalleryIdx] = useState(0);
+  const [addons, setAddons] = useState({});
+  const hasPickups = Array.isArray(tour.pickupPoints) && tour.pickupPoints.length > 1;
+  const [pickupIdx, setPickupIdx] = useState(0);
+  const pickup = (Array.isArray(tour.pickupPoints) && tour.pickupPoints[pickupIdx]) || null;
+  const pickupSurcharge = pickup?.surcharge || 0;
+
+  const gallery = window.tourGallery(tour);
+
+  const addonList = [
+    { k: 'hotel', label: lang==='en'?'Hotel pickup':'Traslado hotel', price: 15 },
+    { k: 'photo', label: lang==='en'?'Pro photo pack (50 photos)':'Pack de fotos pro (50)', price: 25 },
+    { k: 'lunch', label: lang==='en'?'Upgrade to premium lunch':'Upgrade almuerzo premium', price: 18 }
+  ];
+
+  const total = (tour.flat
+    ? tour.priceAdult + Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0)*1,0)
+    : adults * tour.priceAdult + kids * (tour.priceKid||0) + (adults+kids) * Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0),0)
+  ) + pickupSurcharge;
+
+  const tourReviews = window.REVIEWS.filter(r => r.tour === tour.id).concat(window.REVIEWS.filter(r => r.tour !== tour.id).slice(0,2));
+
+  // next 7 days
+  const dates = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+
+  const canBook = selDate && selTime && (tour.flat || adults > 0);
+
+  return (
+    <div className="fade-in">
+      {/* Breadcrumb + back */}
+      <div className="container" style={{ paddingTop: 20, paddingBottom: 8, display:'flex', alignItems:'center', gap: 10 }}>
+        <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>
+          <Icon d={icons.chevronLeft} size={14}/> {t.navTours}
+        </button>
+        <span className="mono" style={{ color:'var(--ink-soft)' }}>/ {tour.phLabel}</span>
+      </div>
+
+      {/* Gallery + header */}
+      <div className="container" style={{ paddingTop: 12 }}>
+        <div className="rg-gallery" style={{ display:'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gridTemplateRows: '220px 220px', gap: 10, marginBottom: 28 }}>
+          <div style={{ gridRow:'span 2', position:'relative', cursor:'zoom-in' }} onClick={() => openLightbox(gallery, 0)}>
+            <window.Photo src={gallery[0].src} label={gallery[0].label} style={{ width:'100%', height:'100%', borderRadius: 'var(--radius-lg)' }}/>
+            <button onClick={(e)=>{ e.stopPropagation(); openLightbox(gallery, 0); }}
+              aria-label={lang==='en'?'View all photos':'Ver todas las fotos'}
+              style={{
+                position:'absolute', right: 14, bottom: 14, padding:'8px 14px', borderRadius: 999,
+                background: 'rgba(246,241,230,0.92)', color: 'var(--ink)', border: 'none',
+                cursor: 'pointer', display:'flex', alignItems:'center', gap: 6, fontSize: 12, fontWeight: 600,
+                boxShadow: '0 4px 14px rgba(0,0,0,0.2)'
+              }}>
+              <Icon d={icons.search} size={13}/>
+              {gallery.length} {lang==='en'?'photos':'fotos'}
+            </button>
+          </div>
+          {gallery.slice(1, 5).map((g, i) => (
+            <div key={i} style={{ cursor:'zoom-in' }} onClick={() => openLightbox(gallery, i + 1)}>
+              <window.Photo src={g.src} label={g.label} style={{ width:'100%', height:'100%', borderRadius: 'var(--radius)' }}/>
+            </div>
+          ))}
+        </div>
+
+        <div className="rg-sidebar" style={{ display:'grid', gridTemplateColumns: '1fr 380px', gap: 48, alignItems:'flex-start' }}>
+          {/* LEFT: details */}
+          <div>
+            <div style={{ display:'flex', gap: 8, marginBottom: 14, flexWrap:'wrap' }}>
+              {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
+              <span className="badge ghost"><Icon d={icons.clock} size={10}/> {tour.duration} {t.hours}</span>
+              <span className="badge ghost"><Icon d={icons.pin} size={10}/> {tour.location}</span>
+            </div>
+            <h1 className="display" style={{ fontSize: 56, margin: 0, lineHeight: 0.95, letterSpacing: '-0.03em' }}>
+              {tour.title[lang]}
+            </h1>
+            <p style={{ fontSize: 20, color: 'var(--ink-soft)', marginTop: 16 }}>{tour.tagline[lang]}</p>
+
+            <div style={{ display:'flex', gap: 24, marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap:'wrap' }}>
+              <div>
+                <div style={{ display:'flex', alignItems:'center', gap: 6, color:'var(--sun-2)' }}>
+                  <window.Stars rating={tour.rating} size={16}/>
+                  <span style={{ fontWeight: 600 }}>{tour.rating}</span>
+                </div>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4 }}>{tour.reviews} {t.reviews}</div>
+              </div>
+            </div>
+
+            {/* INCLUDES */}
+            <div style={{ marginTop: 36 }}>
+              <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>03 / {t.includes.toUpperCase()}</div>
+              <div style={{ display:'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+                {tour.includes.map((inc,i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap: 10, padding: 12, background: 'var(--bone-2)', borderRadius: 10 }}>
+                    <div style={{ width: 24, height: 24, borderRadius:'50%', background:'var(--lagoon)', color:'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink: 0 }}>
+                      <Icon d={icons.check} size={12} stroke={2.5}/>
+                    </div>
+                    <span style={{ fontSize: 14 }}>{inc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* MEETING POINT */}
+            {tour.meet && (
+              <div style={{ marginTop: 36 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>04 / {t.meetingPoint.toUpperCase()}</div>
+                <div className="card" style={{ padding: 20, display:'flex', gap: 16, alignItems:'center' }}>
+                  <div style={{ width: 48, height: 48, borderRadius:'50%', background: 'var(--sun)', color:'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <Icon d={icons.pin} size={20}/>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{tour.meet[lang]}</div>
+                    <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4 }}>{tour.location}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* REVIEWS */}
+            <div style={{ marginTop: 40 }}>
+              <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>05 / {t.reviews.toUpperCase()} · {tour.reviews}</div>
+              <div style={{ display:'flex', flexDirection:'column', gap: 16 }}>
+                {tourReviews.slice(0,3).map((r,i) => (
+                  <div key={i} className="card" style={{ padding: 20 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 10 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap: 10 }}>
+                        <div style={{ width: 36, height: 36, borderRadius:'50%', background:'var(--lagoon-pale)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 16 }}>
+                          {r.flag}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
+                          <div className="mono" style={{ color:'var(--ink-soft)' }}>{r.date}</div>
+                        </div>
+                      </div>
+                      <window.Stars rating={r.rating}/>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>{r.body[lang]}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: booking panel */}
+          <div className="rg-sticky-col" style={{ position:'sticky', top: 90 }}>
+            <div className="card" style={{ padding: 24 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap: 12, flexWrap:'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <span className="mono" style={{ color:'var(--ink-soft)' }}>{t.from}</span>
+                  <div className="display" style={{ fontSize: 40 }}>${tour.priceAdult}</div>
+                  <div className="mono" style={{ color:'var(--ink-soft)' }}>{tour.flat ? t.perVan : t.perPerson}</div>
+                </div>
+                <span className="badge lagoon dot" style={{ flexShrink: 0 }}>{lang==='en'?'available today':'disponible hoy'}</span>
+              </div>
+
+              <div style={{ height: 1, background:'var(--line)', margin: '20px 0' }}/>
+
+              {/* Pickup selector */}
+              {hasPickups && (
+                <label className="field" style={{ marginBottom: 14 }}>
+                  <span className="mono">{lang === 'en' ? 'Pickup' : 'Recogida'}</span>
+                  <select className="select" value={pickupIdx} onChange={(e)=>setPickupIdx(Number(e.target.value))}>
+                    {tour.pickupPoints.map((p, i) => (
+                      <option key={i} value={i}>
+                        {p.label[lang]}{p.surcharge > 0 ? ` · +$${p.surcharge}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {/* Date picker */}
+              <label className="field">
+                <span className="mono">{t.date}</span>
+                <div style={{ display:'flex', gap: 6, overflowX:'auto', paddingBottom: 4 }}>
+                  {dates.slice(0, 8).map((d,i) => {
+                    const iso = d.toISOString().slice(0,10);
+                    const isSel = selDate === iso;
+                    return (
+                      <button key={i} onClick={()=>setSelDate(iso)} style={{
+                        padding: '8px 10px', borderRadius: 10, border: `1.5px solid ${isSel ? 'var(--ink)' : 'var(--line)'}`,
+                        background: isSel ? 'var(--ink)' : 'transparent', color: isSel ? 'var(--bone)' : 'var(--ink)',
+                        cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', minWidth: 52, gap: 2
+                      }}>
+                        <span style={{ fontSize: 10, textTransform:'uppercase', opacity: 0.7 }}>{d.toLocaleDateString(lang==='en'?'en':'es', { weekday:'short' })}</span>
+                        <span style={{ fontWeight: 600 }}>{d.getDate()}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </label>
+
+              {/* Time */}
+              <label className="field" style={{ marginTop: 14 }}>
+                <span className="mono">{t.time}</span>
+                <div style={{ display:'flex', gap: 6, flexWrap:'wrap' }}>
+                  {tour.times.map((tm,i) => {
+                    const isSel = selTime === tm;
+                    return (
+                      <button key={i} onClick={()=>setSelTime(tm)} style={{
+                        padding: '8px 14px', borderRadius: 999,
+                        border: `1.5px solid ${isSel ? 'var(--ink)' : 'var(--line)'}`,
+                        background: isSel ? 'var(--ink)' : 'transparent', color: isSel ? 'var(--bone)' : 'var(--ink)',
+                        cursor:'pointer', fontSize: 13, fontWeight: 500
+                      }}>{tm}</button>
+                    );
+                  })}
+                </div>
+              </label>
+
+              {/* People (not for flat vans) */}
+              {!tour.flat && (
+                <>
+                  <label className="field" style={{ marginTop: 14 }}>
+                    <span className="mono">{t.adults}</span>
+                    <Stepper value={adults} setValue={setAdults} min={1} max={12}/>
+                  </label>
+                  {tour.priceKid !== null && (
+                    <label className="field" style={{ marginTop: 12 }}>
+                      <span className="mono">{t.kids} · {t.kidsAge}</span>
+                      <Stepper value={kids} setValue={setKids} min={0} max={10}/>
+                    </label>
+                  )}
+                </>
+              )}
+
+              {/* Add-ons */}
+              <div style={{ marginTop: 16 }}>
+                <span className="mono" style={{ color:'var(--ink-soft)', display:'block', marginBottom: 8 }}>{t.addOns}</span>
+                <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
+                  {addonList.map(a => (
+                    <label key={a.k} style={{ display:'flex', alignItems:'center', gap: 10, padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 8, cursor:'pointer' }}>
+                      <input type="checkbox" checked={!!addons[a.k]} onChange={(e)=>setAddons({...addons, [a.k]: e.target.checked})}/>
+                      <span style={{ flex: 1, fontSize: 13 }}>{a.label}</span>
+                      <span className="mono" style={{ color:'var(--ink-soft)' }}>+${a.price}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div style={{ marginTop: 18, padding: 14, background:'var(--ink)', color:'var(--bone)', borderRadius: 10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <span className="mono" style={{ opacity: 0.8 }}>{t.total}</span>
+                <span className="display" style={{ fontSize: 28 }}>${total.toLocaleString()}</span>
+              </div>
+
+              <button disabled={!canBook} className="btn btn-sun btn-lg" style={{ width:'100%', marginTop: 14, opacity: canBook ? 1 : 0.5 }}
+                onClick={() => navigate('booking', { tourId: tour.id, adults, kids, addons, date: selDate, time: selTime, total, pickup })}>
+                {t.bookNowAlt || t.continue} <Icon d={icons.arrow} size={14}/>
+              </button>
+              <button disabled={!canBook} className="btn btn-outline" style={{ width:'100%', marginTop: 8, opacity: canBook ? 1 : 0.5 }}
+                onClick={() => addToCart({ tourId: tour.id, adults, kids, addons, date: selDate, time: selTime, subtotal: total, pickup })}>
+                <Icon d={icons.bag} size={14}/> {t.addToCart}
+              </button>
+              <div style={{ textAlign:'center', marginTop: 10, fontSize: 11, color:'var(--ink-soft)' }}>
+                {lang==='en'?'Free cancellation up to 24hrs before':'Cancelación gratis 24hrs antes'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Stepper = ({ value, setValue, min = 0, max = 20 }) => (
+  <div style={{ display:'flex', alignItems:'center', border: '1.5px solid var(--line-strong)', borderRadius: 10, width: 'fit-content' }}>
+    <button onClick={()=>setValue(Math.max(min, value-1))} style={{ width: 40, height: 40, border:'none', background:'transparent', cursor:'pointer', color: value <= min ? 'var(--ink-soft)' : 'var(--ink)' }}>
+      <Icon d={icons.minus} size={14}/>
+    </button>
+    <span style={{ width: 40, textAlign:'center', fontWeight: 600 }}>{value}</span>
+    <button onClick={()=>setValue(Math.min(max, value+1))} style={{ width: 40, height: 40, border:'none', background:'transparent', cursor:'pointer' }}>
+      <Icon d={icons.plus} size={14}/>
+    </button>
+  </div>
+);
+
+window.TourDetail = TourDetail;
+window.Stepper = Stepper;

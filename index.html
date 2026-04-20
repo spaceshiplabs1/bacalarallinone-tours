@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>bacalarallinone.tours — Bacalar, Mahahual, Mayan Riviera</title>
+
+<!-- Generic meta (overridden dynamically by <SEOHead/> per route) -->
+<meta name="description" content="bacalarallinone.tours — tours in Bacalar, Mahahual and the Mayan Riviera. Local captains, port-friendly day trips, private transfers."/>
+<meta name="robots" content="index,follow"/>
+<meta name="theme-color" content="#2fb8c9"/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="bacalarallinone.tours"/>
+<meta property="og:title" content="bacalarallinone.tours — Bacalar, Mahahual, Mayan Riviera"/>
+<meta property="og:description" content="Tours in Bacalar, Mahahual and the Mayan Riviera."/>
+<meta property="og:image" content="./images/hero-lagoon-1600.webp"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:locale:alternate" content="es_MX"/>
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="bacalarallinone.tours"/>
+<meta name="twitter:description" content="Tours in Bacalar, Mahahual and the Mayan Riviera."/>
+<meta name="twitter:image" content="./images/hero-lagoon-1600.webp"/>
+
+<!-- Canonical (overridden per route) -->
+<link rel="canonical" href="https://bacalarallinone.tours/"/>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='19' fill='%232fb8c9'/%3E%3Ccircle cx='29' cy='12' r='5' fill='%23e89a3c'/%3E%3Cpath d='M6 28 L14 15 L22 28 Z' fill='%23c4651e'/%3E%3Cpath d='M0 32 Q10 29 20 32 T40 32 L40 40 L0 40 Z' fill='%23f5f0e6' opacity='0.4'/%3E%3C/svg%3E"/>
+<link rel="stylesheet" href="styles.css"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="data.js"></script>
+<script src="i18n.js"></script>
+<script type="text/babel" src="photos.jsx"></script>
+<script type="text/babel" src="artwork.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="pages/home.jsx"></script>
+<script type="text/babel" src="pages/catalog.jsx"></script>
+<script type="text/babel" src="pages/detail.jsx"></script>
+<script type="text/babel" src="pages/booking.jsx"></script>
+<script type="text/babel" src="pages/port.jsx"></script>
+<script type="text/babel" src="pages/port_transfers_map.jsx"></script>
+<script type="text/babel" src="pages/map_debug.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "tropical",
+  "lang": "en"
+}/*EDITMODE-END*/;
+
+const App = () => {
+  // persistent state via localStorage
+  const loadKey = 'bacalar-v1';
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(loadKey)) || {}; } catch(e) { return {}; } })();
+
+  // ── Router ────────────────────────────────────────────────────────────────
+  // URL shape (uses hash so any static server works without rewrites):
+  //   #/                         → home
+  //   #/tours                    → catalog
+  //   #/tours/:filter            → catalog filtered
+  //   #/tour/:slugOrId           → detail
+  //   #/booking                  → booking
+  //   #/port                     → port flow
+  //   #/transfers                → transfers
+  //   #/map                      → map
+  //   #/map/:focus               → map with selected pin
+  //   #/map-debug                → pin calibration
+  const parseHash = () => {
+    const h = (window.location.hash || '#/').replace(/^#/, '') || '/';
+    const seg = h.split('/').filter(Boolean);
+    const q = window.location.search ? Object.fromEntries(new URLSearchParams(window.location.search)) : {};
+    if (seg.length === 0)                           return { page: 'home',      params: { ...q } };
+    if (seg[0] === 'tours')                         return { page: 'catalog',   params: { ...q, filter: seg[1] } };
+    if (seg[0] === 'tour')                          return { page: 'detail',    params: { ...q, tourId: seg[1] } };
+    if (seg[0] === 'booking')                       return { page: 'booking',   params: { ...q } };
+    if (seg[0] === 'port')                          return { page: 'port',      params: { ...q } };
+    if (seg[0] === 'transfers')                     return { page: 'transfers', params: { ...q } };
+    if (seg[0] === 'map' && seg[1] === 'debug')     return { page: 'map-debug', params: { ...q } };
+    if (seg[0] === 'map')                           return { page: 'map',       params: { ...q, focus: seg[1] } };
+    if (seg[0] === 'map-debug')                     return { page: 'map-debug', params: { ...q } };
+    return { page: seg[0] || 'home', params: { ...q } };
+  };
+  const routeToHash = (r) => {
+    if (!r || !r.page || r.page === 'home') return '#/';
+    const p = r.params || {};
+    switch (r.page) {
+      case 'catalog':    return p.filter ? `#/tours/${p.filter}` : '#/tours';
+      case 'detail':     return p.tourId ? `#/tour/${p.tourId}` : '#/tour';
+      case 'booking':    return '#/booking';
+      case 'port':       return '#/port';
+      case 'transfers':  return '#/transfers';
+      case 'map':        return p.focus ? `#/map/${p.focus}` : '#/map';
+      case 'map-debug':  return '#/map-debug';
+      default:           return '#/' + r.page;
+    }
+  };
+
+  // Non-URL params (things that don't round-trip well: cart, prefillDate, total, etc.)
+  // We stash them per-navigation in memory; they vanish on reload which is fine.
+  const navMemoryRef = React.useRef({});
+  const mergeMemory = (r) => ({
+    ...r,
+    params: { ...(navMemoryRef.current[routeToHash(r)] || {}), ...(r.params || {}) }
+  });
+
+  const [lang, setLangState] = React.useState(saved.lang || TWEAK_DEFAULTS.lang);
+  const [theme, setThemeState] = React.useState(TWEAK_DEFAULTS.theme); // tropical only
+  const [route, setRoute] = React.useState(() => {
+    // URL hash wins on load; fall back to persisted route
+    if (window.location.hash && window.location.hash.length > 1) return parseHash();
+    return saved.route || { page: 'home', params: {} };
+  });
+  const [cart, setCartState] = React.useState(Array.isArray(saved.cart) ? saved.cart : []);
+  const [cartOpen, setCartOpen] = React.useState(false);
+  const [favorites, setFavoritesState] = React.useState(Array.isArray(saved.favorites) ? saved.favorites : []);
+  const [toast, setToastState] = React.useState(null);
+  const toastTimer = React.useRef(null);
+  const [lightbox, setLightbox] = React.useState({ open: false, photos: [], index: 0 });
+
+  const setLang = (l) => { setLangState(l); persist({ lang: l }); };
+  const setTheme = (th) => { setThemeState(th); persist({ theme: th }); };
+
+  const persist = (patch) => {
+    const next = { lang, theme, route, cart, favorites, ...patch };
+    try { localStorage.setItem(loadKey, JSON.stringify(next)); } catch(e) {}
+  };
+
+  const toggleFav = (tourId) => {
+    const next = favorites.includes(tourId)
+      ? favorites.filter(x => x !== tourId)
+      : [...favorites, tourId];
+    setFavoritesState(next);
+    persist({ favorites: next });
+  };
+  const isFav = (tourId) => favorites.includes(tourId);
+
+  const setCart = (next) => { setCartState(next); persist({ cart: next }); };
+
+  const showToast = (msg, ms = 2200) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastState(msg);
+    toastTimer.current = setTimeout(() => setToastState(null), ms);
+  };
+
+  // opts.silent: true → toast only, do NOT auto-open drawer (for quick-add from TourCard)
+  const addToCart = (item, opts = {}) => {
+    const id = `${item.tourId}-${item.date}-${item.time}-${Date.now().toString(36)}`;
+    setCart([...cart, { ...item, id }]);
+    const toastMsg = (window.I18N?.[lang]?.addedToCart) || 'Added to cart';
+    showToast(toastMsg);
+    if (!opts.silent) setCartOpen(true);
+  };
+  const removeFromCart = (id) => setCart(cart.filter(x => x.id !== id));
+  const clearCart = () => setCart([]);
+  const openCart = () => setCartOpen(true);
+  const closeCart = () => setCartOpen(false);
+  const cartCount = cart.length;
+  const cartTotal = cart.reduce((s, x) => s + (Number(x.subtotal) || 0), 0);
+
+  // Lightbox helpers
+  const openLightbox = (photos, index = 0) => setLightbox({ open: true, photos, index });
+  const closeLightbox = () => setLightbox(lb => ({ ...lb, open: false }));
+
+  const navigate = (page, params = {}) => {
+    const r = { page, params };
+    const hash = routeToHash(r);
+    // Stash non-URL params (cart, prefillDate, prefillTime, pickup, etc.) in memory
+    navMemoryRef.current[hash] = params;
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, '', hash);
+    }
+    setRoute(r);
+    persist({ route: r });
+    window.__route = r;
+    window.dispatchEvent(new Event('__routechange'));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  // Browser back/forward + external hash changes → sync state
+  React.useEffect(() => {
+    const onHash = () => {
+      const r = mergeMemory(parseHash());
+      setRoute(r);
+      persist({ route: r });
+      window.__route = r;
+      window.dispatchEvent(new Event('__routechange'));
+    };
+    window.addEventListener('hashchange', onHash);
+    window.addEventListener('popstate',   onHash);
+    // Ensure the URL reflects the initial route (if loaded from localStorage)
+    const expected = routeToHash(route);
+    if (window.location.hash !== expected) {
+      window.history.replaceState(null, '', expected);
+    }
+    return () => {
+      window.removeEventListener('hashchange', onHash);
+      window.removeEventListener('popstate',   onHash);
+    };
+  }, []);
+
+  // Publish current route on each change so SEOHead can pick it up
+  React.useEffect(() => {
+    window.__route = route;
+    window.dispatchEvent(new Event('__routechange'));
+  }, [route]);
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Tweaks bridge
+  const [tweaksOn, setTweaksOn] = React.useState(false);
+  React.useEffect(() => {
+    const handler = (e) => {
+      if (!e.data) return;
+      if (e.data.type === '__activate_edit_mode') setTweaksOn(true);
+      if (e.data.type === '__deactivate_edit_mode') setTweaksOn(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const updateTweak = (patch) => {
+    if (patch.theme) setTheme(patch.theme);
+    if (patch.lang) setLang(patch.lang);
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: patch }, '*');
+  };
+
+  const t = window.I18N[lang];
+  const ctx = {
+    lang, setLang, theme, setTheme, navigate, t,
+    cart, cartCount, cartTotal, addToCart, removeFromCart, clearCart,
+    cartOpen, openCart, closeCart,
+    favorites, toggleFav, isFav,
+    toast, showToast,
+    openLightbox, closeLightbox
+  };
+
+  let page;
+  switch (route.page) {
+    case 'catalog': page = <window.Catalog initialFilter={route.params?.filter}/>; break;
+    case 'detail': page = <window.TourDetail tourId={route.params?.tourId} prefill={route.params}/>; break;
+    case 'booking': page = <window.Booking booking={route.params}/>; break;
+    case 'port': page = <window.PortFlow/>; break;
+    case 'transfers': page = <window.Transfers/>; break;
+    case 'map': page = <window.MapPage focus={route.params?.focus}/>; break;
+    case 'map-debug': page = <window.MapDebug/>; break;
+    default: page = <window.Home/>;
+  }
+
+  return (
+    <window.AppCtx.Provider value={ctx}>
+      <div className="app" data-screen-label={route.page}>
+        <window.Header current={route.page}/>
+        {page}
+        <window.Footer/>
+        <window.WAWidget/>
+        <window.CartDrawer/>
+        <window.Toast/>
+        <window.SEOHead/>
+        <window.Lightbox
+          open={lightbox.open}
+          photos={lightbox.photos}
+          initialIndex={lightbox.index}
+          onClose={closeLightbox}
+        />
+
+        {tweaksOn && (
+          <div className="fade-in" style={{
+            position:'fixed', bottom: 90, left: 24, zIndex: 98,
+            width: 260, background: 'var(--bone)', border: '1px solid var(--line)',
+            borderRadius: 14, padding: 18, boxShadow: 'var(--shadow)'
+          }}>
+            <div className="display" style={{ fontSize: 18, marginBottom: 12 }}>Tweaks</div>
+
+            <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 6 }}>{t.language}</div>
+            <div style={{ display:'flex', gap: 6, marginBottom: 14 }}>
+              {['en','es'].map(l => (
+                <button key={l} onClick={()=>updateTweak({ lang: l })} className={`chip ${lang === l ? 'active' : ''}`} style={{ border:'none', cursor:'pointer' }}>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 6 }}>Jump to</div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap: 6 }}>
+              {[
+                ['home','Home'],['catalog','Catalog'],['port','Port'],
+                ['transfers','Transfers'],['map','Map'],
+                ['detail','Detail'],['booking','Booking']
+              ].map(([k,l]) => (
+                <button key={k} onClick={()=> k==='detail' ? navigate('detail',{tourId:'sailboat-bacalar'}) : k==='booking' ? navigate('booking',{tourId:'sailboat-bacalar',adults:2,kids:0,addons:{},date:'2026-05-10',time:'09:00',total:130}) : navigate(k)}
+                  className="chip" style={{ border:'1px solid var(--line)', cursor:'pointer', fontSize: 11 }}>{l}</button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </window.AppCtx.Provider>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
