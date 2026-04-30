@@ -66,6 +66,10 @@ window.tourPhoto = (tour) => {
     'transfer-cun':        window.PHOTOS.van,
     'transfer-tulum':      L('transfer-tulum', '1600')
   };
+  // API-backed tours (loaded by data-api.js) carry their own coverUrl pointing
+  // at R2. Prefer it; fall back to the legacy local-image map for tours
+  // without a cover (e.g. the placeholder during initial load).
+  if (tour && tour.coverUrl) return tour.coverUrl;
   return byId[tour.id] || window.PHOTOS.lagoon;
 };
 
@@ -105,6 +109,16 @@ const TOUR_TO_KEY = {
 // Returns up to 5 gallery entries: main + 4 contextual shots from the same category pool,
 // de-duplicated and stable per tour id.
 window.tourGallery = (tour) => {
+  // API-backed tours: data-api.js populates `_gallery` (after detail load)
+  // or at least `coverUrl`. Use those when available — otherwise fall back
+  // to the legacy local-pool gallery below.
+  if (tour && tour._gallery && tour._gallery.length > 1) return tour._gallery;
+  if (tour && tour.coverUrl) {
+    // Kick off lazy detail-load so subsequent renders get the full gallery.
+    if (typeof window.tagcEnsureDetail === 'function') window.tagcEnsureDetail(tour);
+    if (tour._gallery && tour._gallery.length) return tour._gallery;
+    return [{ src: tour.coverUrl, label: tour.phLabel || '' }];
+  }
   const mainKey = TOUR_TO_KEY[tour.id] || 'hero-lagoon';
   const poolKeys = (POOL[tour.category] || POOL.lagoon).filter(k => k !== mainKey);
   // pad with cross-category fillers if pool is short
