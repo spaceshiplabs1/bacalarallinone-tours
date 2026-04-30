@@ -156,13 +156,36 @@ const Transfers = () => {
 };
 
 // Map page
+// Does a tour belong to a given map pin? Matches by:
+//  1. tour id containing the pin id (e.g. 'muyil-float' ↔ 'muyil')
+//  2. location string mentions the pin name
+//  3. pickupPoints' label (en or es) mentions the pin name
+//  4. category-based fallbacks for hub pins (bacalar → all lagoon tours, etc.)
+const tourMatchesPin = (tour, pin) => {
+  if (!pin) return true;
+  const pinId   = pin.id;
+  const pinName = pin.name.toLowerCase();
+  if (tour.id === pinId || tour.id.includes(pinId)) return true;
+  if ((tour.location || '').toLowerCase().includes(pinName)) return true;
+  if (Array.isArray(tour.pickupPoints) && tour.pickupPoints.some(p =>
+    ((p.label?.en || '') + ' ' + (p.label?.es || '')).toLowerCase().includes(pinName)
+  )) return true;
+  if (pinId === 'bacalar' && tour.category === 'lagoon') return true;
+  if (pinId === 'mahahual' && tour.audience.includes('port')) return true;
+  if (pinId === 'cancun'   && tour.id === 'transfer-cun') return true;
+  if (pinId === 'cancun'   && tour.id === 'chichen-riviera') return true;
+  if (pinId === 'tulum'    && tour.id === 'transfer-tulum') return true;
+  if (pinId === 'chichen'  && (tour.id === 'chichen-itza' || tour.id === 'chichen-riviera')) return true;
+  return false;
+};
+
 const MapPage = ({ focus }) => {
   const { t, lang, navigate } = useT();
   const [sel, setSel] = useState(focus || null);
   const selected = window.MAP_PINS.find(p => p.id === sel);
-  const toursAtPin = selected
-    ? window.TOURS.filter(t => t.location.toLowerCase().includes(selected.name.toLowerCase()) || (selected.id === 'mahahual' && t.audience.includes('port')) || (selected.id === 'bacalar' && t.category === 'lagoon'))
-    : [];
+  const toursToShow = selected
+    ? window.TOURS.filter(tour => tourMatchesPin(tour, selected))
+    : window.TOURS;
 
   return (
     <div className="container fade-in" style={{ paddingTop: 32, paddingBottom: 40 }}>
@@ -174,7 +197,13 @@ const MapPage = ({ focus }) => {
       <div className="rg" style={{ display:'grid', gridTemplateColumns: '1.4fr 1fr', gap: 28, alignItems:'flex-start' }}>
         <div>
           <MiniMap onPinClick={(p)=>setSel(p.id)} selected={sel}/>
-          <div style={{ display:'flex', gap: 8, flexWrap:'wrap', marginTop: 16 }}>
+          <div style={{ display:'flex', gap: 8, flexWrap:'wrap', marginTop: 16, alignItems:'center' }}>
+            <button
+              className={`chip ${!sel ? 'active' : ''}`}
+              onClick={()=>setSel(null)}
+              style={{ border:'none', cursor:'pointer' }}>
+              {lang === 'en' ? 'All' : 'Todos'}
+            </button>
             {window.MAP_PINS.map(p => (
               <button key={p.id} className={`chip ${sel === p.id ? 'active' : ''}`} onClick={()=>setSel(p.id)} style={{ border:'none', cursor:'pointer' }}>
                 <Icon d={icons.pin} size={10}/> {p.name}
@@ -184,34 +213,53 @@ const MapPage = ({ focus }) => {
         </div>
 
         <div className="card" style={{ padding: 24, minHeight: 400 }}>
-          {!selected && (
-            <div style={{ color:'var(--ink-soft)', textAlign:'center', padding: 60 }}>
-              {lang==='en'?'Select a destination on the map →':'Selecciona un destino en el mapa →'}
-            </div>
-          )}
-          {selected && (
-            <div className="fade-in">
-              <div className="mono" style={{ color:'var(--ink-soft)' }}>SELECTED</div>
-              <h2 className="display" style={{ fontSize: 36, margin: '4px 0 10px' }}>{selected.name}</h2>
-              <div className="mono" style={{ color:'var(--clay)', marginBottom: 20 }}>{selected.label[lang]}</div>
-              <div style={{ display:'flex', flexDirection:'column', gap: 12 }}>
-                {toursAtPin.slice(0,4).map(tour => (
-                  <div key={tour.id} onClick={()=>navigate('detail', { tourId: tour.id })}
-                    style={{ display:'flex', gap: 12, padding: 12, borderRadius: 10, border:'1px solid var(--line)', cursor:'pointer' }}>
-                    <window.Photo src={window.tourPhoto(tour)} style={{ width: 64, height: 64, borderRadius: 8, flexShrink: 0 }} overlay={false}/>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{tour.title[lang]}</div>
-                      <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4 }}>${tour.priceAdult} · {tour.duration}h</div>
-                    </div>
-                    <Icon d={icons.arrow} size={14}/>
-                  </div>
-                ))}
-                {toursAtPin.length === 0 && (
-                  <div style={{ color:'var(--ink-soft)', fontSize: 13 }}>{lang==='en'?'No tours here yet — ask us on WhatsApp.':'Sin tours aquí — escríbenos por WhatsApp.'}</div>
-                )}
+          <div className="fade-in">
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap: 12 }}>
+              <div style={{ minWidth: 0 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)' }}>
+                  {selected ? 'SELECTED' : (lang === 'en' ? 'ALL DESTINATIONS' : 'TODOS LOS DESTINOS')}
+                </div>
+                <h2 className="display" style={{ fontSize: 32, margin: '4px 0 6px', lineHeight: 1 }}>
+                  {selected ? selected.name : (lang === 'en' ? 'Our catalog' : 'Nuestro catálogo')}
+                </h2>
+                <div className="mono" style={{ color:'var(--clay)', marginBottom: 16 }}>
+                  {selected
+                    ? selected.label[lang]
+                    : `${toursToShow.length} ${toursToShow.length === 1 ? (t.item || 'tour') : (t.items || 'tours')}`
+                  }
+                </div>
               </div>
+              {selected && (
+                <button
+                  onClick={()=>setSel(null)}
+                  className="btn btn-ghost btn-sm"
+                  title={lang === 'en' ? 'Clear selection' : 'Quitar selección'}>
+                  <Icon d={icons.x} size={12}/> {lang === 'en' ? 'All' : 'Todos'}
+                </button>
+              )}
             </div>
-          )}
+
+            <div style={{ display:'flex', flexDirection:'column', gap: 10, maxHeight: 520, overflowY: 'auto', paddingRight: 4 }}>
+              {toursToShow.map(tour => (
+                <div key={tour.id} onClick={()=>navigate('detail', { tourId: tour.id })}
+                  style={{ display:'flex', gap: 12, padding: 10, borderRadius: 10, border:'1px solid var(--line)', cursor:'pointer', alignItems:'center' }}>
+                  <window.Photo src={window.tourPhoto(tour)} style={{ width: 64, height: 64, borderRadius: 8, flexShrink: 0 }} overlay={false}/>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}>{tour.title[lang]}</div>
+                    <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4, fontSize: 10 }}>
+                      ${tour.priceAdult}{!tour.flat ? ` · ${tour.duration}h` : ' · ' + (t.perVan || 'per van')}
+                    </div>
+                  </div>
+                  <Icon d={icons.arrow} size={14}/>
+                </div>
+              ))}
+              {toursToShow.length === 0 && (
+                <div style={{ color:'var(--ink-soft)', fontSize: 13, textAlign:'center', padding: 24 }}>
+                  {lang==='en' ? 'No tours at this pin yet — ask us on WhatsApp.' : 'Sin tours en este pin — escríbenos por WhatsApp.'}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
