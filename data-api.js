@@ -112,9 +112,12 @@
     const e = es || null;
     return {
       // Existing components find tours by `id`; we use slug as the canonical
-      // id since slug is unique per tenant and stable.
+      // id since slug is unique per tenant and stable. The real API UUID is
+      // exposed as `apiId` for cart line items where details.tourId must be
+      // a UUID.
       id: t.slug,
       slug: t.slug,
+      apiId: t.id,
       title: {
         en: t.translation.name,
         es: e?.translation?.name ?? t.translation.name,

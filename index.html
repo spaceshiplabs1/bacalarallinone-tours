@@ -38,6 +38,7 @@
 <div id="root"></div>
 
 <script src="data-api.js"></script>
+<script src="cart-api.js"></script>
 <script src="i18n.js"></script>
 <script type="text/babel" src="photos.jsx"></script>
 <script type="text/babel" src="artwork.jsx"></script>
@@ -46,6 +47,7 @@
 <script type="text/babel" src="pages/catalog.jsx"></script>
 <script type="text/babel" src="pages/detail.jsx"></script>
 <script type="text/babel" src="pages/booking.jsx"></script>
+<script type="text/babel" src="pages/thanks.jsx"></script>
 <script type="text/babel" src="pages/port.jsx"></script>
 <script type="text/babel" src="pages/port_transfers_map.jsx"></script>
 <script type="text/babel" src="pages/map_debug.jsx"></script>
@@ -81,6 +83,7 @@ const App = () => {
     if (seg[0] === 'tours')                         return { page: 'catalog',   params: { ...q, filter: seg[1] } };
     if (seg[0] === 'tour')                          return { page: 'detail',    params: { ...q, tourId: seg[1] } };
     if (seg[0] === 'booking')                       return { page: 'booking',   params: { ...q } };
+    if (seg[0] === 'thanks')                        return { page: 'thanks',    params: { ...q } };
     if (seg[0] === 'port')                          return { page: 'port',      params: { ...q } };
     if (seg[0] === 'transfers')                     return { page: 'transfers', params: { ...q } };
     if (seg[0] === 'map' && seg[1] === 'debug')     return { page: 'map-debug', params: { ...q } };
@@ -95,6 +98,7 @@ const App = () => {
       case 'catalog':    return p.filter ? `#/tours/${p.filter}` : '#/tours';
       case 'detail':     return p.tourId ? `#/tour/${p.tourId}` : '#/tour';
       case 'booking':    return '#/booking';
+      case 'thanks':     return '#/thanks';
       case 'port':       return '#/port';
       case 'transfers':  return '#/transfers';
       case 'map':        return p.focus ? `#/map/${p.focus}` : '#/map';
@@ -250,6 +254,7 @@ const App = () => {
     case 'catalog': page = <window.Catalog initialFilter={route.params?.filter}/>; break;
     case 'detail': page = <window.TourDetail tourId={route.params?.tourId} prefill={route.params}/>; break;
     case 'booking': page = <window.Booking booking={route.params}/>; break;
+    case 'thanks':  page = <window.Thanks params={route.params}/>; break;
     case 'port': page = <window.PortFlow/>; break;
     case 'transfers': page = <window.Transfers/>; break;
     case 'map': page = <window.MapPage focus={route.params?.focus}/>; break;

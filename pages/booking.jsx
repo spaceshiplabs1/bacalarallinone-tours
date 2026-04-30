@@ -16,8 +16,9 @@ const Booking = ({ booking }) => {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', country: 'Mexico',
-    cruiseShip: '', card: '', exp: '', cvc: '', cardName: ''
+    cruiseShip: ''
   });
+  const [submitState, setSubmitState] = useState({ submitting: false, error: null });
   const [ref] = useState('BAC-' + Math.random().toString(36).slice(2,8).toUpperCase());
 
   React.useEffect(() => {
@@ -31,7 +32,46 @@ const Booking = ({ booking }) => {
   const tour = primaryTour;
 
   const step1Valid = form.firstName && form.lastName && form.email && form.phone;
-  const step2Valid = form.card.length >= 12 && form.exp && form.cvc.length >= 3 && form.cardName;
+
+  // Real submit: bridge UI cart lines → API cart → Stripe Checkout.
+  // Booking.jsx is reached either with `cart: [...]` (multi-item) or with
+  // a single-tour booking object (`{tourId, date, time, adults, kids, total}`).
+  // The cart helper expects an array shape in both cases.
+  const submitToStripe = async () => {
+    if (submitState.submitting) return;
+    setSubmitState({ submitting: true, error: null });
+    try {
+      const cartLines = items.map((it) => ({
+        tourId: it.tourId,
+        date: it.date,
+        time: it.time,
+        adults: it.adults || 0,
+        kids: it.kids || 0,
+        pickup: it.pickup,
+        subtotal: Number(it.subtotal) || (Number(booking?.total) || 0),
+      }));
+      const customer = {
+        email: form.email,
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        phone: form.phone,
+        locale: lang,
+      };
+      const origin = window.location.origin + window.location.pathname;
+      await window.tagcCart.submitAndRedirect({
+        customer,
+        items: cartLines,
+        successUrl: `${origin}#/thanks?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl:  `${origin}#/booking`,
+      });
+      // submitAndRedirect navigates away on success; nothing below runs.
+    } catch (err) {
+      console.error('[booking] checkout failed:', err);
+      setSubmitState({
+        submitting: false,
+        error: err?.body?.error || err?.message || 'checkout_failed',
+      });
+    }
+  };
 
   return (
     <div className="container fade-in" style={{ paddingTop: 28, paddingBottom: 60, maxWidth: 980 }}>
@@ -102,56 +142,48 @@ const Booking = ({ booking }) => {
 
           {step === 2 && (
             <div className="card fade-in" style={{ padding: 28 }}>
-              <h2 className="display" style={{ fontSize: 32, margin: '0 0 20px' }}>{t.payment}</h2>
+              <h2 className="display" style={{ fontSize: 32, margin: '0 0 8px' }}>{t.payment}</h2>
+              <p style={{ color:'var(--ink-soft)', marginTop: 0, marginBottom: 22 }}>
+                {lang==='en'
+                  ? 'Card details are entered on Stripe’s secure page after you continue. Your booking is held while you pay; you can cancel free up to 48 hrs before.'
+                  : 'Los datos de tu tarjeta se ingresan en la página segura de Stripe después de continuar. Tu reserva queda apartada mientras pagas.'}
+              </p>
 
-              {/* Fake card preview */}
-              <div style={{ background: 'linear-gradient(135deg, var(--ink) 0%, var(--lagoon-deep) 100%)', color:'var(--bone)', padding: 22, borderRadius: 14, marginBottom: 22, position:'relative', overflow:'hidden' }}>
-                <div style={{ position:'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius:'50%', background: 'rgba(255,255,255,0.05)' }}/>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                  <div className="mono" style={{ opacity: 0.7 }}>bacalarallinone · SECURE</div>
-                  <Icon d={icons.credit} size={22}/>
+              {/* Review block */}
+              <div style={{ padding: 18, border: '1px solid var(--line)', borderRadius: 12, marginBottom: 18 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 10 }}>
+                  {lang==='en' ? 'Booking under' : 'Reserva a nombre de'}
                 </div>
-                <div style={{ fontFamily:'JetBrains Mono, monospace', fontSize: 22, letterSpacing:'0.12em', marginTop: 32 }}>
-                  {(form.card.replace(/\s/g,'').match(/.{1,4}/g) || ['····','····','····','····']).join(' ').padEnd(19,' ')}
-                </div>
-                <div style={{ display:'flex', justifyContent:'space-between', marginTop: 18, fontSize: 12, opacity: 0.85 }}>
-                  <div>
-                    <div className="mono" style={{ opacity: 0.6 }}>HOLDER</div>
-                    <div style={{ marginTop: 2 }}>{form.cardName || '—'}</div>
-                  </div>
-                  <div>
-                    <div className="mono" style={{ opacity: 0.6 }}>EXP</div>
-                    <div style={{ marginTop: 2, fontFamily:'JetBrains Mono, monospace' }}>{form.exp || 'MM/YY'}</div>
-                  </div>
-                </div>
+                <div style={{ fontWeight: 600, fontSize: 16 }}>{form.firstName} {form.lastName}</div>
+                <div style={{ color:'var(--ink-soft)', fontSize: 13, marginTop: 2 }}>{form.email} · {form.phone}</div>
               </div>
 
-              <div style={{ display:'grid', gridTemplateColumns: '1fr', gap: 14 }}>
-                <label className="field"><span className="mono">{t.cardNumber}</span>
-                  <input className="input" maxLength="19" value={form.card} onChange={e=>setForm({...form, card: e.target.value.replace(/[^0-9 ]/g,'')})} placeholder="4242 4242 4242 4242"/>
-                </label>
-                <div style={{ display:'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <label className="field"><span className="mono">{t.expiry}</span>
-                    <input className="input" maxLength="5" placeholder="MM/YY" value={form.exp} onChange={e=>setForm({...form, exp: e.target.value})}/>
-                  </label>
-                  <label className="field"><span className="mono">{t.cvc}</span>
-                    <input className="input" maxLength="4" value={form.cvc} onChange={e=>setForm({...form, cvc: e.target.value.replace(/[^0-9]/g,'')})} placeholder="123"/>
-                  </label>
-                </div>
-                <label className="field"><span className="mono">{t.nameOnCard}</span>
-                  <input className="input" value={form.cardName} onChange={e=>setForm({...form, cardName: e.target.value})}/>
-                </label>
-              </div>
-
-              <div style={{ display:'flex', gap: 10, alignItems:'center', marginTop: 18, padding: 12, background: 'var(--bone-2)', borderRadius: 8, fontSize: 12, color:'var(--ink-soft)' }}>
+              <div style={{ display:'flex', gap: 10, alignItems:'center', padding: 12, background: 'var(--bone-2)', borderRadius: 8, fontSize: 12, color:'var(--ink-soft)' }}>
                 <Icon d={icons.shield} size={16}/>
-                {lang==='en'?'Encrypted. We never store your card. Test mode — use any digits.':'Cifrado. No guardamos tu tarjeta. Modo demo — usa cualquier número.'}
+                {lang==='en'
+                  ? 'Powered by Stripe. We never see or store your card.'
+                  : 'Procesado por Stripe. Nunca vemos ni guardamos tu tarjeta.'}
               </div>
+
+              {submitState.error && (
+                <div style={{ marginTop: 14, padding: 12, background: 'rgba(220, 60, 60, 0.08)', border: '1px solid rgba(220, 60, 60, 0.3)', borderRadius: 8, fontSize: 13, color: '#a02020' }}>
+                  {lang==='en' ? 'Could not start checkout: ' : 'No se pudo iniciar el pago: '} <span className="mono">{submitState.error}</span>
+                </div>
+              )}
 
               <div style={{ display:'flex', justifyContent:'space-between', marginTop: 24 }}>
-                <button className="btn btn-ghost" onClick={()=>setStep(1)}><Icon d={icons.chevronLeft} size={14}/> {t.back}</button>
-                <button className="btn btn-sun btn-lg" disabled={!step2Valid} style={{ opacity: step2Valid ? 1 : 0.5 }} onClick={()=>setStep(3)}>
-                  {t.payAndConfirm} · ${grandTotal.toLocaleString()}
+                <button className="btn btn-ghost" disabled={submitState.submitting} onClick={()=>setStep(1)}>
+                  <Icon d={icons.chevronLeft} size={14}/> {t.back}
+                </button>
+                <button
+                  className="btn btn-sun btn-lg"
+                  disabled={submitState.submitting}
+                  style={{ opacity: submitState.submitting ? 0.6 : 1 }}
+                  onClick={submitToStripe}
+                >
+                  {submitState.submitting
+                    ? (lang==='en' ? 'Redirecting…' : 'Redirigiendo…')
+                    : `${t.payAndConfirm} · $${grandTotal.toLocaleString()}`}
                 </button>
               </div>
             </div>
