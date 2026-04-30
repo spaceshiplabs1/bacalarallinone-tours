@@ -80,8 +80,20 @@ const TourDetail = ({ tourId, prefill }) => {
           <div>
             <div style={{ display:'flex', gap: 8, marginBottom: 14, flexWrap:'wrap' }}>
               {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
+              {tour.isFeatured && <span className="badge sun">★ Featured</span>}
+              {tour.isVipPrivate && <span className="badge jungle">Private</span>}
               <span className="badge ghost"><Icon d={icons.clock} size={10}/> {tour.duration} {t.hours}</span>
               <span className="badge ghost"><Icon d={icons.pin} size={10}/> {tour.location}</span>
+              {tour.difficulty && (
+                <span className="badge ghost" style={{ textTransform:'capitalize' }}>
+                  Difficulty: {tour.difficulty}
+                </span>
+              )}
+              {tour.maxPax && (
+                <span className="badge ghost">
+                  Max {tour.maxPax} pax
+                </span>
+              )}
             </div>
             <h1 className="display" style={{ fontSize: 56, margin: 0, lineHeight: 0.95, letterSpacing: '-0.03em' }}>
               {tour.title[lang]}
@@ -97,6 +109,17 @@ const TourDetail = ({ tourId, prefill }) => {
                 <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4 }}>{tour.reviews} {t.reviews}</div>
               </div>
             </div>
+
+            {/* ABOUT (long description) */}
+            {tour.descriptionHtml && tour.descriptionHtml[lang] && (
+              <div style={{ marginTop: 36 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>02 / {(lang==='en'?'About this tour':'Sobre el tour').toUpperCase()}</div>
+                <div
+                  style={{ fontSize: 16, lineHeight: 1.65, color:'var(--ink)' }}
+                  dangerouslySetInnerHTML={{ __html: tour.descriptionHtml[lang] }}
+                />
+              </div>
+            )}
 
             {/* INCLUDES */}
             <div style={{ marginTop: 36 }}>
@@ -125,6 +148,57 @@ const TourDetail = ({ tourId, prefill }) => {
                     <div style={{ fontWeight: 600 }}>{tour.meet[lang]}</div>
                     <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4 }}>{tour.location}</div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ITINERARY */}
+            {tour.itineraryHtml && tour.itineraryHtml[lang] && (
+              <div style={{ marginTop: 36 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>
+                  {(lang==='en'?'Itinerary':'Itinerario').toUpperCase()}
+                </div>
+                <div
+                  style={{ fontSize: 15, lineHeight: 1.7 }}
+                  dangerouslySetInnerHTML={{ __html: tour.itineraryHtml[lang] }}
+                />
+              </div>
+            )}
+
+            {/* NOT INCLUDED */}
+            {tour.exclusionsHtml && tour.exclusionsHtml[lang] && (
+              <div style={{ marginTop: 36 }}>
+                <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 14 }}>
+                  {(lang==='en'?"What's not included":'No incluye').toUpperCase()}
+                </div>
+                <div
+                  style={{ fontSize: 15, lineHeight: 1.7, color:'var(--ink-soft)' }}
+                  dangerouslySetInnerHTML={{ __html: tour.exclusionsHtml[lang] }}
+                />
+              </div>
+            )}
+
+            {/* CANCELLATION POLICY */}
+            {tour.termsHtml && tour.termsHtml[lang] && (
+              <details style={{ marginTop: 36, padding: 20, border:'1px solid var(--line)', borderRadius: 12, background: 'var(--bone-2)' }}>
+                <summary style={{ cursor:'pointer', fontWeight: 600, fontSize: 14 }}>
+                  {(lang==='en'?'Cancellation policy & terms':'Cancelación y términos')}
+                </summary>
+                <div
+                  style={{ fontSize: 14, lineHeight: 1.6, marginTop: 14, color:'var(--ink-soft)' }}
+                  dangerouslySetInnerHTML={{ __html: tour.termsHtml[lang] }}
+                />
+              </details>
+            )}
+
+            {/* BLACKOUT NOTICE (informational — date picker enforcement is later) */}
+            {Array.isArray(tour.blackoutDates) && tour.blackoutDates.length > 0 && (
+              <div style={{ marginTop: 24, padding: 14, borderRadius: 10, background: 'rgba(229, 73, 73, 0.08)', border:'1px solid rgba(229, 73, 73, 0.2)' }}>
+                <div className="mono" style={{ color:'var(--clay)', marginBottom: 6 }}>
+                  {(lang==='en'?'Unavailable dates':'Fechas no disponibles').toUpperCase()}
+                </div>
+                <div style={{ fontSize: 13, color:'var(--ink-soft)' }}>
+                  {tour.blackoutDates.join(' · ')}
                 </div>
               </div>
             )}

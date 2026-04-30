@@ -130,6 +130,7 @@
       audience: audienceFromTags(t.tags || []),
       location: t.category?.name ?? "",
       duration: Math.max(1, Math.round(t.durationMinutes / 60)),
+      durationMinutes: t.durationMinutes,
       priceAdult: t.basePrice ? Math.round(t.basePrice / 100) : 0,
       priceKid:
         t.isKidFriendly && t.basePrice
@@ -154,6 +155,25 @@
       _gallery: t.coverImage?.url
         ? [{ src: t.coverImage.url, label: "" }]
         : [],
+      // ---- Extended API fields (used by the redesigned detail sections) ----
+      difficulty: t.difficulty || "easy",
+      minPax: t.minPax ?? 1,
+      maxPax: t.maxPax ?? null,
+      isFeatured: !!t.isFeatured,
+      isVipPrivate: !!t.isVipPrivate,
+      defaultCurrency: t.defaultCurrency || "USD",
+      // Long-form blocks (filled when ensureDetail() runs).
+      descriptionHtml: { en: null, es: null },
+      itineraryHtml:   { en: null, es: null },
+      exclusionsHtml:  { en: null, es: null },
+      termsHtml:       { en: null, es: null },
+      metaTitle:       { en: t.translation.metaTitle || null, es: null },
+      metaDescription: { en: t.translation.metaDescription || null, es: null },
+      // Filled by ensureDetail; default to no-blackouts.
+      blackoutDates: [],
+      schedules: [],
+      pickupZones: [],   // [{id, name, color}]
+      zonePrices: [],    // [{zoneId, paxCategory, price, currency}]
       _detailLoaded: false,
     };
   }
@@ -190,18 +210,29 @@
         const en = await enRes.json();
         const sched = (en.schedules || []).find((s) => s.isActive !== false);
         tour.times = sched?.startTimes || tour.times;
+        tour.schedules = en.schedules || [];
+        tour.blackoutDates = en.blackoutDates || [];
+        tour.zonePrices = en.zonePrices || [];
         if (en.translation?.inclusionsHtml) {
           tour.includes = parseInclusionsHtml(en.translation.inclusionsHtml);
         }
+        tour.descriptionHtml.en = en.translation?.descriptionHtml || null;
+        tour.itineraryHtml.en   = en.translation?.itineraryHtml   || null;
+        tour.exclusionsHtml.en  = en.translation?.exclusionsHtml  || null;
+        tour.termsHtml.en       = en.translation?.termsHtml       || null;
+        tour.metaTitle.en       = en.translation?.metaTitle       || null;
+        tour.metaDescription.en = en.translation?.metaDescription || null;
         tour._gallery = (en.images || []).map((im) => ({
           src: im.url,
           label: "",
         }));
         if (en.pickupZones?.length) {
+          tour.pickupZones = en.pickupZones;
           tour.pickupPoints = en.pickupZones.map((z) => ({
             label: { en: z.name, es: z.name },
             surcharge: 0,
             etaMin: 0,
+            zoneId: z.id,
           }));
         }
       }
@@ -210,6 +241,12 @@
         tour.title.es = es.translation?.name || tour.title.es;
         tour.tagline.es =
           es.translation?.shortDescription || tour.tagline.es;
+        tour.descriptionHtml.es = es.translation?.descriptionHtml || tour.descriptionHtml.es;
+        tour.itineraryHtml.es   = es.translation?.itineraryHtml   || tour.itineraryHtml.es;
+        tour.exclusionsHtml.es  = es.translation?.exclusionsHtml  || tour.exclusionsHtml.es;
+        tour.termsHtml.es       = es.translation?.termsHtml       || tour.termsHtml.es;
+        tour.metaTitle.es       = es.translation?.metaTitle       || tour.metaTitle.es;
+        tour.metaDescription.es = es.translation?.metaDescription || tour.metaDescription.es;
       }
       tour._detailLoaded = true;
       // Force a re-render so newly-arrived gallery / times / etc. show up.
