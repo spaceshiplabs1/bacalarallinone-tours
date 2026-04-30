@@ -23,9 +23,38 @@
 
   const API_HEADERS = { "x-tenant-host": TENANT_HOST };
 
-  // Initialize empties so components mounted before the fetch settles don't
-  // throw on .filter / .find / etc.
-  window.TOURS = [];
+  // Synchronous placeholder so components that render before the fetch
+  // resolves (e.g. detail page on a deep-link refresh) get a complete tour
+  // shape from window.TOURS[0] / .find(...) instead of `undefined`. The
+  // placeholder gets replaced as soon as loadCatalog() resolves and we
+  // dispatch __routechange.
+  const PLACEHOLDER_TOUR = {
+    id: "__loading__",
+    slug: "__loading__",
+    title: { en: "Loading…", es: "Cargando…" },
+    tagline: { en: "", es: "" },
+    category: "lagoon",
+    audience: ["regular"],
+    location: "",
+    duration: 0,
+    priceAdult: 0,
+    priceKid: 0,
+    rating: 0,
+    reviews: 0,
+    tags: [],
+    includes: [],
+    times: [],
+    color: "lagoon",
+    phLabel: "LOADING",
+    pickupPoints: [
+      { label: { en: "", es: "" }, surcharge: 0, etaMin: 0 },
+    ],
+    flat: false,
+    coverUrl: null,
+    _gallery: [],
+    _detailLoaded: false,
+  };
+  window.TOURS = [PLACEHOLDER_TOUR];
 
   // Static editorial content kept on the front-end for now (the API doesn't
   // expose reviews or the territory-map pins yet).
