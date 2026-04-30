@@ -213,7 +213,10 @@
       }
       tour._detailLoaded = true;
       // Force a re-render so newly-arrived gallery / times / etc. show up.
-      window.dispatchEvent(new Event("__routechange"));
+      // App re-renders on `hashchange` (not __routechange). Dispatching
+      // hashchange with the URL unchanged re-runs the route handler and
+      // setRoute(parseHash()) returns a fresh object → React re-renders.
+      window.dispatchEvent(new Event("hashchange"));
     } catch (e) {
       console.warn("[tagc] tour detail load failed:", tour.slug, e);
     }
@@ -248,7 +251,10 @@
   loadCatalog()
     .then((list) => {
       window.TOURS = list;
-      window.dispatchEvent(new Event("__routechange"));
+      // App re-renders on `hashchange` (not __routechange). Dispatching
+      // hashchange with the URL unchanged re-runs the route handler and
+      // setRoute(parseHash()) returns a fresh object → React re-renders.
+      window.dispatchEvent(new Event("hashchange"));
     })
     .catch((err) => {
       console.error("[tagc] catalog load failed:", err);
