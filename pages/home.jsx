@@ -49,7 +49,7 @@ const Home = () => {
               <span style={{ flex: 1, height: 1, background: 'var(--line-strong)' }}/>
             </div>
             <h1 className="display hero-item d1" style={{ fontSize: 'clamp(48px, 6vw, 84px)', margin: 0, lineHeight: 0.92 }}>
-              {t.heroTitle}<br/>
+              {t.heroTitle} <span style={{ color: 'var(--lagoon-deep)' }}>{t.heroTitleAccent}</span><br/>
               <span style={{ color: 'var(--clay)' }}>{t.heroTitleItalic}</span>
             </h1>
             {/* Brush-script pull-quote — echoes the "bacalar" wordmark
@@ -123,7 +123,7 @@ const Home = () => {
           rhythm of their own. */}
       <section ref={pathSectionRef} className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
-          <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
+          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
         </div>
 
@@ -316,7 +316,7 @@ const Home = () => {
       {/* FEATURED TOURS */}
       <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
-          <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
+          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>{t.viewAll} <Icon d={icons.arrow} size={14}/></button>
         </div>
@@ -364,7 +364,7 @@ const Home = () => {
       <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 0 }}>
         <div className="container">
           <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 40 }}>
-            <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
+            <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
             <div style={{ flex: 1, height: 1, background: 'rgba(245,240,230,0.2)' }}/>
           </div>
           <div className="rg-4" style={{ display:'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
