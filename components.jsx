@@ -320,8 +320,9 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           background: 'linear-gradient(180deg, rgba(12,42,46,0) 30%, rgba(12,42,46,0.55) 60%, rgba(12,42,46,0.92) 100%)',
         }}
       />
-      {/* Top-left: category label + audience badges. Category sits above
-          the badges so it reads as the primary tag for the tile. */}
+      {/* Top-left: category label + audience badges + duration chip.
+          Pulled all secondary metadata up here so the title can own the
+          bottom of the card uncontested. */}
       <div style={{ position: 'absolute', top: 14, left: 14, right: 64, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
         {tour.location && (
           <span
@@ -344,10 +345,29 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
           {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+          <span
+            style={{
+              background: 'rgba(12,42,46,0.55)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              color: 'var(--bone)',
+              fontSize: 11,
+              letterSpacing: 0.6,
+              padding: '4px 9px',
+              borderRadius: 999,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <Icon d={icons.clock} size={11}/> {tour.duration}{t.hr}
+          </span>
         </div>
       </div>
-      {/* Top-right: fav heart only — quick-add was confusing next to a CTA. */}
-      <div style={{ position: 'absolute', top: 14, right: 14 }}>
+
+      {/* Top-right: price chip stacked over the fav heart. Frosted-glass
+          to match the category pill — keeps the card's photo legible. */}
+      <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
         <button
           onClick={(e) => { e.stopPropagation(); toggleFav(tour.id); }}
           title={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
@@ -361,21 +381,46 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         >
           <Icon d={icons.heart} size={16}/>
         </button>
+        <span
+          style={{
+            background: 'rgba(12,42,46,0.55)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            padding: '6px 12px',
+            borderRadius: 999,
+            display: 'inline-flex',
+            alignItems: 'baseline',
+            gap: 5,
+          }}
+        >
+          {/* Use the brand sun amber so the price reads as a price, not as
+              part of the title (both white competed for attention). */}
+          <span
+            className="display"
+            style={{
+              fontSize: 18,
+              lineHeight: 1,
+              color: 'var(--sun)',
+              textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+            }}
+          >
+            ${tour.priceAdult}
+          </span>
+          <span style={{ fontSize: 11, color: 'rgba(245,240,230,0.78)' }}>
+            {tour.flat ? t.perVan : t.perPerson}
+          </span>
+        </span>
       </div>
 
-      {/* Bottom overlay: oversized title + price + meta. Tagline temporarily
-          hidden so the title can breathe; category moved to the top-left
-          chip above. lang-aware hyphens let long compound titles wrap
-          gracefully across two lines instead of overflowing the tile. */}
+      {/* Bottom overlay: title only, oversized — owns the lower half of
+          the tile. lang-aware hyphens keep long compound names from
+          overflowing on narrower cards. */}
       <div
         style={{
           position: 'absolute',
           left: 0, right: 0, bottom: 0,
           padding: '22px 22px 76px',
           color: 'var(--bone)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
         }}
       >
         <h3
@@ -383,8 +428,8 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           lang={lang}
           style={{
             margin: 0,
-            fontSize: 'clamp(30px, 3vw, 42px)',
-            lineHeight: 1.02,
+            fontSize: 'clamp(36px, 3.6vw, 52px)',
+            lineHeight: 0.98,
             textShadow: '0 2px 14px rgba(0,0,0,0.45)',
             hyphens: 'auto',
             WebkitHyphens: 'auto',
@@ -394,17 +439,6 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         >
           {tour.title[lang]}
         </h3>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
-          <span className="display" style={{ fontSize: 34, lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-            ${tour.priceAdult}
-          </span>
-          <span style={{ fontSize: 13, color: 'rgba(245,240,230,0.82)' }}>
-            {tour.flat ? t.perVan : t.perPerson}
-          </span>
-          <span style={{ fontSize: 13, color: 'rgba(245,240,230,0.82)', marginLeft: 'auto', display: 'inline-flex', gap: 5, alignItems: 'center' }}>
-            <Icon d={icons.clock} size={13}/> {tour.duration}{t.hr}
-          </span>
-        </div>
       </div>
 
       {/* Pinned Book Now strip at the very bottom of the card. */}
