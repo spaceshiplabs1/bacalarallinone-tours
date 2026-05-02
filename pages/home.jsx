@@ -2,6 +2,9 @@
 const Home = () => {
   const { t, lang, navigate, openLightbox } = useT();
   const featured = window.TOURS.slice(0, 6);
+  // Track which path-tile illustrations have actually loaded so we
+  // can fade them in over a shimmer skeleton instead of popping.
+  const [loadedIllos, setLoadedIllos] = useState({});
   const heroShots = [
     { src: window.PHOTOS.lagoonBoat, label: 'BACALAR LAGOON' },
     { src: window.PHOTOS.chacchoben, label: 'CHACCHOBEN'     },
@@ -90,89 +93,101 @@ const Home = () => {
 
         <div className="rg-3" style={{ display:'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
           {[
-            { key: 'port',     n: '01', icon: icons.ship,    title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      bg: 'var(--clay)',   ink: 'var(--bone)' },
-            { key: 'regular',  n: '02', icon: icons.anchor,  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   bg: 'var(--lagoon-deep)', ink: 'var(--bone)' },
-            { key: 'transfer', n: '03', icon: icons.van,     title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', bg: 'var(--jungle)', ink: 'var(--bone)' }
-          ].map(path => (
-            <div
-              key={path.key}
-              className="path-tile"
-              onClick={() => navigate(path.target)}
-              style={{
-                cursor: 'pointer',
-                position: 'relative',
-                overflow: 'hidden',
-                background: path.bg,
-                color: path.ink,
-                borderRadius: 18,
-                padding: '32px 28px 28px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-                minHeight: 320,
-                boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
-              }}
-            >
-              {/* Oversized ghost glyph in the corner — decorative, soft
-                  enough to not fight the title. */}
+            { key: 'port',     n: '01', illo: './images/path-port.png',     title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      bg: 'var(--clay)',        ink: 'var(--bone)' },
+            { key: 'regular',  n: '02', illo: './images/path-regular.png',  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   bg: 'var(--lagoon-deep)', ink: 'var(--bone)' },
+            { key: 'transfer', n: '03', illo: './images/path-transfer.png', title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', bg: 'var(--jungle)',      ink: 'var(--bone)' }
+          ].map(path => {
+            const loaded = !!loadedIllos[path.key];
+            return (
               <div
-                aria-hidden
-                className="path-tile-glyph"
+                key={path.key}
+                className="path-tile"
+                onClick={() => navigate(path.target)}
                 style={{
-                  position: 'absolute',
-                  top: -18, right: -18,
-                  width: 200, height: 200,
-                  opacity: 0.18,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: path.bg,
                   color: path.ink,
+                  borderRadius: 18,
+                  padding: '28px 28px 28px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  pointerEvents: 'none',
+                  flexDirection: 'column',
+                  gap: 14,
+                  minHeight: 380,
+                  boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
                 }}
               >
-                <Icon d={path.icon} size={200} stroke={1.4}/>
+                {/* Illustration. While the PNG is loading we show a
+                    shimmer skeleton inside the same dimensions so the
+                    layout doesn't shift on swap. */}
+                <div
+                  className="path-tile-illo-wrap"
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    aspectRatio: '800 / 687',
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                  }}
+                >
+                  {!loaded && (
+                    <div
+                      aria-hidden
+                      className="skeleton-shimmer"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'rgba(245,240,230,0.18)',
+                        borderRadius: 12,
+                      }}
+                    />
+                  )}
+                  <img
+                    src={path.illo}
+                    alt=""
+                    loading="lazy"
+                    onLoad={() => setLoadedIllos((p) => ({ ...p, [path.key]: true }))}
+                    className="path-tile-illo"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      opacity: loaded ? 1 : 0,
+                      transform: loaded ? 'scale(1)' : 'scale(0.94)',
+                      transition: 'opacity 420ms ease, transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1)',
+                    }}
+                  />
+                </div>
+
+                <div className="mono" style={{ opacity: 0.78, letterSpacing: 1.4, fontSize: 11 }}>
+                  {path.n} / {path.title.toUpperCase()}
+                </div>
+
+                <h3
+                  className="display"
+                  style={{
+                    margin: 0,
+                    fontSize: 'clamp(28px, 2.6vw, 36px)',
+                    lineHeight: 1.02,
+                  }}
+                >
+                  {path.title}
+                </h3>
+
+                <p style={{ margin: 0, opacity: 0.86, fontSize: 14, lineHeight: 1.5 }}>
+                  {path.sub}
+                </p>
+
+                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14 }} className="path-tile-cta">
+                  <span>{path.cta}</span>
+                  <Icon d={icons.arrow} size={16}/>
+                </div>
               </div>
-
-              {/* Foreground icon — smaller, sits in a translucent square
-                  so it reads as a brand mark for the section. */}
-              <div
-                style={{
-                  width: 56, height: 56, borderRadius: 14,
-                  background: 'rgba(245,240,230,0.18)',
-                  border: '1px solid rgba(245,240,230,0.35)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  position: 'relative',
-                }}
-              >
-                <Icon d={path.icon} size={26} stroke={2}/>
-              </div>
-
-              <div className="mono" style={{ opacity: 0.78, letterSpacing: 1.4, fontSize: 11, position: 'relative' }}>
-                {path.n} / {path.title.toUpperCase()}
-              </div>
-
-              <h3
-                className="display"
-                style={{
-                  margin: 0,
-                  fontSize: 'clamp(28px, 2.6vw, 36px)',
-                  lineHeight: 1.02,
-                  position: 'relative',
-                }}
-              >
-                {path.title}
-              </h3>
-
-              <p style={{ margin: 0, opacity: 0.86, fontSize: 14, lineHeight: 1.5, position: 'relative' }}>
-                {path.sub}
-              </p>
-
-              <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14, position: 'relative' }} className="path-tile-cta">
-                <span>{path.cta}</span>
-                <Icon d={icons.arrow} size={16}/>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
