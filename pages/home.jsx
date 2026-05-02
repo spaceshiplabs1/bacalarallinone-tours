@@ -5,6 +5,32 @@ const Home = () => {
   // Track which path-tile illustrations have actually loaded so we
   // can fade them in over a shimmer skeleton instead of popping.
   const [loadedIllos, setLoadedIllos] = useState({});
+  // Defer the entrance animation until the section actually scrolls
+  // into view, so a user landing higher up still gets to see the
+  // bouncy load when they reach the "Pick your path" block.
+  const pathSectionRef = useRef(null);
+  const [pathInView, setPathInView] = useState(false);
+  useEffect(() => {
+    const el = pathSectionRef.current;
+    if (!el || pathInView) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setPathInView(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setPathInView(true);
+          obs.disconnect();
+        }
+      },
+      // Fire a bit before the section is fully on-screen so the
+      // animation finishes by the time the user is fully reading it.
+      { rootMargin: '0px 0px -15% 0px', threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [pathInView]);
   const heroShots = [
     { src: window.PHOTOS.lagoonBoat, label: 'BACALAR LAGOON' },
     { src: window.PHOTOS.chacchoben, label: 'CHACCHOBEN'     },
@@ -85,7 +111,7 @@ const Home = () => {
           and the photo-dominant tour cards below. The big in-card
           glyph + brand-color background gives them a distinct visual
           rhythm of their own. */}
-      <section className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
+      <section ref={pathSectionRef} className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
@@ -98,6 +124,9 @@ const Home = () => {
             { key: 'transfer', n: '03', illo: './images/path-transfer.png', title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', accent: 'var(--jungle-2)' }
           ].map((path, idx) => {
             const loaded = !!loadedIllos[path.key];
+            // Run the bouncy entrance only when the section is in
+            // view AND the PNG has already arrived from the network.
+            const animate = loaded && pathInView;
             return (
               <div
                 key={path.key}
@@ -140,7 +169,7 @@ const Home = () => {
                     alt=""
                     loading="lazy"
                     onLoad={() => setLoadedIllos((p) => ({ ...p, [path.key]: true }))}
-                    className={`path-tile-illo ${loaded ? 'path-tile-illo--in' : ''}`}
+                    className={`path-tile-illo ${animate ? 'path-tile-illo--in' : ''}`}
                     style={{
                       position: 'absolute',
                       inset: 0,
@@ -149,7 +178,7 @@ const Home = () => {
                       objectFit: 'contain',
                       // Stagger the entrance so the three stickers pop
                       // in one after another instead of all at once.
-                      animationDelay: `${idx * 130}ms`,
+                      animationDelay: `${idx * 160}ms`,
                     }}
                   />
                 </div>
