@@ -109,10 +109,18 @@
     );
   }
 
-  // ---- shape translation: UI cart-line → API tour cart-item ----
-  // UI line: { tourId (slug), date "YYYY-MM-DD", time "HH:MM", adults, kids,
-  //            pickup?, subtotal (dollars) }
+  // ---- shape translation: UI cart-line → API cart-item ----
+  // Handles two line shapes:
+  //   tour line:     { tourId (slug), date, time, adults, kids, pickup?, subtotal }
+  //   transfer line: { kind: 'transfer', subtotal, currency, transfer:{...} }
+  // The `kind` discriminator on the transfer shape is the only thing
+  // distinguishing them; tour lines stay backwards-compatible (no kind).
   function toApiItem(line) {
+    if (line.kind === "transfer") return toApiTransferItem(line);
+    return toApiTourItem(line);
+  }
+
+  function toApiTourItem(line) {
     const tour = (window.TOURS || []).find((x) => x.id === line.tourId || x.slug === line.tourId);
     if (!tour) throw new Error(`cart_api unknown tour: ${line.tourId}`);
     if (!tour.apiId) throw new Error(`cart_api tour missing apiId: ${tour.slug}`);
@@ -137,6 +145,64 @@
         scheduledTime: line.time,
         passengers,
         ...(line.specialRequests ? { specialRequests: line.specialRequests } : {}),
+      },
+    };
+  }
+
+  // Transfer line shape (composed by pages/transfers.jsx after a quote
+  // succeeds): {
+  //   kind: 'transfer',
+  //   serviceType, // 'arrival' | 'departure' | 'round_trip' | 'point_to_point'
+  //   origin: { address, lat, lng },
+  //   destination: { address, lat, lng },
+  //   pax, luggage,
+  //   vehicleId, vehicleName,
+  //   routePriceId,                 // echoed from quote response → drives vendor copy
+  //   roundTrip: bool,
+  //   addons: [{addonId, code, qty, unitPrice}],
+  //   currency, subtotal,           // dollars; total INCL addons + RT logic
+  //   flightInfo?,                  // freeform string
+  // }
+  function toApiTransferItem(line) {
+    const t = line;
+    const currency = t.currency || "USD";
+    const subtotalCents = Math.max(0, Math.round(Number(t.subtotal) * 100));
+    const direction = t.roundTrip ? "Round-trip" : "One-way";
+    const where = `${t.origin?.address || "pickup"} → ${t.destination?.address || "dropoff"}`;
+    const description = `${direction} transfer · ${t.vehicleName || "van"} · ${where}`
+      .slice(0, 500);
+    const apiAddons = (t.addons || [])
+      .filter((a) => a.addonId)
+      .map((a) => ({
+        addonId: a.addonId,
+        qty: Number(a.qty) || 1,
+        unitPrice: Math.max(0, Math.round(Number(a.unitPrice) * 100)),
+      }));
+    return {
+      type: "shuttle_transfer",
+      description,
+      qty: 1,
+      unitPrice: subtotalCents,
+      lineTotal: subtotalCents,
+      currency,
+      details: {
+        serviceType: t.serviceType || "point_to_point",
+        origin: {
+          address: t.origin?.address || undefined,
+          lat: Number(t.origin.lat),
+          lng: Number(t.origin.lng),
+        },
+        destination: {
+          address: t.destination?.address || undefined,
+          lat: Number(t.destination.lat),
+          lng: Number(t.destination.lng),
+        },
+        pax: Number(t.pax) || 1,
+        luggage: Number(t.luggage) || 0,
+        vehicleId: t.vehicleId,
+        ...(t.routePriceId ? { routePriceId: t.routePriceId } : {}),
+        addons: apiAddons,
+        ...(t.flightInfo ? { flightInfo: String(t.flightInfo).slice(0, 500) } : {}),
       },
     };
   }
