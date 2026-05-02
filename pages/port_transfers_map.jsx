@@ -221,7 +221,10 @@ const Transfers = () => {
             position: 'absolute', inset: 0,
             backgroundImage: 'url(./images/transfer-hero-lagoon.png)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center 60%',
+            // Push the visible window down toward the bottom of the image so
+            // the van (which sits low in both photos) stays in frame even
+            // when the section gets cropped on tall viewports.
+            backgroundPosition: 'center 85%',
           }}
         />
         <div
@@ -231,7 +234,7 @@ const Transfers = () => {
             position: 'absolute', inset: 0,
             backgroundImage: 'url(./images/transfer-hero-highway.png)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center 50%',
+            backgroundPosition: 'center 80%',
           }}
         />
         {/* Dim overlay so the headline + meta line stay readable */}
