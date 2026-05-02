@@ -429,24 +429,52 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 }
 .path-tile-cta { transition: transform 200ms ease; }
 .path-tile-cta svg { transition: transform 220ms ease; }
-/* No card backdrop, so hover lifts the illustration itself instead
-   of the whole column. The CTA arrow nudge is kept. */
+/* No card backdrop, so hover lifts the illustration itself.
+   The illustration enters with a bouncy side-scale once its PNG has
+   actually loaded (the React onLoad handler swaps the class), then
+   sits at its resting transform. Hover then plays a small pop+sway
+   with elastic easing for a tactile feel.
+
+   Property layering: the entrance animation drives the transform
+   while it runs (forwards = keeps final state). Once it finishes,
+   the resting :hover transition can take over because the element's
+   transform is no longer animation-controlled. */
 .path-tile-illo {
-  transition: opacity 420ms ease,
-              transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1),
+  opacity: 0;
+  transform: scaleX(0.55) translateY(28px);
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 320ms ease;
 }
-.path-tile:hover .path-tile-illo {
-  transform: scale(1.05) translateY(-4px);
-  filter: drop-shadow(0 14px 28px rgba(12,42,46,0.22));
+.path-tile-illo--in {
+  animation: pathIlloEnter 760ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
-.path-tile:hover .path-tile-cta svg { transform: translateX(6px); }
+@keyframes pathIlloEnter {
+  0%   { opacity: 0; transform: scaleX(0.55) translateY(28px); }
+  55%  { opacity: 1; transform: scaleX(1.08) scaleY(0.94) translateY(0); }
+  75%  {             transform: scaleX(0.97) scaleY(1.03) translateY(0); }
+  100% { opacity: 1; transform: scaleX(1) scaleY(1) translateY(0); }
+}
+.path-tile:hover .path-tile-illo--in {
+  transform: scale(1.06) translateY(-6px) rotate(-1.5deg);
+  filter: drop-shadow(0 16px 32px rgba(12,42,46,0.24));
+}
+.path-tile:active .path-tile-illo--in {
+  transform: scale(1.02) translateY(-2px) rotate(-0.5deg);
+  transition-duration: 120ms;
+}
+.path-tile:hover .path-tile-cta svg {
+  transform: translateX(8px);
+}
+.path-tile-cta svg {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 @media (prefers-reduced-motion: reduce) {
   .path-tile,
   .path-tile-illo,
   .path-tile-cta,
-  .path-tile-cta svg { transition: none !important; }
-  .path-tile:hover .path-tile-illo { transform: none; filter: none; }
+  .path-tile-cta svg { transition: none !important; animation: none !important; }
+  .path-tile-illo--in { opacity: 1; transform: none; animation: none; }
+  .path-tile:hover .path-tile-illo--in { transform: none; filter: none; }
   .path-tile:hover .path-tile-cta svg { transform: none; }
 }
 

@@ -96,7 +96,7 @@ const Home = () => {
             { key: 'port',     n: '01', illo: './images/path-port.png',     title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      accent: 'var(--clay)' },
             { key: 'regular',  n: '02', illo: './images/path-regular.png',  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   accent: 'var(--lagoon-deep)' },
             { key: 'transfer', n: '03', illo: './images/path-transfer.png', title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', accent: 'var(--jungle-2)' }
-          ].map(path => {
+          ].map((path, idx) => {
             const loaded = !!loadedIllos[path.key];
             return (
               <div
@@ -140,16 +140,16 @@ const Home = () => {
                     alt=""
                     loading="lazy"
                     onLoad={() => setLoadedIllos((p) => ({ ...p, [path.key]: true }))}
-                    className="path-tile-illo"
+                    className={`path-tile-illo ${loaded ? 'path-tile-illo--in' : ''}`}
                     style={{
                       position: 'absolute',
                       inset: 0,
                       width: '100%',
                       height: '100%',
                       objectFit: 'contain',
-                      opacity: loaded ? 1 : 0,
-                      transform: loaded ? 'scale(1)' : 'scale(0.94)',
-                      transition: 'opacity 420ms ease, transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1)',
+                      // Stagger the entrance so the three stickers pop
+                      // in one after another instead of all at once.
+                      animationDelay: `${idx * 130}ms`,
                     }}
                   />
                 </div>
