@@ -237,12 +237,17 @@ const Transfers = () => {
             backgroundPosition: 'center 80%',
           }}
         />
-        {/* Dim overlay so the headline + meta line stay readable */}
+        {/* Horizontal gradient — dark on the left where the headline
+            and copy sit, transparent on the right where the photo's
+            subject (van) is so it keeps its natural light. Light
+            bottom darken kept for the meta line + form card. */}
         <div
           aria-hidden
           style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.55) 100%)',
+            background:
+              'linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 35%, rgba(0,0,0,0) 65%),' +
+              'linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,0.28) 100%)',
           }}
         />
         <div className="container" style={{ position: 'relative' }}>

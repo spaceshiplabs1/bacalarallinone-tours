@@ -107,7 +107,12 @@ const Catalog = ({ initialFilter }) => {
           aria-hidden
           style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.6) 100%)',
+            // Horizontal gradient (dark left → transparent right) lets
+            // the photo subjects keep their natural light. Slight
+            // bottom darken keeps the search bar's overlap legible.
+            background:
+              'linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 35%, rgba(0,0,0,0) 65%),' +
+              'linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,0.32) 100%)',
           }}
         />
         <div className="container" style={{ position: 'relative' }}>

@@ -9,24 +9,14 @@ const PortFlow = ({ navigate }) => {
 
   return (
     <div className="fade-in">
-      {/* Hero band — two crossfading commercial sunset shots of the
-          Mahahual cruise pier. Reuses the .transfers-hero-bg keyframes
-          (2-image cycle, 14s). Dim gradient overlay keeps the headline
-          legible regardless of which photo is on top. */}
+      {/* Hero band — single sunset shot of the Mahahual cruise pier.
+          Horizontal gradient overlay (dark on the left where the
+          headline sits, transparent on the right where the cruise
+          ship is) so the photo's subject keeps its natural light
+          instead of being uniformly darkened. */}
       <section style={{ color: 'var(--bone)', padding: '90px 0 110px', position:'relative', overflow:'hidden', background: 'var(--ink)', minHeight: 380 }}>
         <div
           aria-hidden
-          className="transfers-hero-bg transfers-hero-bg--a"
-          style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: 'url(./images/port-hero-frontal.webp)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center 60%',
-          }}
-        />
-        <div
-          aria-hidden
-          className="transfers-hero-bg transfers-hero-bg--b"
           style={{
             position: 'absolute', inset: 0,
             backgroundImage: 'url(./images/port-hero-sunset.webp)',
@@ -38,7 +28,9 @@ const PortFlow = ({ navigate }) => {
           aria-hidden
           style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.62) 100%)',
+            background:
+              'linear-gradient(90deg, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.32) 35%, rgba(0,0,0,0) 65%),' +
+              'linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,0.30) 100%)',
           }}
         />
         <div className="container" style={{ position:'relative' }}>
