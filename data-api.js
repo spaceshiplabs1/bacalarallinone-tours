@@ -105,6 +105,32 @@
     beach: "sun",
     ocean: "deep",
     transfer: "jungle",
+    sailboat: "lagoon",
+    "motor-boat": "lagoon",
+    "paddle-kayak": "lagoon",
+    "water-activities": "lagoon",
+    snorkel: "deep",
+    cenotes: "deep",
+    cultural: "clay",
+    atv: "jungle",
+    "zip-line": "jungle",
+  };
+
+  // Display category — what the catalog filter chips match against.
+  // Sailing / paddle / motor-boat tours all live on Bacalar's lagoon, so
+  // they collapse into the "lagoon" filter the user already knows. Keeps
+  // the chip set short while making the new daytour imports filterable.
+  const DISPLAY_CATEGORY = {
+    sailboat: "lagoon",
+    "motor-boat": "lagoon",
+    "paddle-kayak": "lagoon",
+    "water-activities": "lagoon",
+    cenotes: "adventure",
+    snorkel: "ocean",
+    "mayan-ruins": "ruins",
+    atv: "adventure",
+    "zip-line": "adventure",
+    cultural: "ruins",
   };
 
   function shapeListItem(en, es) {
@@ -129,7 +155,7 @@
           t.translation.shortDescription ||
           "",
       },
-      category: t.category?.slug ?? "lagoon",
+      category: DISPLAY_CATEGORY[t.category?.slug] ?? t.category?.slug ?? "lagoon",
       audience: audienceFromTags(t.tags || []),
       location: t.category?.name ?? "",
       duration: Math.max(1, Math.round(t.durationMinutes / 60)),
