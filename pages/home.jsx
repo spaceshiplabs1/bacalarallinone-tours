@@ -128,6 +128,10 @@ const Home = () => {
             // Run the bouncy entrance only when the section is in
             // view AND the PNG has already arrived from the network.
             const animate = loaded && pathInView;
+            const badgeIcon =
+              path.key === 'port'    ? icons.ship
+            : path.key === 'regular' ? icons.compass
+            :                          icons.van;
             return (
               <div
                 key={path.key}
@@ -179,16 +183,60 @@ const Home = () => {
                       objectFit: 'contain',
                       // Stagger the entrance so the three stickers pop
                       // in one after another instead of all at once.
-                      // 220ms apart × 3 = ~660ms of cascade on top of
-                      // the 1300ms per-tile duration, so the whole
-                      // sequence reads as a smooth wave.
                       animationDelay: `${idx * 220}ms`,
                     }}
                   />
+                  {/* Icon badge floating at the bottom-side corner of
+                      the illustration — brand-color disc with a white
+                      glyph. Sits on top of the sticker so it reads as
+                      a section-mark stamp. */}
+                  <div
+                    className="path-tile-badge"
+                    aria-hidden
+                    style={{
+                      position: 'absolute',
+                      bottom: '4%',
+                      right: '6%',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      background: path.accent,
+                      color: 'var(--bone)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 8px 18px rgba(12,42,46,0.22), 0 0 0 4px var(--bone)',
+                    }}
+                  >
+                    <Icon d={badgeIcon} size={26} stroke={2}/>
+                  </div>
                 </div>
 
-                <div className="mono" style={{ color: path.accent, letterSpacing: 1.4, fontSize: 11 }}>
-                  {path.n} / {path.title.toUpperCase()}
+                {/* Section meta: oversized brand-color number, smaller
+                    mono caption following on the same baseline. */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span
+                    className="display"
+                    style={{
+                      fontSize: 'clamp(40px, 4vw, 56px)',
+                      lineHeight: 0.9,
+                      color: path.accent,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {path.n}
+                  </span>
+                  <span
+                    className="mono"
+                    style={{
+                      color: path.accent,
+                      letterSpacing: 1.4,
+                      fontSize: 11,
+                      opacity: 0.85,
+                    }}
+                  >
+                    / {path.title.toUpperCase()}
+                  </span>
                 </div>
 
                 {/* Wrapper reserves room for up to 2 lines and pushes the

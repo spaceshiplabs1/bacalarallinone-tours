@@ -438,20 +438,19 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
    uses after animation completes; :hover then transitions on top. */
 .path-tile-illo {
   opacity: 0;
-  transform: scaleX(0.78) translateY(18px);
+  transform: scale(0.86) translateY(20px);
 }
 .path-tile-illo--in {
   opacity: 1;
-  transform: scaleX(1) scaleY(1) translateY(0);
-  animation: pathIlloEnter 1300ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  transform: scale(1) translateY(0);
+  animation: pathIlloEnter 1100ms cubic-bezier(0.34, 1.4, 0.64, 1);
   transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 280ms ease;
 }
 @keyframes pathIlloEnter {
-  0%   { opacity: 0; transform: scaleX(0.78) translateY(18px); }
-  60%  { opacity: 1; transform: scaleX(1.04) scaleY(0.97) translateY(0); }
-  82%  {             transform: scaleX(0.99) scaleY(1.02) translateY(0); }
-  100% { opacity: 1; transform: scaleX(1) scaleY(1) translateY(0); }
+  0%   { opacity: 0; transform: scale(0.86) translateY(20px); }
+  60%  { opacity: 1; transform: scale(1.03) translateY(-3px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 .path-tile:hover .path-tile-illo--in {
   transform: scale(1.06) translateY(-6px) rotate(-1.5deg);

@@ -40,7 +40,7 @@ const icons = {
   send: <><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></>,
   bag: <><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></>,
   trash: <><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 13h10l1-13"/></>,
-  van: <><path d="M2 17h2"/><path d="M20 17h2"/><path d="M4 17V8h11l5 4v5"/><path d="M15 8v4h5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></>
+  van: <><rect x="3" y="9" width="18" height="8" rx="1.5"/><path d="M9 9v4M15 9v4"/><path d="M3 13h18"/><circle cx="7" cy="17.5" r="1.8" fill="currentColor" stroke="none"/><circle cx="17" cy="17.5" r="1.8" fill="currentColor" stroke="none"/></>
 };
 
 window.Icon = Icon;
