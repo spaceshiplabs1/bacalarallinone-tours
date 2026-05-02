@@ -72,6 +72,156 @@ const Logo = ({ size = 1 }) => (
 );
 window.Logo = Logo;
 
+// ───────────────────────────────────────────── wave decorations
+// Echo the wave underline beneath "bacalar" in the brand logo across
+// the rest of the site. Three reusable SVG components — drop them in
+// dividers, footers, hero corners, or as small accents under headings.
+//
+// All three are pure SVG (no images, no extra requests), color-aware
+// via CSS variables, and scale via inline style props.
+
+// Single brush-style wave, like the squiggle below "bacalar" in the
+// wordmark. Use under a heading, after a number, in a callout.
+//   <WaveMark/>                 // default sun, 88×14
+//   <WaveMark color="lagoon" width={120}/>
+const WaveMark = ({ color = 'sun', width = 88, height = 14, strokeWidth = 2.6 }) => {
+  const stroke = color.startsWith('var(') || color.startsWith('#') ? color : `var(--${color})`;
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 88 14"
+      preserveAspectRatio="none"
+      aria-hidden
+      style={{ display: 'block', overflow: 'visible' }}
+    >
+      <path
+        d="M2 8 Q12 -1 22 8 T42 8 T62 8 T86 7"
+        fill="none"
+        stroke={stroke}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+window.WaveMark = WaveMark;
+
+// Section divider — three layered horizontal sine waves in the lagoon
+// rampada, full-bleed across its container. Replaces flat <hr>-style
+// lines between sections so the page feels less editorial-rigid.
+//   <WaveDivider/>                  // full
+//   <WaveDivider variant="subtle"/> // single hairline
+const WaveDivider = ({ variant = 'full', height = 56 }) => {
+  if (variant === 'subtle') {
+    return (
+      <svg
+        width="100%"
+        height={Math.round(height * 0.5)}
+        viewBox="0 0 1200 28"
+        preserveAspectRatio="none"
+        aria-hidden
+        style={{ display: 'block' }}
+      >
+        <path
+          d="M0 14 Q200 0 400 14 T800 14 T1200 14"
+          fill="none"
+          stroke="var(--lagoon-pale)"
+          strokeWidth="1.5"
+          opacity="0.85"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      width="100%"
+      height={height}
+      viewBox="0 0 1200 56"
+      preserveAspectRatio="none"
+      aria-hidden
+      style={{ display: 'block' }}
+    >
+      <path
+        d="M0 22 Q200 6 400 22 T800 22 T1200 22"
+        fill="none"
+        stroke="var(--lagoon-darkest)"
+        strokeWidth="1.6"
+        opacity="0.45"
+      />
+      <path
+        d="M0 30 Q200 14 400 30 T800 30 T1200 30"
+        fill="none"
+        stroke="var(--lagoon-deep)"
+        strokeWidth="1.6"
+        opacity="0.65"
+      />
+      <path
+        d="M0 38 Q200 22 400 38 T800 38 T1200 38"
+        fill="none"
+        stroke="var(--lagoon)"
+        strokeWidth="1.6"
+        opacity="0.85"
+      />
+    </svg>
+  );
+};
+window.WaveDivider = WaveDivider;
+
+// Decorative wave-corner block — abstract overlapping waves filling
+// the corner of a section. Use absolutely positioned inside a
+// position:relative section. Variant flips orientation.
+//   <WaveCorner placement="top-right"/>
+//   <WaveCorner placement="bottom-left" tone="pale"/>
+const WaveCorner = ({ placement = 'top-right', size = 220, tone = 'lagoon' }) => {
+  const flipX = placement.endsWith('left');
+  const flipY = placement.startsWith('bottom');
+  // Three fills layered from darkest to lightest, like sun on rippling water.
+  const fills =
+    tone === 'pale'
+      ? ['var(--lagoon)', 'var(--lagoon-mid)', 'var(--lagoon-pale)']
+      : ['var(--lagoon-darkest)', 'var(--lagoon-deep)', 'var(--lagoon)'];
+  const styleByPlacement = {
+    'top-right':    { top: 0, right: 0 },
+    'top-left':     { top: 0, left: 0 },
+    'bottom-right': { bottom: 0, right: 0 },
+    'bottom-left':  { bottom: 0, left: 0 },
+  }[placement];
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 220 220"
+      aria-hidden
+      style={{
+        position: 'absolute',
+        ...styleByPlacement,
+        transform: `${flipX ? 'scaleX(-1) ' : ''}${flipY ? 'scaleY(-1)' : ''}`.trim(),
+        transformOrigin: 'center',
+        pointerEvents: 'none',
+        opacity: 0.22,
+      }}
+    >
+      <path
+        d="M220 0 C 180 60, 120 60, 80 120 C 40 180, 0 180, 0 220 L 220 220 Z"
+        fill={fills[0]}
+        opacity="0.55"
+      />
+      <path
+        d="M220 30 C 180 90, 130 90, 95 145 C 60 200, 30 200, 30 220 L 220 220 Z"
+        fill={fills[1]}
+        opacity="0.6"
+      />
+      <path
+        d="M220 60 C 190 110, 150 120, 120 165 C 90 210, 70 210, 70 220 L 220 220 Z"
+        fill={fills[2]}
+        opacity="0.7"
+      />
+    </svg>
+  );
+};
+window.WaveCorner = WaveCorner;
+
 // ───────────────────────────────────────────── header
 const Header = ({ current }) => {
   const { t, lang, setLang, navigate, cartCount, openCart } = useT();

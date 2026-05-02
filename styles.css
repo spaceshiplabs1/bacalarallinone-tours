@@ -1,5 +1,5 @@
 /* bacalarallinone.tours — design tokens + base */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Caveat+Brush&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
   /* Tropical (default) */
@@ -8,13 +8,16 @@
   --ink: #0c2a2e;
   --ink-2: #1a4348;
   --ink-soft: #4a6a6e;
-  --lagoon: #2fb8c9;   /* bacalar turquoise */
+  --lagoon: #2fb8c9;          /* bacalar turquoise */
   --lagoon-deep: #1a6d7a;
   --lagoon-pale: #b8e8ee;
+  --lagoon-darkest: #1d3a5c;  /* navy from the logo's "bacalar" script */
+  --lagoon-mid: #4cc8d4;      /* between pale and turquoise */
   --jungle: #1f4a2e;
   --jungle-2: #2d6b41;
-  --sun: #e89a3c;       /* sunset amber */
+  --sun: #e89a3c;             /* sunset amber */
   --sun-2: #d4722a;
+  --sun-pale: #f7d28b;        /* lighter amber for gradients/fills */
   --clay: #b35a3c;
   --line: rgba(12, 42, 46, 0.14);
   --line-strong: rgba(12, 42, 46, 0.28);
@@ -99,6 +102,16 @@ body::before {
   font-weight: 400;
   font-style: italic;
   letter-spacing: -0.01em;
+}
+/* Brush-script accent — echoes the "bacalar" wordmark in the logo.
+   Only for short pull-quotes / decorative callouts, never body or
+   primary headings. The logo carries this energy already; we want
+   matching bursts of it scattered, not a flood. */
+.script {
+  font-family: 'Caveat Brush', cursive;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1;
 }
 .mono {
   font-family: 'JetBrains Mono', monospace;
