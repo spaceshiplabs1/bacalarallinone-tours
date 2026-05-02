@@ -9,18 +9,46 @@ const PortFlow = ({ navigate }) => {
 
   return (
     <div className="fade-in">
-      {/* Hero band */}
-      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '56px 0 72px', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius:'50%', background: 'var(--clay)', opacity: 0.3 }}/>
-        <div style={{ position:'absolute', bottom: -80, left: -80, width: 300, height: 300, borderRadius:'50%', background: 'var(--lagoon-deep)', opacity: 0.4 }}/>
+      {/* Hero band — two crossfading commercial sunset shots of the
+          Mahahual cruise pier. Reuses the .transfers-hero-bg keyframes
+          (2-image cycle, 14s). Dim gradient overlay keeps the headline
+          legible regardless of which photo is on top. */}
+      <section style={{ color: 'var(--bone)', padding: '90px 0 110px', position:'relative', overflow:'hidden', background: 'var(--ink)', minHeight: 380 }}>
+        <div
+          aria-hidden
+          className="transfers-hero-bg transfers-hero-bg--a"
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(./images/port-hero-frontal.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 60%',
+          }}
+        />
+        <div
+          aria-hidden
+          className="transfers-hero-bg transfers-hero-bg--b"
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(./images/port-hero-sunset.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 55%',
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.28) 40%, rgba(0,0,0,0.62) 100%)',
+          }}
+        />
         <div className="container" style={{ position:'relative' }}>
-          <div className="mono" style={{ color: 'var(--sun)', marginBottom: 14 }}>● PORT DAY · MAHAHUAL · COSTA MAYA</div>
-          <h1 className="display" style={{ fontSize: 'clamp(40px, 5vw, 72px)', margin: 0, lineHeight: 0.95, maxWidth: 900 }}>
+          <div className="mono" style={{ color: 'var(--sun)', marginBottom: 14, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>● PORT DAY · MAHAHUAL · COSTA MAYA</div>
+          <h1 className="display" style={{ fontSize: 'clamp(40px, 5vw, 72px)', margin: 0, lineHeight: 0.95, maxWidth: 900, textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
             {lang==='en'
               ? <>Off the ship at 9. <span style={{color:'var(--sun)'}}>Back by 2:30.</span> Nothing in-between wasted.</>
               : <>Bajas a las 9. <span style={{color:'var(--sun)'}}>De vuelta 2:30.</span> Ni un minuto perdido.</>}
           </h1>
-          <p style={{ fontSize: 18, color: 'rgba(245,240,230,0.8)', marginTop: 18, maxWidth: 620 }}>
+          <p style={{ fontSize: 18, color: 'rgba(245,240,230,0.92)', marginTop: 18, maxWidth: 620, textShadow: '0 1px 8px rgba(0,0,0,0.55)' }}>
             {lang==='en'
               ? 'Short, sharp adventures within 45 min of the Mahahual pier. Guides who know your ship\'s departure time better than your concierge.'
               : 'Aventuras cortas e intensas a máx. 45 min del muelle Mahahual. Guías que conocen tu crucero mejor que el concierge del barco.'}
@@ -29,10 +57,10 @@ const PortFlow = ({ navigate }) => {
             <span className="badge" style={{ background:'var(--sun)', color:'var(--ink)' }}>
               <Icon d={icons.shield} size={10}/> BACK-TO-SHIP GUARANTEE
             </span>
-            <span className="badge" style={{ background:'rgba(255,255,255,0.12)', color:'var(--bone)' }}>
+            <span className="badge" style={{ background:'rgba(255,255,255,0.20)', color:'var(--bone)', backdropFilter: 'blur(4px)' }}>
               <Icon d={icons.clock} size={10}/> SAME-DAY BOOKING OK
             </span>
-            <span className="badge" style={{ background:'rgba(255,255,255,0.12)', color:'var(--bone)' }}>
+            <span className="badge" style={{ background:'rgba(255,255,255,0.20)', color:'var(--bone)', backdropFilter: 'blur(4px)' }}>
               <Icon d={icons.pin} size={10}/> 5-MIN PIER PICKUP
             </span>
           </div>
