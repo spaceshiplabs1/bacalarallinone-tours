@@ -6,6 +6,18 @@ const Catalog = ({ initialFilter }) => {
   const [sort, setSort] = useState('popular');
   const [query, setQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  // Tracks the live window.TOURS reference so the filtered useMemo below
+  // re-runs when data-api.js swaps the placeholder for the real catalog.
+  // data-api.js dispatches a `hashchange` event after the swap, which the
+  // App-level router already listens to — but the Catalog's useMemo deps
+  // don't change, so we need our own signal here. Bumping a counter on
+  // hashchange forces the memo to recompute against the new window.TOURS.
+  const [toursTick, setToursTick] = useState(0);
+  useEffect(() => {
+    const onChange = () => setToursTick((n) => n + 1);
+    window.addEventListener('hashchange', onChange);
+    return () => window.removeEventListener('hashchange', onChange);
+  }, []);
 
   const filters = [
     { k: 'all', label: t.filterAll },
@@ -39,7 +51,7 @@ const Catalog = ({ initialFilter }) => {
     if (sort === 'rating') out.sort((a,b) => b.rating - a.rating);
     if (sort === 'popular') out.sort((a,b) => b.reviews - a.reviews);
     return out;
-  }, [filter, portOnly, sort, query, lang]);
+  }, [filter, portOnly, sort, query, lang, toursTick]);
 
   // Distinguish "still loading the catalog" from "no results match the
   // current filter" so we don't show the empty-state copy on first paint.

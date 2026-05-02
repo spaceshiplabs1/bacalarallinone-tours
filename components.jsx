@@ -320,10 +320,31 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           background: 'linear-gradient(180deg, rgba(12,42,46,0) 30%, rgba(12,42,46,0.55) 60%, rgba(12,42,46,0.92) 100%)',
         }}
       />
-      {/* Top-left: badges */}
-      <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', gap: 6 }}>
-        {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
-        {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+      {/* Top-left: category label + audience badges. Category sits above
+          the badges so it reads as the primary tag for the tile. */}
+      <div style={{ position: 'absolute', top: 14, left: 14, right: 64, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        {tour.location && (
+          <span
+            className="mono"
+            style={{
+              background: 'rgba(12,42,46,0.55)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              color: 'var(--bone)',
+              fontSize: 11,
+              letterSpacing: 1.4,
+              padding: '5px 10px',
+              borderRadius: 999,
+              textTransform: 'uppercase',
+            }}
+          >
+            <Icon d={icons.pin} size={10}/> {tour.location}
+          </span>
+        )}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
+          {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+        </div>
       </div>
       {/* Top-right: fav heart only — quick-add was confusing next to a CTA. */}
       <div style={{ position: 'absolute', top: 14, right: 14 }}>
@@ -342,49 +363,37 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         </button>
       </div>
 
-      {/* Bottom overlay: location, oversized title, tagline, price + meta. */}
+      {/* Bottom overlay: oversized title + price + meta. Tagline temporarily
+          hidden so the title can breathe; category moved to the top-left
+          chip above. lang-aware hyphens let long compound titles wrap
+          gracefully across two lines instead of overflowing the tile. */}
       <div
         style={{
           position: 'absolute',
           left: 0, right: 0, bottom: 0,
-          padding: '22px 22px 76px',  // leave room for the Book Now strip
+          padding: '22px 22px 76px',
           color: 'var(--bone)',
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
         }}
       >
-        <div className="mono" style={{ color: 'rgba(245,240,230,0.82)', fontSize: 12, letterSpacing: 1.2 }}>
-          <Icon d={icons.pin} size={11}/> {tour.location || (lang === 'en' ? 'Bacalar' : 'Bacalar')}
-        </div>
         <h3
           className="display"
+          lang={lang}
           style={{
             margin: 0,
             fontSize: 'clamp(30px, 3vw, 42px)',
             lineHeight: 1.02,
             textShadow: '0 2px 14px rgba(0,0,0,0.45)',
+            hyphens: 'auto',
+            WebkitHyphens: 'auto',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
           }}
         >
           {tour.title[lang]}
         </h3>
-        {tour.tagline?.[lang] && (
-          <p
-            style={{
-              margin: 0,
-              fontSize: 15,
-              lineHeight: 1.35,
-              color: 'rgba(245,240,230,0.92)',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textShadow: '0 1px 6px rgba(0,0,0,0.55)',
-            }}
-          >
-            {tour.tagline[lang]}
-          </p>
-        )}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
           <span className="display" style={{ fontSize: 34, lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
             ${tour.priceAdult}
