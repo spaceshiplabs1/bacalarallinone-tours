@@ -55,44 +55,22 @@ window.AppCtx = React.createContext({ lang: 'en', t: {}, setLang: () => {}, them
 window.useT = () => React.useContext(window.AppCtx);
 
 // ───────────────────────────────────────────── logo
-const Logo = ({ size = 1 }) => {
-  const { t, lang } = useT();
-  return (
-    <div style={{ display:'flex', alignItems:'center', gap: 10 * size }}>
-      <svg width={36 * size} height={36 * size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-        <defs>
-          <linearGradient id="logoWater" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="var(--lagoon-pale)"/>
-            <stop offset="50%" stopColor="var(--lagoon)"/>
-            <stop offset="100%" stopColor="var(--lagoon-deep)"/>
-          </linearGradient>
-          <clipPath id="logoClip"><circle cx="20" cy="20" r="19"/></clipPath>
-        </defs>
-        <circle cx="20" cy="20" r="19" fill="url(#logoWater)"/>
-        <g clipPath="url(#logoClip)">
-          {/* sun arc */}
-          <circle cx="29" cy="12" r="5" fill="var(--sun)"/>
-          {/* pyramid silhouette (maya ruin) */}
-          <path d="M6 28 L14 15 L22 28 Z" fill="var(--clay)"/>
-          <rect x="12" y="22" width="4" height="6" fill="var(--ink)" opacity="0.8"/>
-          {/* sailboat */}
-          <g transform="translate(22,18)">
-            <path d="M0 8 L6 0 L6 8 Z" fill="var(--bone)"/>
-            <rect x="-2" y="8" width="12" height="1.6" fill="var(--ink)" rx="0.8"/>
-          </g>
-          {/* wave */}
-          <path d="M0 32 Q10 29 20 32 T40 32 L40 40 L0 40 Z" fill="var(--bone)" opacity="0.25"/>
-          <path d="M0 34 Q10 31 20 34 T40 34" stroke="var(--bone)" strokeWidth="0.6" fill="none" opacity="0.5"/>
-        </g>
-        <circle cx="20" cy="20" r="19" fill="none" stroke="var(--ink)" strokeWidth="1" opacity="0.15"/>
-      </svg>
-      <div style={{ display:'flex', alignItems:'baseline', gap: 2 }}>
-        <span className="display" style={{ fontSize: 18 * size, fontWeight: 800, letterSpacing: '-0.03em' }}>{t.brand}</span>
-        <span style={{ fontSize: 18 * size, color: 'var(--clay)', fontWeight: 500 }}>{t.brandDot}</span>
-      </div>
-    </div>
-  );
-};
+// Brand wordmark image — replaces the old SVG mark + bricolage
+// "bacalarallinone.tours" combo with a single bitmap that already
+// contains the script wordmark + wave underline. Background was
+// chroma-keyed to transparent so it sits on any color cleanly.
+const Logo = ({ size = 1 }) => (
+  <img
+    src="./images/logo-long.webp"
+    alt="bacalarallinone.tours"
+    style={{
+      height: 44 * size,
+      width: 'auto',
+      display: 'block',
+      flexShrink: 0,
+    }}
+  />
+);
 window.Logo = Logo;
 
 // ───────────────────────────────────────────── header
