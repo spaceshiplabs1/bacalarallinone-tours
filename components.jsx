@@ -291,7 +291,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
   // length so the grid stays clean.
   return (
     <div
-      className="fade-in"
+      className="fade-in tour-card-tile"
       onClick={onClick}
       style={{
         cursor: 'pointer',
@@ -309,6 +309,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         src={window.tourPhoto(tour)}
         alt={tour.title[lang]}
         loading="lazy"
+        className="tour-card-img"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
       />
       {/* Stronger gradient on the bottom 70% so big white type stays readable. */}
@@ -400,6 +401,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
       {/* Pinned Book Now strip at the very bottom of the card. */}
       <button
         onClick={onClick}
+        className="tour-card-cta"
         style={{
           position: 'absolute',
           left: 14, right: 14, bottom: 14,
