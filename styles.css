@@ -313,6 +313,43 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   .transfers-hero-bg--b { display: none; }
 }
 
+/* Catalog page hero: three stacked background images that cross-fade
+   on a 21s cycle (≈7s per image). Cubic-bezier eases in and out softer
+   than ease-in-out, and a parallel zoom gives a subtle Ken Burns feel
+   without being distracting. */
+@keyframes catalogHeroFadeA {
+  0%, 28%   { opacity: 1; }
+  35%, 95%  { opacity: 0; }
+  100%      { opacity: 1; }
+}
+@keyframes catalogHeroFadeB {
+  0%, 28%   { opacity: 0; }
+  35%, 61%  { opacity: 1; }
+  68%, 100% { opacity: 0; }
+}
+@keyframes catalogHeroFadeC {
+  0%, 61%   { opacity: 0; }
+  68%, 95%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+@keyframes catalogHeroZoom {
+  0%   { transform: scale(1.00); }
+  100% { transform: scale(1.08); }
+}
+.catalog-hero-bg {
+  animation-duration: 21s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  will-change: opacity, transform;
+}
+.catalog-hero-bg--a { animation-name: catalogHeroFadeA, catalogHeroZoom; animation-duration: 21s, 21s; }
+.catalog-hero-bg--b { animation-name: catalogHeroFadeB, catalogHeroZoom; animation-duration: 21s, 21s; opacity: 0; animation-delay: 0s, -7s; }
+.catalog-hero-bg--c { animation-name: catalogHeroFadeC, catalogHeroZoom; animation-duration: 21s, 21s; opacity: 0; animation-delay: 0s, -14s; }
+@media (prefers-reduced-motion: reduce) {
+  .catalog-hero-bg { animation: none !important; }
+  .catalog-hero-bg--b, .catalog-hero-bg--c { display: none; }
+}
+
 .hero-card {
   /* Resting state — explicit so hover can override once the intro animation ends */
   opacity: 1;

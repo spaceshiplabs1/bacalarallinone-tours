@@ -5,6 +5,7 @@ const Catalog = ({ initialFilter }) => {
   const [portOnly, setPortOnly] = useState(false);
   const [sort, setSort] = useState('popular');
   const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
 
   const filters = [
     { k: 'all', label: t.filterAll },
@@ -51,20 +52,30 @@ const Catalog = ({ initialFilter }) => {
       >
         <div
           aria-hidden
-          className="transfers-hero-bg transfers-hero-bg--a"
+          className="catalog-hero-bg catalog-hero-bg--a"
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'url(./images/hero-lagoon.webp)',
+            backgroundImage: 'url(./images/hero-lagoon-1600.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
           }}
         />
         <div
           aria-hidden
-          className="transfers-hero-bg transfers-hero-bg--b"
+          className="catalog-hero-bg catalog-hero-bg--b"
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'url(./images/cenotes-tour.webp)',
+            backgroundImage: 'url(./images/cenotes-tour-1600.webp)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+          }}
+        />
+        <div
+          aria-hidden
+          className="catalog-hero-bg catalog-hero-bg--c"
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(./images/chichen-itza-1600.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
           }}
@@ -92,34 +103,49 @@ const Catalog = ({ initialFilter }) => {
       </section>
 
       {/* Featured search bar overlapping the hero, like the transfers form.
-          Constrained max-width + centered so it doesn't run the full page. */}
-      <div className="container" style={{ marginTop: -32, position: 'relative' }}>
+          Constrained max-width + centered so it doesn't run the full page.
+          Border + ring shift on focus so the input clearly signals state. */}
+      <div className="container" style={{ marginTop: -36, position: 'relative' }}>
         <div
           className="card"
           style={{
-            padding: '10px 16px',
-            boxShadow: 'var(--shadow)',
-            maxWidth: 640,
+            padding: '12px 18px',
+            boxShadow: searchFocused
+              ? '0 1px 2px rgba(12,42,46,0.06), 0 12px 32px rgba(47,184,201,0.18), 0 0 0 2px var(--lagoon)'
+              : 'var(--shadow)',
+            maxWidth: 720,
             margin: '0 auto',
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            gap: 14,
+            transition: 'box-shadow 180ms ease, transform 180ms ease',
+            transform: searchFocused ? 'translateY(-2px)' : 'translateY(0)',
           }}
         >
-          <Icon d={icons.search} size={18} style={{ color: 'var(--ink-soft)', flexShrink: 0 }}/>
+          <Icon
+            d={icons.search}
+            size={20}
+            style={{
+              color: searchFocused ? 'var(--lagoon-deep)' : 'var(--ink-soft)',
+              flexShrink: 0,
+              transition: 'color 180ms ease',
+            }}
+          />
           <input
             placeholder={lang==='en'
               ? 'Search tours — "ruins", "lagoon", "ATV"…'
               : 'Busca tours — "ruinas", "laguna", "ATV"…'}
             value={query}
             onChange={(e)=>setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             style={{
               flex: 1,
               border: 'none',
               outline: 'none',
               background: 'transparent',
               fontSize: 15,
-              padding: '12px 0',
+              padding: '14px 0',
               color: 'var(--ink)',
               fontFamily: 'inherit',
             }}
