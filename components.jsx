@@ -55,16 +55,15 @@ window.AppCtx = React.createContext({ lang: 'en', t: {}, setLang: () => {}, them
 window.useT = () => React.useContext(window.AppCtx);
 
 // ───────────────────────────────────────────── logo
-// Brand mark image — square-ish "Bacalar / All in one tours" badge
-// (~1.6:1 ratio) replaces the older SVG mark + bricolage wordmark.
-// Header height bumped to give it room. The horizontal wordmark
-// variant lives at logo-long.webp if we ever want to swap back.
+// Brand wordmark image — script "bacalarallinone.tours" with wave
+// underline. Background chroma-keyed to transparent so it sits on
+// any color cleanly.
 const Logo = ({ size = 1 }) => (
   <img
-    src="./images/logo-alone.webp"
+    src="./images/logo-long.webp"
     alt="bacalarallinone.tours"
     style={{
-      height: 64 * size,
+      height: 44 * size,
       width: 'auto',
       display: 'block',
       flexShrink: 0,
@@ -103,7 +102,7 @@ const Header = ({ current }) => {
       backdropFilter: 'blur(12px)',
       borderBottom: '1px solid var(--line)'
     }}>
-      <div className="container" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', height: 88, gap: 20 }}>
+      <div className="container" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', height: 68, gap: 20 }}>
         <a href="#" onClick={(e) => { e.preventDefault(); navigate('home'); }} style={{ textDecoration:'none', color:'inherit' }}>
           <Logo />
         </a>
@@ -159,7 +158,7 @@ const Header = ({ current }) => {
         <div
           onClick={() => setOpen(false)}
           style={{
-            position:'fixed', inset: '88px 0 0', zIndex: 49,
+            position:'fixed', inset: '68px 0 0', zIndex: 49,
             background: 'var(--bone)', borderTop: '1px solid var(--line)',
             animation: 'slideUp 0.2s ease both'
           }}>
