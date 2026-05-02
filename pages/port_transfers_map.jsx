@@ -349,9 +349,21 @@ const Transfers = () => {
                       background: sel ? 'rgba(47, 184, 201, 0.06)' : 'var(--bone)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+                      {v.imageUrl && (
+                        <img
+                          src={v.imageUrl}
+                          alt={v.name}
+                          style={{
+                            width: 140, height: 94, objectFit: 'cover',
+                            borderRadius: 8, flexShrink: 0,
+                            border: '1px solid var(--line)', background: 'var(--bone-2)',
+                          }}
+                          loading="lazy"
+                        />
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                           <input type="radio" checked={sel} onChange={() => setSelectedVehicleId(v.vehicleId)} />
                           <span style={{ fontWeight: 600, fontSize: 16 }}>{v.name}</span>
                           <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 11 }}>
@@ -364,7 +376,7 @@ const Transfers = () => {
                           </div>
                         )}
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <div className="display" style={{ fontSize: 22 }}>${dollarsFromCents(priceCents)}</div>
                         <div className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10 }}>{v.currency} · {roundTrip ? 'RT' : 'OW'}</div>
                       </div>
