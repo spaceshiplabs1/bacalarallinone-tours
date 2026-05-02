@@ -24,9 +24,10 @@ const Home = () => {
           obs.disconnect();
         }
       },
-      // Fire a bit before the section is fully on-screen so the
-      // animation finishes by the time the user is fully reading it.
-      { rootMargin: '0px 0px -15% 0px', threshold: 0.15 }
+      // Wait until ~35% of the section is on screen before firing.
+      // Catches the user when they're slowing down to actually look at
+      // the section instead of triggering during a fast scroll past.
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.35 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -178,7 +179,10 @@ const Home = () => {
                       objectFit: 'contain',
                       // Stagger the entrance so the three stickers pop
                       // in one after another instead of all at once.
-                      animationDelay: `${idx * 160}ms`,
+                      // 220ms apart × 3 = ~660ms of cascade on top of
+                      // the 1300ms per-tile duration, so the whole
+                      // sequence reads as a smooth wave.
+                      animationDelay: `${idx * 220}ms`,
                     }}
                   />
                 </div>
