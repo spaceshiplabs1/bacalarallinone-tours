@@ -438,6 +438,64 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   .datepicker-day:hover { transform: none !important; }
 }
 
+/* Time chips on the tour detail booking panel — same hover language
+   as datepicker-day for consistency. */
+.time-chip:not(.is-selected):hover {
+  background-color: var(--lagoon-pale) !important;
+  border-color: var(--lagoon) !important;
+  transform: translateY(-1px);
+}
+.time-chip:not(.is-selected):active {
+  transform: translateY(0);
+  background-color: var(--lagoon) !important;
+  color: var(--bone) !important;
+}
+.time-chip.is-selected:hover { background-color: var(--ink-2) !important; }
+
+/* Stepper +/- buttons — subtle bone-2 fill on hover to invite the
+   click without competing with the larger lagoon-pale used elsewhere. */
+.stepper-btn:not(:disabled):hover { background-color: var(--bone-2) !important; }
+.stepper-btn:not(:disabled):active { background-color: var(--lagoon-pale) !important; }
+
+/* Add-on rows — checked state already lifts color via inline styles;
+   hover bumps the unchecked rows so they read as clickable. */
+.addon-row:not(.is-checked):hover {
+  background-color: var(--bone-2) !important;
+  border-color: var(--line-strong) !important;
+}
+.addon-row.is-checked:hover {
+  background-color: rgba(184,232,238,0.55) !important;
+}
+
+/* Gallery photo tiles — slow zoom on the inner Photo image plus a
+   subtle dimming overlay so the user knows the tile is interactive. */
+.gallery-tile { position: relative; }
+.gallery-tile img,
+.gallery-tile .ph,
+.gallery-tile > * {
+  transition: transform 480ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.gallery-tile:hover img,
+.gallery-tile:hover .ph,
+.gallery-tile:hover > * {
+  transform: scale(1.04);
+}
+.gallery-tile::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(12,42,46,0) 60%, rgba(12,42,46,0.18) 100%);
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+.gallery-tile:hover::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .time-chip:hover, .stepper-btn:hover, .addon-row:hover { transform: none !important; }
+  .gallery-tile:hover img,
+  .gallery-tile:hover .ph,
+  .gallery-tile:hover > * { transform: none !important; }
+}
+
 /* Home "Pick your path" tiles — color-blocked, no-photo navigation.
    Hover lifts the tile, shifts the ghost glyph out toward the corner,
    and slides the CTA arrow forward so the click target reads "alive"

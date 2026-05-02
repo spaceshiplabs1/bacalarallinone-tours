@@ -96,10 +96,13 @@ const TourDetail = ({ tourId, prefill }) => {
             >
               {/* Hero photo (always slot 0). */}
               <div
+                className="gallery-tile"
                 style={{
                   gridRow: heroBigSpansBothRows ? 'span 2' : 'auto',
                   position: 'relative',
                   cursor: 'zoom-in',
+                  overflow: 'hidden',
+                  borderRadius: 'var(--radius-lg)',
                 }}
                 onClick={() => openLightbox(gallery, 0)}
               >
@@ -138,13 +141,18 @@ const TourDetail = ({ tourId, prefill }) => {
               {gallery.slice(1, n === 2 ? 2 : n <= 4 ? n : 5).map((g, i) => (
                 <div
                   key={i}
-                  style={{ cursor: 'zoom-in' }}
+                  className="gallery-tile"
+                  style={{
+                    cursor: 'zoom-in',
+                    overflow: 'hidden',
+                    borderRadius: 'var(--radius)',
+                  }}
                   onClick={() => openLightbox(gallery, i + 1)}
                 >
                   <window.Photo
                     src={g.src}
                     label={g.label}
-                    style={{ width: '100%', height: '100%', borderRadius: 'var(--radius)' }}
+                    style={{ width: '100%', height: '100%' }}
                   />
                 </div>
               ))}
@@ -353,12 +361,19 @@ const TourDetail = ({ tourId, prefill }) => {
                   {tour.times.map((tm,i) => {
                     const isSel = selTime === tm;
                     return (
-                      <button key={i} onClick={()=>setSelTime(tm)} style={{
-                        padding: '8px 14px', borderRadius: 999,
-                        border: `1.5px solid ${isSel ? 'var(--ink)' : 'var(--line)'}`,
-                        background: isSel ? 'var(--ink)' : 'transparent', color: isSel ? 'var(--bone)' : 'var(--ink)',
-                        cursor:'pointer', fontSize: 13, fontWeight: 500
-                      }}>{tm}</button>
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={()=>setSelTime(tm)}
+                        className={`time-chip${isSel ? ' is-selected' : ''}`}
+                        style={{
+                          padding: '8px 14px', borderRadius: 999,
+                          border: `1.5px solid ${isSel ? 'var(--ink)' : 'var(--line)'}`,
+                          background: isSel ? 'var(--ink)' : 'transparent', color: isSel ? 'var(--bone)' : 'var(--ink)',
+                          cursor:'pointer', fontSize: 13, fontWeight: 500,
+                          transition: 'background-color 140ms ease, border-color 140ms ease, transform 140ms ease',
+                        }}
+                      >{tm}</button>
                     );
                   })}
                 </div>
@@ -393,13 +408,27 @@ const TourDetail = ({ tourId, prefill }) => {
               <div style={{ marginTop: 16 }}>
                 <span className="mono" style={{ color:'var(--ink-soft)', display:'block', marginBottom: 8 }}>{t.addOns}</span>
                 <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
-                  {addonList.map(a => (
-                    <label key={a.k} style={{ display:'flex', alignItems:'center', gap: 10, padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 8, cursor:'pointer' }}>
-                      <input type="checkbox" checked={!!addons[a.k]} onChange={(e)=>setAddons({...addons, [a.k]: e.target.checked})}/>
-                      <span style={{ flex: 1, fontSize: 13 }}>{a.label}</span>
-                      <span className="mono" style={{ color:'var(--ink-soft)' }}>+${a.price}</span>
-                    </label>
-                  ))}
+                  {addonList.map(a => {
+                    const checked = !!addons[a.k];
+                    return (
+                      <label
+                        key={a.k}
+                        className={`addon-row${checked ? ' is-checked' : ''}`}
+                        style={{
+                          display:'flex', alignItems:'center', gap: 10,
+                          padding: '8px 10px',
+                          border: `1px solid ${checked ? 'var(--lagoon)' : 'var(--line)'}`,
+                          background: checked ? 'rgba(184,232,238,0.35)' : 'transparent',
+                          borderRadius: 8, cursor:'pointer',
+                          transition: 'background-color 140ms ease, border-color 140ms ease',
+                        }}
+                      >
+                        <input type="checkbox" checked={checked} onChange={(e)=>setAddons({...addons, [a.k]: e.target.checked})}/>
+                        <span style={{ flex: 1, fontSize: 13 }}>{a.label}</span>
+                        <span className="mono" style={{ color:'var(--ink-soft)' }}>+${a.price}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -431,12 +460,24 @@ const TourDetail = ({ tourId, prefill }) => {
 const Stepper = ({ value, setValue, min = 0, max = 20, compact = false }) => {
   const sz = compact ? 30 : 40;
   return (
-    <div style={{ display:'flex', alignItems:'center', border: '1.5px solid var(--line-strong)', borderRadius: compact ? 8 : 10, width: 'fit-content' }}>
-      <button type="button" onClick={()=>setValue(Math.max(min, value-1))} style={{ width: sz, height: sz, border:'none', background:'transparent', cursor:'pointer', color: value <= min ? 'var(--ink-soft)' : 'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+    <div className="stepper" style={{ display:'flex', alignItems:'center', border: '1.5px solid var(--line-strong)', borderRadius: compact ? 8 : 10, width: 'fit-content' }}>
+      <button
+        type="button"
+        className="stepper-btn"
+        disabled={value <= min}
+        onClick={()=>setValue(Math.max(min, value-1))}
+        style={{ width: sz, height: sz, border:'none', background:'transparent', cursor: value <= min ? 'not-allowed' : 'pointer', color: value <= min ? 'var(--ink-soft)' : 'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center', borderTopLeftRadius: 'inherit', borderBottomLeftRadius: 'inherit', transition: 'background-color 140ms ease' }}
+      >
         <Icon d={icons.minus} size={compact ? 12 : 14}/>
       </button>
       <span style={{ width: sz, textAlign:'center', fontWeight: 600, fontSize: compact ? 13 : 16 }}>{value}</span>
-      <button type="button" onClick={()=>setValue(Math.min(max, value+1))} style={{ width: sz, height: sz, border:'none', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <button
+        type="button"
+        className="stepper-btn"
+        disabled={value >= max}
+        onClick={()=>setValue(Math.min(max, value+1))}
+        style={{ width: sz, height: sz, border:'none', background:'transparent', cursor: value >= max ? 'not-allowed' : 'pointer', color: value >= max ? 'var(--ink-soft)' : 'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center', borderTopRightRadius: 'inherit', borderBottomRightRadius: 'inherit', transition: 'background-color 140ms ease' }}
+      >
         <Icon d={icons.plus} size={compact ? 12 : 14}/>
       </button>
     </div>
