@@ -212,20 +212,25 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Section meta: oversized brand-color number, smaller
-                    mono caption following on the same baseline. */}
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                  <span
-                    className="display"
-                    style={{
-                      fontSize: 'clamp(40px, 4vw, 56px)',
-                      lineHeight: 0.9,
-                      color: path.accent,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {path.n}
-                  </span>
+                {/* Section meta: oversized brand-color number with a
+                    brush-style wave squiggle underneath echoing the
+                    logo's wave below "bacalar". Mono caption sits to
+                    the right on the same baseline. */}
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <span
+                      className="display"
+                      style={{
+                        fontSize: 'clamp(40px, 4vw, 56px)',
+                        lineHeight: 0.9,
+                        color: path.accent,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {path.n}
+                    </span>
+                    <WaveMark color={path.accent} width={64} height={10} strokeWidth={2.4}/>
+                  </div>
                   <span
                     className="mono"
                     style={{
@@ -233,6 +238,7 @@ const Home = () => {
                       letterSpacing: 1.4,
                       fontSize: 11,
                       opacity: 0.85,
+                      paddingBottom: 10,
                     }}
                   >
                     / {path.title.toUpperCase()}
@@ -292,8 +298,14 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Wave divider between Pick-your-path and Featured Tours —
+          echo of the logo's underline, ties the home rhythm together. */}
+      <div className="container" style={{ paddingTop: 8, paddingBottom: 8 }}>
+        <WaveDivider/>
+      </div>
+
       {/* FEATURED TOURS */}
-      <section className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
+      <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
@@ -306,8 +318,13 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Subtle wave divider — single hairline echo before the map. */}
+      <div className="container" style={{ paddingTop: 8, paddingBottom: 8 }}>
+        <WaveDivider variant="subtle"/>
+      </div>
+
       {/* MAP */}
-      <section className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
+      <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
         <div className="rg" style={{ display:'grid', gridTemplateColumns: '1fr 1.6fr', gap: 40, alignItems:'center' }}>
           <div>
             <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 12 }}>01 / THE REGION</div>

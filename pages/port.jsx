@@ -33,6 +33,10 @@ const PortFlow = ({ navigate }) => {
               'linear-gradient(180deg, rgba(0,0,0,0) 65%, rgba(0,0,0,0.30) 100%)',
           }}
         />
+        {/* Layered lagoon waves filling the bottom-left corner —
+            echoes the logo's wave under "bacalar" without competing
+            with the cruise ship on the right. */}
+        <WaveCorner placement="bottom-left" size={260} tone="lagoon"/>
         <div className="container" style={{ position:'relative' }}>
           <div
             className="mono"
