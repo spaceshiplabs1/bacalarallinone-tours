@@ -131,7 +131,7 @@ const Home = () => {
             const badgeIcon =
               path.key === 'port'    ? icons.ship
             : path.key === 'regular' ? icons.compass
-            :                          icons.van;
+            :                          icons.bus;
             return (
               <div
                 key={path.key}
@@ -181,9 +181,9 @@ const Home = () => {
                       width: '100%',
                       height: '100%',
                       objectFit: 'contain',
-                      // Stagger the entrance so the three stickers pop
-                      // in one after another instead of all at once.
-                      animationDelay: `${idx * 220}ms`,
+                      // Stagger the transition so the three stickers
+                      // ease in one after another instead of all at once.
+                      transitionDelay: `${idx * 200}ms`,
                     }}
                   />
                   {/* Icon badge floating at the bottom-side corner of

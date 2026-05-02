@@ -429,28 +429,22 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 }
 .path-tile-cta { transition: transform 200ms ease; }
 .path-tile-cta svg { transition: transform 220ms ease; }
-/* The illustration starts hidden + squeezed, then plays a bouncy
-   entrance keyframe once the section scrolls into view AND the PNG
-   has arrived. Once the keyframe ends we DO NOT use animation-fill-mode:
-   forwards — that would lock the transform to the keyframe's final
-   value and block the :hover override. Instead the resting state is
-   set as a regular CSS rule on .path-tile-illo--in, which the browser
-   uses after animation completes; :hover then transitions on top. */
+/* Pure CSS transition — no keyframes. Rest state: hidden + slightly
+   shrunk + nudged down. Adding .path-tile-illo--in transitions the
+   element to its final state with elastic ease-out, which gives the
+   bounce naturally via the easing curve (no separate animation step
+   to glitch with). Hover overrides transform on the same property
+   so the transition takes care of the rollover too. */
 .path-tile-illo {
   opacity: 0;
-  transform: scale(0.86) translateY(20px);
+  transform: scale(0.92) translateY(16px);
+  transition: opacity 700ms ease,
+              transform 800ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 280ms ease;
 }
 .path-tile-illo--in {
   opacity: 1;
   transform: scale(1) translateY(0);
-  animation: pathIlloEnter 1100ms cubic-bezier(0.34, 1.4, 0.64, 1);
-  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
-              filter 280ms ease;
-}
-@keyframes pathIlloEnter {
-  0%   { opacity: 0; transform: scale(0.86) translateY(20px); }
-  60%  { opacity: 1; transform: scale(1.03) translateY(-3px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 .path-tile:hover .path-tile-illo--in {
   transform: scale(1.06) translateY(-6px) rotate(-1.5deg);
@@ -458,7 +452,6 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 }
 .path-tile:active .path-tile-illo--in {
   transform: scale(1.02) translateY(-2px) rotate(-0.5deg);
-  transition-duration: 120ms;
 }
 .path-tile:hover .path-tile-cta svg { transform: translateX(8px); }
 .path-tile-cta svg {
@@ -468,8 +461,8 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   .path-tile,
   .path-tile-illo,
   .path-tile-cta,
-  .path-tile-cta svg { transition: none !important; animation: none !important; }
-  .path-tile-illo--in { opacity: 1; transform: none; animation: none; }
+  .path-tile-cta svg { transition: none !important; }
+  .path-tile-illo { opacity: 1; transform: none; }
   .path-tile:hover .path-tile-illo--in { transform: none; filter: none; }
   .path-tile:hover .path-tile-cta svg { transform: none; }
 }

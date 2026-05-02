@@ -10,8 +10,12 @@ const Icon = ({ d, size = 18, stroke = 1.7 }) => (
 
 const icons = {
   anchor: <><circle cx="12" cy="5" r="2"/><path d="M12 7v13"/><path d="M5 16a7 7 0 0 0 14 0"/><path d="M8 13H4"/><path d="M20 13h-4"/></>,
-  ship: <><path d="M2 20a5 5 0 0 0 5-3 5 5 0 0 0 10 0 5 5 0 0 0 5 3"/><path d="M4 18 2 8h20l-2 10"/><path d="M12 8V4h4l2 4"/><path d="M8 8V6"/></>,
-  compass: <><circle cx="12" cy="12" r="10"/><path d="m16 8-4 4-4 4 4-4 4-4z" fill="currentColor"/></>,
+  // ship/compass/bus paths sourced verbatim from lucide.dev (ISC) —
+  // higher-fidelity than my hand-drawn versions and instantly readable
+  // at small badge sizes.
+  ship: <><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M12 10v4"/><path d="M12 2v3"/></>,
+  compass: <><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></>,
+  bus: <><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></>,
   leaf: <><path d="M11 20A7 7 0 0 1 4 13V5h8a7 7 0 0 1 7 7 7 7 0 0 1-7 7h-1z"/><path d="M4 5s6 2 10 7"/></>,
   pyramid: <><path d="M12 3 2 21h20L12 3z"/><path d="M6 14h12"/><path d="M9 9h6"/></>,
   waves: <><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></>,
