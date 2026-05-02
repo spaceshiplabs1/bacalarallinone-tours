@@ -1,4 +1,4 @@
-// Catalog — filter + sort + map sidebar
+// Catalog — filter + sort, full-width responsive card grid
 const Catalog = ({ initialFilter }) => {
   const { t, lang, navigate } = useT();
   const [filter, setFilter] = useState(initialFilter || 'all');
@@ -69,32 +69,15 @@ const Catalog = ({ initialFilter }) => {
         </select>
       </div>
 
-      <div className="rg" style={{ display:'grid', gridTemplateColumns: '1fr 320px', gap: 28, marginTop: 28 }}>
-        <div className="rg-cards" style={{ display:'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-          {filtered.map(tour => (
-            <TourCard key={tour.id} tour={tour} onClick={() => navigate('detail', { tourId: tour.id })}/>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ gridColumn: '1/-1', textAlign:'center', padding: 60, color:'var(--ink-soft)' }}>
-              {lang==='en'?'No tours match. Try different filters.':'No hay tours. Cambia los filtros.'}
-            </div>
-          )}
-        </div>
-
-        {/* sidebar map */}
-        <div className="rg-sticky-col" style={{ position: 'sticky', top: 90, alignSelf:'flex-start' }}>
-          <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 10 }}>LIVE MAP</div>
-          <MiniMap/>
-          <div className="card" style={{ marginTop: 16, padding: 16 }}>
-            <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 8 }}>NEED HELP?</div>
-            <div style={{ fontSize: 14, marginBottom: 12 }}>
-              {lang==='en'?'Chat with a local concierge, pick the right tour.':'Habla con un concierge local.'}
-            </div>
-            <button className="btn btn-sm" style={{ background:'#25D366', color:'white', width:'100%' }}>
-              <Icon d={icons.whatsapp} size={14}/> {t.chatCta}
-            </button>
+      <div className="rg-cards" style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20, marginTop: 28 }}>
+        {filtered.map(tour => (
+          <TourCard key={tour.id} tour={tour} onClick={() => navigate('detail', { tourId: tour.id })}/>
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: '1/-1', textAlign:'center', padding: 60, color:'var(--ink-soft)' }}>
+            {lang==='en'?'No tours match. Try different filters.':'No hay tours. Cambia los filtros.'}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
