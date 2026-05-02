@@ -18,7 +18,13 @@ const Catalog = ({ initialFilter }) => {
   ];
 
   const filtered = useMemo(() => {
+    // data-api.js seeds window.TOURS with a single "__loading__" placeholder
+    // so detail-page deep links don't crash before the catalog fetch resolves.
+    // Filter it out here so the catalog never renders the placeholder as a
+    // real card (which made auto-fit stretch it across the whole row on
+    // first paint).
     let out = window.TOURS.filter(tr => {
+      if (tr.id === '__loading__' || tr.slug === '__loading__') return false;
       if (filter !== 'all' && tr.category !== filter) return false;
       if (portOnly && !tr.audience.includes('port')) return false;
       if (query) {
@@ -34,6 +40,11 @@ const Catalog = ({ initialFilter }) => {
     if (sort === 'popular') out.sort((a,b) => b.reviews - a.reviews);
     return out;
   }, [filter, portOnly, sort, query, lang]);
+
+  // Distinguish "still loading the catalog" from "no results match the
+  // current filter" so we don't show the empty-state copy on first paint.
+  const stillLoading =
+    window.TOURS.length === 1 && window.TOURS[0].id === '__loading__';
 
   return (
     <div className="fade-in">
@@ -173,13 +184,15 @@ const Catalog = ({ initialFilter }) => {
           </select>
         </div>
 
-        <div className="rg-cards" style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, marginTop: 20 }}>
+        <div className="rg-cards" style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 22, marginTop: 20 }}>
           {filtered.map(tour => (
             <TourCard key={tour.id} tour={tour} onClick={() => navigate('detail', { tourId: tour.id })}/>
           ))}
           {filtered.length === 0 && (
             <div style={{ gridColumn: '1/-1', textAlign:'center', padding: 60, color:'var(--ink-soft)' }}>
-              {lang==='en'?'No tours match. Try different filters.':'No hay tours. Cambia los filtros.'}
+              {stillLoading
+                ? (lang==='en' ? 'Loading tours…' : 'Cargando tours…')
+                : (lang==='en' ? 'No tours match. Try different filters.' : 'No hay tours. Cambia los filtros.')}
             </div>
           )}
         </div>

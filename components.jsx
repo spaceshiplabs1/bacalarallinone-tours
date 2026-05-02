@@ -346,21 +346,21 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         style={{
           position: 'absolute',
           left: 0, right: 0, bottom: 0,
-          padding: '20px 20px 64px',  // leave room for the Book Now strip
+          padding: '22px 22px 76px',  // leave room for the Book Now strip
           color: 'var(--bone)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 8,
+          gap: 10,
         }}
       >
-        <div className="mono" style={{ color: 'rgba(245,240,230,0.78)', fontSize: 11, letterSpacing: 1.2 }}>
-          <Icon d={icons.pin} size={10}/> {tour.location || (lang === 'en' ? 'Bacalar' : 'Bacalar')}
+        <div className="mono" style={{ color: 'rgba(245,240,230,0.82)', fontSize: 12, letterSpacing: 1.2 }}>
+          <Icon d={icons.pin} size={11}/> {tour.location || (lang === 'en' ? 'Bacalar' : 'Bacalar')}
         </div>
         <h3
           className="display"
           style={{
             margin: 0,
-            fontSize: 'clamp(26px, 2.6vw, 36px)',
+            fontSize: 'clamp(30px, 3vw, 42px)',
             lineHeight: 1.02,
             textShadow: '0 2px 14px rgba(0,0,0,0.45)',
           }}
@@ -371,9 +371,9 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           <p
             style={{
               margin: 0,
-              fontSize: 13,
+              fontSize: 15,
               lineHeight: 1.35,
-              color: 'rgba(245,240,230,0.88)',
+              color: 'rgba(245,240,230,0.92)',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -385,14 +385,14 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           </p>
         )}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
-          <span className="display" style={{ fontSize: 28, lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+          <span className="display" style={{ fontSize: 34, lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
             ${tour.priceAdult}
           </span>
-          <span style={{ fontSize: 12, color: 'rgba(245,240,230,0.78)' }}>
+          <span style={{ fontSize: 13, color: 'rgba(245,240,230,0.82)' }}>
             {tour.flat ? t.perVan : t.perPerson}
           </span>
-          <span style={{ fontSize: 12, color: 'rgba(245,240,230,0.78)', marginLeft: 'auto', display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-            <Icon d={icons.clock} size={12}/> {tour.duration}{t.hr}
+          <span style={{ fontSize: 13, color: 'rgba(245,240,230,0.82)', marginLeft: 'auto', display: 'inline-flex', gap: 5, alignItems: 'center' }}>
+            <Icon d={icons.clock} size={13}/> {tour.duration}{t.hr}
           </span>
         </div>
       </div>
@@ -402,16 +402,16 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         onClick={onClick}
         style={{
           position: 'absolute',
-          left: 12, right: 12, bottom: 12,
-          padding: '12px 16px',
+          left: 14, right: 14, bottom: 14,
+          padding: '14px 18px',
           background: 'var(--sun)',
           color: 'var(--ink)',
           border: 'none',
           borderRadius: 10,
           cursor: 'pointer',
           fontWeight: 700,
-          fontSize: 14,
-          letterSpacing: 0.5,
+          fontSize: 15,
+          letterSpacing: 0.6,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -419,7 +419,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           textTransform: 'uppercase',
         }}
       >
-        {lang === 'en' ? 'Book now' : 'Reservar'} <Icon d={icons.arrow} size={14}/>
+        {lang === 'en' ? 'Book now' : 'Reservar'} <Icon d={icons.arrow} size={15}/>
       </button>
     </div>
   );
