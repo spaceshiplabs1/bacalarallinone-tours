@@ -266,8 +266,7 @@ window.Footer = Footer;
 
 // ───────────────────────────────────────────── tour card
 const TourCard = ({ tour, onClick, compact = false }) => {
-  const { t, lang, isFav, toggleFav } = useT();
-  const fav = isFav(tour.id);
+  const { t, lang } = useT();
   // Compact stays close to the old layout — used by detail page "related" rail.
   if (compact) {
     return (
@@ -290,186 +289,246 @@ const TourCard = ({ tour, onClick, compact = false }) => {
   // aspectRatio keeps every card the same height regardless of copy
   // length so the grid stays clean.
   return (
+    // Outer tile: no overflow:hidden so the price label can poke out
+    // beyond the rounded corner. Photo + overlays live in an inner
+    // wrapper that does the clipping.
     <div
       className="fade-in tour-card-tile"
       onClick={onClick}
       style={{
         cursor: 'pointer',
         position: 'relative',
-        borderRadius: 16,
-        overflow: 'hidden',
-        background: 'var(--ink)',
         aspectRatio: '4/5',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
       }}
     >
-      <img
-        src={window.tourPhoto(tour)}
-        alt={tour.title[lang]}
-        loading="lazy"
-        className="tour-card-img"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-      {/* Stronger gradient on the bottom 70% so big white type stays readable. */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, rgba(12,42,46,0) 30%, rgba(12,42,46,0.55) 60%, rgba(12,42,46,0.92) 100%)',
-        }}
-      />
-      {/* Top-left: category label + audience badges + duration chip.
-          Pulled all secondary metadata up here so the title can own the
-          bottom of the card uncontested. */}
-      <div style={{ position: 'absolute', top: 14, left: 14, right: 64, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-        {tour.location && (
-          <span
-            className="mono"
-            style={{
-              background: 'rgba(12,42,46,0.55)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              color: 'var(--bone)',
-              fontSize: 11,
-              letterSpacing: 1.4,
-              padding: '5px 10px',
-              borderRadius: 999,
-              textTransform: 'uppercase',
-            }}
-          >
-            <Icon d={icons.pin} size={10}/> {tour.location}
-          </span>
-        )}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
-          {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
-          <span
-            style={{
-              background: 'rgba(12,42,46,0.55)',
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              color: 'var(--bone)',
-              fontSize: 11,
-              letterSpacing: 0.6,
-              padding: '4px 9px',
-              borderRadius: 999,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <Icon d={icons.clock} size={11}/> {tour.duration}{t.hr}
-          </span>
-        </div>
-      </div>
-
-      {/* Top-right: price chip stacked over the fav heart. Frosted-glass
-          to match the category pill — keeps the card's photo legible. */}
-      <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleFav(tour.id); }}
-          title={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
-          aria-label={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
-          style={{
-            width: 38, height: 38, borderRadius: '50%',
-            background: 'rgba(245,240,230,0.92)', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: fav ? 'var(--clay)' : 'var(--ink-soft)',
-          }}
-        >
-          <Icon d={icons.heart} size={16}/>
-        </button>
-        <span
-          style={{
-            background: 'rgba(12,42,46,0.55)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            padding: '6px 12px',
-            borderRadius: 999,
-            display: 'inline-flex',
-            alignItems: 'baseline',
-            gap: 5,
-          }}
-        >
-          {/* Use the brand sun amber so the price reads as a price, not as
-              part of the title (both white competed for attention). */}
-          <span
-            className="display"
-            style={{
-              fontSize: 18,
-              lineHeight: 1,
-              color: 'var(--sun)',
-              textShadow: '0 1px 4px rgba(0,0,0,0.5)',
-            }}
-          >
-            ${tour.priceAdult}
-          </span>
-          <span style={{ fontSize: 11, color: 'rgba(245,240,230,0.78)' }}>
-            {tour.flat ? t.perVan : t.perPerson}
-          </span>
-        </span>
-      </div>
-
-      {/* Bottom overlay: title only, oversized — owns the lower half of
-          the tile. lang-aware hyphens keep long compound names from
-          overflowing on narrower cards. */}
       <div
         style={{
           position: 'absolute',
-          left: 0, right: 0, bottom: 0,
-          padding: '22px 22px 76px',
-          color: 'var(--bone)',
+          inset: 0,
+          borderRadius: 16,
+          overflow: 'hidden',
+          background: 'var(--ink)',
+          boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
         }}
       >
-        <h3
-          className="display"
-          lang={lang}
+        <img
+          src={window.tourPhoto(tour)}
+          alt={tour.title[lang]}
+          loading="lazy"
+          className="tour-card-img"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+        {/* Stronger gradient on the bottom 70% so big white type stays readable. */}
+        <div
+          aria-hidden
           style={{
-            margin: 0,
-            fontSize: 'clamp(36px, 3.6vw, 52px)',
-            lineHeight: 0.98,
-            textShadow: '0 2px 14px rgba(0,0,0,0.45)',
-            hyphens: 'auto',
-            WebkitHyphens: 'auto',
-            overflowWrap: 'break-word',
-            wordBreak: 'break-word',
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(12,42,46,0) 30%, rgba(12,42,46,0.55) 60%, rgba(12,42,46,0.92) 100%)',
+          }}
+        />
+        {/* Top-left: category label + audience badges + duration chip.
+            Pulled all secondary metadata up here so the title can own the
+            bottom of the card uncontested. */}
+        <div style={{ position: 'absolute', top: 14, left: 14, right: 110, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+          {tour.location && (
+            <span
+              className="mono"
+              style={{
+                background: 'rgba(12,42,46,0.55)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                color: 'var(--bone)',
+                fontSize: 11,
+                letterSpacing: 1.4,
+                padding: '5px 10px',
+                borderRadius: 999,
+                textTransform: 'uppercase',
+              }}
+            >
+              <Icon d={icons.pin} size={10}/> {tour.location}
+            </span>
+          )}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
+            {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+            <span
+              style={{
+                background: 'rgba(12,42,46,0.55)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                color: 'var(--bone)',
+                fontSize: 11,
+                letterSpacing: 0.6,
+                padding: '4px 9px',
+                borderRadius: 999,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <Icon d={icons.clock} size={11}/> {tour.duration}{t.hr}
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom overlay: title only, oversized — owns the lower half of
+            the tile. text-wrap: pretty avoids orphan last lines so the
+            base ends with a fuller line of words rather than a single
+            stranded word. lang-aware hyphens keep long compound names
+            from overflowing on narrower cards. */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 0, right: 0, bottom: 0,
+            padding: '22px 22px 76px',
+            color: 'var(--bone)',
           }}
         >
-          {tour.title[lang]}
-        </h3>
+          <h3
+            className="display"
+            lang={lang}
+            style={{
+              margin: 0,
+              fontSize: 'clamp(36px, 3.6vw, 52px)',
+              lineHeight: 0.98,
+              textShadow: '0 2px 14px rgba(0,0,0,0.45)',
+              hyphens: 'auto',
+              WebkitHyphens: 'auto',
+              overflowWrap: 'break-word',
+              wordBreak: 'break-word',
+              textWrap: 'pretty',
+            }}
+          >
+            {tour.title[lang]}
+          </h3>
+        </div>
+
+        {/* Pinned Book Now strip at the very bottom of the card. */}
+        <button
+          onClick={onClick}
+          className="tour-card-cta"
+          style={{
+            position: 'absolute',
+            left: 14, right: 14, bottom: 14,
+            padding: '14px 18px',
+            background: 'var(--sun)',
+            color: 'var(--ink)',
+            border: 'none',
+            borderRadius: 10,
+            cursor: 'pointer',
+            fontWeight: 700,
+            fontSize: 15,
+            letterSpacing: 0.6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            textTransform: 'uppercase',
+          }}
+        >
+          {lang === 'en' ? 'Book now' : 'Reservar'} <Icon d={icons.arrow} size={15}/>
+        </button>
       </div>
 
-      {/* Pinned Book Now strip at the very bottom of the card. */}
-      <button
-        onClick={onClick}
-        className="tour-card-cta"
+      {/* Price label — sticks out of the top-right corner so it reads
+          like a hangtag. Sits OUTSIDE the photo wrapper's overflow:hidden
+          which is why the wrapper restructure above was needed. */}
+      <div
         style={{
           position: 'absolute',
-          left: 14, right: 14, bottom: 14,
-          padding: '14px 18px',
+          top: -10,
+          right: 16,
           background: 'var(--sun)',
           color: 'var(--ink)',
-          border: 'none',
+          padding: '8px 14px',
           borderRadius: 10,
-          cursor: 'pointer',
+          boxShadow: '0 6px 18px rgba(212,114,42,0.45), 0 1px 2px rgba(0,0,0,0.2)',
+          display: 'inline-flex',
+          alignItems: 'baseline',
+          gap: 5,
           fontWeight: 700,
-          fontSize: 15,
-          letterSpacing: 0.6,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          textTransform: 'uppercase',
         }}
       >
-        {lang === 'en' ? 'Book now' : 'Reservar'} <Icon d={icons.arrow} size={15}/>
-      </button>
+        <span className="display" style={{ fontSize: 20, lineHeight: 1 }}>
+          ${tour.priceAdult}
+        </span>
+        <span style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 500 }}>
+          {tour.flat ? t.perVan : t.perPerson}
+        </span>
+      </div>
     </div>
   );
 };
 window.TourCard = TourCard;
+
+// Skeleton tile that mirrors TourCard's footprint while the catalog
+// is still loading. Matches the 4:5 aspect ratio + 16px radius so
+// swapping skeletons for real cards doesn't reflow the grid.
+const TourCardSkeleton = () => (
+  <div
+    aria-hidden
+    style={{
+      position: 'relative',
+      aspectRatio: '4/5',
+      borderRadius: 16,
+      overflow: 'hidden',
+      background: 'var(--bone-2)',
+      boxShadow: '0 10px 30px rgba(12,42,46,0.10)',
+    }}
+  >
+    <div className="skeleton-shimmer" style={{ position: 'absolute', inset: 0 }}/>
+    {/* Mimic the category pill on top-left */}
+    <div
+      style={{
+        position: 'absolute',
+        top: 14, left: 14,
+        width: 110, height: 22,
+        borderRadius: 999,
+        background: 'rgba(12,42,46,0.10)',
+      }}
+    />
+    {/* Mimic the price tag stub on top-right */}
+    <div
+      style={{
+        position: 'absolute',
+        top: -8, right: 16,
+        width: 78, height: 36,
+        borderRadius: 10,
+        background: 'rgba(12,42,46,0.12)',
+      }}
+    />
+    {/* Mimic the title block at the bottom */}
+    <div
+      style={{
+        position: 'absolute',
+        left: 22, right: 22, bottom: 86,
+        height: 28,
+        borderRadius: 6,
+        background: 'rgba(12,42,46,0.14)',
+      }}
+    />
+    <div
+      style={{
+        position: 'absolute',
+        left: 22, right: 80, bottom: 56,
+        height: 28,
+        borderRadius: 6,
+        background: 'rgba(12,42,46,0.14)',
+      }}
+    />
+    {/* Mimic the Book Now strip */}
+    <div
+      style={{
+        position: 'absolute',
+        left: 14, right: 14, bottom: 14,
+        height: 44,
+        borderRadius: 10,
+        background: 'rgba(12,42,46,0.16)',
+      }}
+    />
+  </div>
+);
+window.TourCardSkeleton = TourCardSkeleton;
 
 // ───────────────────────────────────────────── Interactive Map
 const MiniMap = ({ onPinClick, selected }) => {

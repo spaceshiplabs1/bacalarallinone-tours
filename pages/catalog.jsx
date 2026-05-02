@@ -197,14 +197,14 @@ const Catalog = ({ initialFilter }) => {
         </div>
 
         <div className="rg-cards" style={{ display:'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 22, marginTop: 20 }}>
-          {filtered.map(tour => (
-            <TourCard key={tour.id} tour={tour} onClick={() => navigate('detail', { tourId: tour.id })}/>
-          ))}
-          {filtered.length === 0 && (
+          {stillLoading
+            ? Array.from({ length: 6 }).map((_, i) => <TourCardSkeleton key={`sk-${i}`}/>)
+            : filtered.map(tour => (
+                <TourCard key={tour.id} tour={tour} onClick={() => navigate('detail', { tourId: tour.id })}/>
+              ))}
+          {!stillLoading && filtered.length === 0 && (
             <div style={{ gridColumn: '1/-1', textAlign:'center', padding: 60, color:'var(--ink-soft)' }}>
-              {stillLoading
-                ? (lang==='en' ? 'Loading tours…' : 'Cargando tours…')
-                : (lang==='en' ? 'No tours match. Try different filters.' : 'No hay tours. Cambia los filtros.')}
+              {lang==='en' ? 'No tours match. Try different filters.' : 'No hay tours. Cambia los filtros.'}
             </div>
           )}
         </div>

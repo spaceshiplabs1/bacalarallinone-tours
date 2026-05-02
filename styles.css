@@ -392,6 +392,29 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   .tour-card-tile:hover .tour-card-img { transform: none; }
 }
 
+/* Skeleton loaders — same footprint as the real tiles so swapping them
+   in / out doesn't shift the layout. The shimmer is a slow gradient
+   sweep that signals "loading" without being noisy. */
+@keyframes skeletonShimmer {
+  0%   { background-position: -150% 0; }
+  100% { background-position: 250% 0; }
+}
+.skeleton-shimmer {
+  background-color: var(--bone-2);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.55) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; }
+}
+
 .hero-card {
   /* Resting state — explicit so hover can override once the intro animation ends */
   opacity: 1;
