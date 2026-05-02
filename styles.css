@@ -415,6 +415,29 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   .skeleton-shimmer { animation: none; }
 }
 
+/* DatePicker day-cell hover. Inline styles paint the resting state
+   (selected / disabled / off-schedule / blackout colors), CSS handles
+   the rollover. !important is needed because inline styles win over
+   regular CSS — only pseudo-class rules with !important can override
+   them. */
+.datepicker-day:not(:disabled):not(.is-selected):hover {
+  background-color: var(--lagoon-pale) !important;
+  border-color: var(--lagoon) !important;
+  color: var(--ink) !important;
+  transform: translateY(-1px);
+}
+.datepicker-day:not(:disabled):not(.is-selected):active {
+  transform: translateY(0);
+  background-color: var(--lagoon) !important;
+  color: var(--bone) !important;
+}
+.datepicker-day.is-selected:hover {
+  background-color: var(--ink-2) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .datepicker-day:hover { transform: none !important; }
+}
+
 /* Home "Pick your path" tiles — color-blocked, no-photo navigation.
    Hover lifts the tile, shifts the ghost glyph out toward the corner,
    and slides the CTA arrow forward so the click target reads "alive"

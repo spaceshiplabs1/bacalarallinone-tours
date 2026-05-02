@@ -715,6 +715,7 @@ const DatePicker = ({ value, onChange, schedules = [], blackoutDates = [], cutof
               type="button"
               onClick={() => !disabled && onChange(iso)}
               disabled={disabled}
+              className={`datepicker-day${selected ? ' is-selected' : ''}`}
               title={
                 state === 'blackout'      ? (lang === 'en' ? 'Unavailable date'           : 'Fecha no disponible') :
                 state === 'off-schedule'  ? (lang === 'en' ? 'Tour does not run that day' : 'El tour no opera ese día') :
@@ -733,6 +734,7 @@ const DatePicker = ({ value, onChange, schedules = [], blackoutDates = [], cutof
                 opacity: !inMonth ? 0.3 : 1,
                 position: 'relative',
                 textDecoration: state === 'blackout' ? 'line-through' : 'none',
+                transition: 'background-color 140ms ease, border-color 140ms ease, transform 140ms ease',
               }}
             >
               {d.getDate()}

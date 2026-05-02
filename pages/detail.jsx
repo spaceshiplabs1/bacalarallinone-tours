@@ -291,24 +291,29 @@ const TourDetail = ({ tourId, prefill }) => {
                 </div>
               </label>
 
-              {/* People (not for flat vans). Three tiers — adults / kids
-                  / infants — surfaced even when there's no kid/infant
-                  pricing so the operator gets an accurate manifest. */}
+              {/* People (not for flat vans). Three tiers in one row to
+                  conserve vertical space — labels stack above each
+                  compact stepper. Surfaced even when there's no kid/
+                  infant pricing so the operator gets an accurate
+                  manifest. */}
               {!tour.flat && (
-                <>
-                  <label className="field" style={{ marginTop: 14 }}>
-                    <span className="mono">{t.adults} · {t.adultsAge}</span>
-                    <Stepper value={adults} setValue={setAdults} min={1} max={12}/>
-                  </label>
-                  <label className="field" style={{ marginTop: 12 }}>
-                    <span className="mono">{t.kids} · {t.kidsAge}</span>
-                    <Stepper value={kids} setValue={setKids} min={0} max={10}/>
-                  </label>
-                  <label className="field" style={{ marginTop: 12 }}>
-                    <span className="mono">{t.infants} · {t.infantsAge}</span>
-                    <Stepper value={infants} setValue={setInfants} min={0} max={6}/>
-                  </label>
-                </>
+                <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  <div>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--ink)' }}>{t.adults}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-soft)', marginBottom: 4 }}>{t.adultsAge}</div>
+                    <Stepper value={adults} setValue={setAdults} min={1} max={12} compact/>
+                  </div>
+                  <div>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--ink)' }}>{t.kids}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-soft)', marginBottom: 4 }}>{t.kidsAge}</div>
+                    <Stepper value={kids} setValue={setKids} min={0} max={10} compact/>
+                  </div>
+                  <div>
+                    <div className="mono" style={{ fontSize: 11, color: 'var(--ink)' }}>{t.infants}</div>
+                    <div style={{ fontSize: 10, color: 'var(--ink-soft)', marginBottom: 4 }}>{t.infantsAge}</div>
+                    <Stepper value={infants} setValue={setInfants} min={0} max={6} compact/>
+                  </div>
+                </div>
               )}
 
               {/* Add-ons */}
@@ -350,17 +355,20 @@ const TourDetail = ({ tourId, prefill }) => {
   );
 };
 
-const Stepper = ({ value, setValue, min = 0, max = 20 }) => (
-  <div style={{ display:'flex', alignItems:'center', border: '1.5px solid var(--line-strong)', borderRadius: 10, width: 'fit-content' }}>
-    <button onClick={()=>setValue(Math.max(min, value-1))} style={{ width: 40, height: 40, border:'none', background:'transparent', cursor:'pointer', color: value <= min ? 'var(--ink-soft)' : 'var(--ink)' }}>
-      <Icon d={icons.minus} size={14}/>
-    </button>
-    <span style={{ width: 40, textAlign:'center', fontWeight: 600 }}>{value}</span>
-    <button onClick={()=>setValue(Math.min(max, value+1))} style={{ width: 40, height: 40, border:'none', background:'transparent', cursor:'pointer' }}>
-      <Icon d={icons.plus} size={14}/>
-    </button>
-  </div>
-);
+const Stepper = ({ value, setValue, min = 0, max = 20, compact = false }) => {
+  const sz = compact ? 30 : 40;
+  return (
+    <div style={{ display:'flex', alignItems:'center', border: '1.5px solid var(--line-strong)', borderRadius: compact ? 8 : 10, width: 'fit-content' }}>
+      <button type="button" onClick={()=>setValue(Math.max(min, value-1))} style={{ width: sz, height: sz, border:'none', background:'transparent', cursor:'pointer', color: value <= min ? 'var(--ink-soft)' : 'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Icon d={icons.minus} size={compact ? 12 : 14}/>
+      </button>
+      <span style={{ width: sz, textAlign:'center', fontWeight: 600, fontSize: compact ? 13 : 16 }}>{value}</span>
+      <button type="button" onClick={()=>setValue(Math.min(max, value+1))} style={{ width: sz, height: sz, border:'none', background:'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Icon d={icons.plus} size={compact ? 12 : 14}/>
+      </button>
+    </div>
+  );
+};
 
 window.TourDetail = TourDetail;
 window.Stepper = Stepper;
