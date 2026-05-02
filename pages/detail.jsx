@@ -55,29 +55,102 @@ const TourDetail = ({ tourId, prefill }) => {
         <span className="mono" style={{ color:'var(--ink-soft)' }}>/ {tour.phLabel}</span>
       </div>
 
-      {/* Gallery + header */}
+      {/* Gallery + header. Layout adapts to gallery length so a tour
+          with 1 photo doesn't render an empty 5-cell collage:
+            1 photo  → full-width hero
+            2 photos → 50/50 split
+            3 photos → big left + 2 stacked right
+            4 photos → big left + 3 stacked right
+            5+ photos → 1 big + 4 small (legacy collage). */}
       <div className="container" style={{ paddingTop: 12 }}>
-        <div className="rg-gallery" style={{ display:'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gridTemplateRows: '220px 220px', gap: 10, marginBottom: 28 }}>
-          <div style={{ gridRow:'span 2', position:'relative', cursor:'zoom-in' }} onClick={() => openLightbox(gallery, 0)}>
-            <window.Photo src={gallery[0].src} label={gallery[0].label} style={{ width:'100%', height:'100%', borderRadius: 'var(--radius-lg)' }}/>
-            <button onClick={(e)=>{ e.stopPropagation(); openLightbox(gallery, 0); }}
-              aria-label={lang==='en'?'View all photos':'Ver todas las fotos'}
+        {gallery.length > 0 && (() => {
+          const n = gallery.length;
+          const HERO_H_TALL = 460;     // 1 photo
+          const ROW_H = 220;           // each row of the multi-photo grid
+          const galTotalH = ROW_H * 2 + 10; // matches gridTemplateRows + gap
+
+          // Pick a column template per count.
+          let cols;
+          if (n === 1)      cols = '1fr';
+          else if (n === 2) cols = '1fr 1fr';
+          else              cols = '1.3fr 1fr 1fr'; // 3+ photos
+
+          // Single hero row for 1 photo, otherwise the 2-row collage.
+          const rows = n === 1 ? `${HERO_H_TALL}px` : `${ROW_H}px ${ROW_H}px`;
+
+          // The "View all" badge only makes sense once the user can't
+          // see the full set at a glance.
+          const showCountBadge = n >= 2;
+          const heroBigSpansBothRows = n >= 3; // for n=2 each photo is its own column
+
+          return (
+            <div
+              className="rg-gallery"
               style={{
-                position:'absolute', right: 14, bottom: 14, padding:'8px 14px', borderRadius: 999,
-                background: 'rgba(246,241,230,0.92)', color: 'var(--ink)', border: 'none',
-                cursor: 'pointer', display:'flex', alignItems:'center', gap: 6, fontSize: 12, fontWeight: 600,
-                boxShadow: '0 4px 14px rgba(0,0,0,0.2)'
-              }}>
-              <Icon d={icons.search} size={13}/>
-              {gallery.length} {lang==='en'?'photos':'fotos'}
-            </button>
-          </div>
-          {gallery.slice(1, 5).map((g, i) => (
-            <div key={i} style={{ cursor:'zoom-in' }} onClick={() => openLightbox(gallery, i + 1)}>
-              <window.Photo src={g.src} label={g.label} style={{ width:'100%', height:'100%', borderRadius: 'var(--radius)' }}/>
+                display: 'grid',
+                gridTemplateColumns: cols,
+                gridTemplateRows: rows,
+                gap: 10,
+                marginBottom: 28,
+              }}
+            >
+              {/* Hero photo (always slot 0). */}
+              <div
+                style={{
+                  gridRow: heroBigSpansBothRows ? 'span 2' : 'auto',
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                }}
+                onClick={() => openLightbox(gallery, 0)}
+              >
+                <window.Photo
+                  src={gallery[0].src}
+                  label={gallery[0].label}
+                  style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-lg)' }}
+                />
+                {showCountBadge && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openLightbox(gallery, 0); }}
+                    aria-label={lang === 'en' ? 'View all photos' : 'Ver todas las fotos'}
+                    style={{
+                      position: 'absolute', right: 14, bottom: 14,
+                      padding: '8px 14px', borderRadius: 999,
+                      background: 'rgba(246,241,230,0.92)', color: 'var(--ink)',
+                      border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      fontSize: 12, fontWeight: 600,
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    <Icon d={icons.search} size={13}/>
+                    {n} {lang === 'en' ? 'photos' : 'fotos'}
+                  </button>
+                )}
+              </div>
+
+              {/* Remaining photos — slice by what the layout can hold.
+                  n=2 → 1 photo on the right.
+                  n=3 → 2 photos stacked in the right column.
+                  n=4 → 3 photos: 2 in middle col, 1 in right (or vice
+                  versa, depending on order). The grid auto-flow places
+                  them in row-major order across the remaining cells.
+                  n=5+ → cap at 4 extras (legacy collage shape). */}
+              {gallery.slice(1, n === 2 ? 2 : n <= 4 ? n : 5).map((g, i) => (
+                <div
+                  key={i}
+                  style={{ cursor: 'zoom-in' }}
+                  onClick={() => openLightbox(gallery, i + 1)}
+                >
+                  <window.Photo
+                    src={g.src}
+                    label={g.label}
+                    style={{ width: '100%', height: '100%', borderRadius: 'var(--radius)' }}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         <div className="rg-sidebar" style={{ display:'grid', gridTemplateColumns: '1fr 380px', gap: 48, alignItems:'flex-start' }}>
           {/* LEFT: details */}
