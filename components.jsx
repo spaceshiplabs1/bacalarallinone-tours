@@ -266,78 +266,161 @@ window.Footer = Footer;
 
 // ───────────────────────────────────────────── tour card
 const TourCard = ({ tour, onClick, compact = false }) => {
-  const { t, lang, isFav, toggleFav, addToCart } = useT();
+  const { t, lang, isFav, toggleFav } = useT();
   const fav = isFav(tour.id);
-  const quickAdd = (e) => {
-    e.stopPropagation();
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    const date = d.toISOString().slice(0, 10);
-    const time = (tour.times && tour.times[0]) || '09:00';
-    const adults = tour.flat ? 1 : 2;
-    const subtotal = tour.flat ? tour.priceAdult : adults * tour.priceAdult;
-    addToCart({ tourId: tour.id, adults, kids: 0, addons: {}, date, time, subtotal }, { silent: true });
-  };
-  return (
-    <div className="card fade-in" onClick={onClick} style={{ cursor:'pointer', display:'flex', flexDirection:'column' }}>
-      <div style={{ height: compact ? 160 : 220, position: 'relative', overflow:'hidden' }}>
-        <img src={window.tourPhoto(tour)} alt="" loading="lazy"
-          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
-        <div style={{ position:'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(12,42,46,0) 50%, rgba(12,42,46,0.55) 100%)' }}/>
-        <span className="ph-label" style={{ position:'absolute', left: 12, bottom: 12 }}>{tour.phLabel}</span>
-        <div style={{ position:'absolute', top: 12, left: 12, display:'flex', gap: 6 }}>
-          {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
-          {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+  // Compact stays close to the old layout — used by detail page "related" rail.
+  if (compact) {
+    return (
+      <div className="card fade-in" onClick={onClick} style={{ cursor:'pointer', display:'flex', flexDirection:'column' }}>
+        <div style={{ height: 160, position: 'relative', overflow:'hidden' }}>
+          <img src={window.tourPhoto(tour)} alt="" loading="lazy"
+            style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }}/>
         </div>
-        <div style={{ position:'absolute', top: 12, right: 12, display:'flex', gap: 6 }}>
-          <button onClick={quickAdd} title={t.addToCart} aria-label={t.addToCart}
-            style={{
-              width: 36, height: 36, borderRadius:'50%',
-              background: 'rgba(245,240,230,0.92)', border: 'none', cursor: 'pointer',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              color: 'var(--ink)'
-            }}>
-            <Icon d={icons.plus} size={16} stroke={2.4}/>
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); toggleFav(tour.id); }}
-            title={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
-            style={{
-              width: 36, height: 36, borderRadius:'50%',
-              background: 'rgba(245,240,230,0.92)', border: 'none', cursor: 'pointer',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              color: fav ? 'var(--clay)' : 'var(--ink-soft)'
-            }}>
-            <Icon d={icons.heart} size={16}/>
-          </button>
+        <div style={{ padding: 16, display:'flex', flexDirection:'column', gap: 6 }}>
+          <h3 className="display" style={{ margin: 0, fontSize: 18 }}>{tour.title[lang]}</h3>
+          <div className="display" style={{ fontSize: 18 }}>${tour.priceAdult}</div>
         </div>
       </div>
-      <div style={{ padding: compact ? 16 : 20, display:'flex', flexDirection:'column', gap: 10, flex: 1 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap: 12 }}>
-          <div>
-            <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 4 }}>
-              <Icon d={icons.pin} size={10}/> {tour.location}
-            </div>
-            <h3 className="display" style={{ margin: 0, fontSize: compact ? 18 : 22, lineHeight: 1.05 }}>
-              {tour.title[lang]}
-            </h3>
-          </div>
+    );
+  }
+
+  // Photo-dominant card: image fills the tile, title + tagline + price
+  // sit overlaid on the bottom half of the photo with a darkening
+  // gradient. A solid Book Now button is pinned at the very bottom.
+  // aspectRatio keeps every card the same height regardless of copy
+  // length so the grid stays clean.
+  return (
+    <div
+      className="fade-in"
+      onClick={onClick}
+      style={{
+        cursor: 'pointer',
+        position: 'relative',
+        borderRadius: 16,
+        overflow: 'hidden',
+        background: 'var(--ink)',
+        aspectRatio: '4/5',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
+      }}
+    >
+      <img
+        src={window.tourPhoto(tour)}
+        alt={tour.title[lang]}
+        loading="lazy"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+      {/* Stronger gradient on the bottom 70% so big white type stays readable. */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, rgba(12,42,46,0) 30%, rgba(12,42,46,0.55) 60%, rgba(12,42,46,0.92) 100%)',
+        }}
+      />
+      {/* Top-left: badges */}
+      <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', gap: 6 }}>
+        {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
+        {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
+      </div>
+      {/* Top-right: fav heart only — quick-add was confusing next to a CTA. */}
+      <div style={{ position: 'absolute', top: 14, right: 14 }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleFav(tour.id); }}
+          title={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
+          aria-label={fav ? t.remove : (lang === 'en' ? 'Save' : 'Guardar')}
+          style={{
+            width: 38, height: 38, borderRadius: '50%',
+            background: 'rgba(245,240,230,0.92)', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: fav ? 'var(--clay)' : 'var(--ink-soft)',
+          }}
+        >
+          <Icon d={icons.heart} size={16}/>
+        </button>
+      </div>
+
+      {/* Bottom overlay: location, oversized title, tagline, price + meta. */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0, right: 0, bottom: 0,
+          padding: '20px 20px 64px',  // leave room for the Book Now strip
+          color: 'var(--bone)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        <div className="mono" style={{ color: 'rgba(245,240,230,0.78)', fontSize: 11, letterSpacing: 1.2 }}>
+          <Icon d={icons.pin} size={10}/> {tour.location || (lang === 'en' ? 'Bacalar' : 'Bacalar')}
         </div>
-        {!compact && <p style={{ margin: 0, fontSize: 13, color:'var(--ink-soft)', lineHeight: 1.4 }}>{tour.tagline[lang]}</p>}
-        <div style={{ display:'flex', gap: 14, fontSize: 12, color:'var(--ink-soft)', marginTop: 'auto' }}>
-          <span style={{ display:'inline-flex', gap: 4, alignItems:'center' }}><Icon d={icons.clock} size={12}/> {tour.duration}{t.hr}</span>
-          <span style={{ display:'inline-flex', gap: 4, alignItems:'center', color: 'var(--sun-2)' }}>
-            <Icon d={icons.star} size={12}/> {tour.rating} · {tour.reviews}
+        <h3
+          className="display"
+          style={{
+            margin: 0,
+            fontSize: 'clamp(26px, 2.6vw, 36px)',
+            lineHeight: 1.02,
+            textShadow: '0 2px 14px rgba(0,0,0,0.45)',
+          }}
+        >
+          {tour.title[lang]}
+        </h3>
+        {tour.tagline?.[lang] && (
+          <p
+            style={{
+              margin: 0,
+              fontSize: 13,
+              lineHeight: 1.35,
+              color: 'rgba(245,240,230,0.88)',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textShadow: '0 1px 6px rgba(0,0,0,0.55)',
+            }}
+          >
+            {tour.tagline[lang]}
+          </p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 4 }}>
+          <span className="display" style={{ fontSize: 28, lineHeight: 1, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+            ${tour.priceAdult}
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(245,240,230,0.78)' }}>
+            {tour.flat ? t.perVan : t.perPerson}
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(245,240,230,0.78)', marginLeft: 'auto', display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+            <Icon d={icons.clock} size={12}/> {tour.duration}{t.hr}
           </span>
         </div>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginTop: 4, paddingTop: 12, borderTop: '1px dashed var(--line)' }}>
-          <div>
-            <span className="mono" style={{ color:'var(--ink-soft)' }}>{t.from}</span>
-            <span className="display" style={{ fontSize: 24, marginLeft: 6 }}>${tour.priceAdult}</span>
-            <span style={{ fontSize: 12, color:'var(--ink-soft)', marginLeft: 4 }}>{tour.flat ? t.perVan : t.perPerson}</span>
-          </div>
-          <Icon d={icons.arrow} size={16}/>
-        </div>
       </div>
+
+      {/* Pinned Book Now strip at the very bottom of the card. */}
+      <button
+        onClick={onClick}
+        style={{
+          position: 'absolute',
+          left: 12, right: 12, bottom: 12,
+          padding: '12px 16px',
+          background: 'var(--sun)',
+          color: 'var(--ink)',
+          border: 'none',
+          borderRadius: 10,
+          cursor: 'pointer',
+          fontWeight: 700,
+          fontSize: 14,
+          letterSpacing: 0.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          textTransform: 'uppercase',
+        }}
+      >
+        {lang === 'en' ? 'Book now' : 'Reservar'} <Icon d={icons.arrow} size={14}/>
+      </button>
     </div>
   );
 };
