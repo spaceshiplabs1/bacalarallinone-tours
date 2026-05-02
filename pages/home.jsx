@@ -158,17 +158,33 @@ const Home = () => {
                   {path.n} / {path.title.toUpperCase()}
                 </div>
 
-                <h3
-                  className="display"
+                {/* Wrapper reserves room for up to 2 lines and pushes the
+                    title to the BOTTOM of that block. Result: titles
+                    that wrap stay where they are; titles that fit on
+                    one line drop to the same baseline as the wrapped
+                    ones — so the title-base across all three tiles
+                    aligns horizontally regardless of length. */}
+                <div
                   style={{
-                    margin: 0,
+                    minHeight: '2.04em',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
                     fontSize: 'clamp(26px, 2.4vw, 32px)',
-                    lineHeight: 1.02,
-                    color: 'var(--ink)',
                   }}
                 >
-                  {path.title}
-                </h3>
+                  <h3
+                    className="display"
+                    style={{
+                      margin: 0,
+                      fontSize: 'inherit',
+                      lineHeight: 1.02,
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    {path.title}
+                  </h3>
+                </div>
 
                 <p style={{ margin: 0, color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.5 }}>
                   {path.sub}
