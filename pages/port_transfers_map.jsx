@@ -375,7 +375,10 @@ const Transfers = () => {
               {lang === 'en' ? 'choose a van' : 'elige tu van'}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}
+              className="rg-vehicle-cards"
+            >
               {quoteState.data.vehicles.map((v) => {
                 const sel = v.vehicleId === selectedVehicleId;
                 const priceCents = roundTrip ? v.priceRoundTrip : v.priceOneWay;
@@ -385,90 +388,103 @@ const Transfers = () => {
                     onClick={() => { setSelectedVehicleId(v.vehicleId); setSelectedAddonIds([]); }}
                     className="card"
                     style={{
-                      padding: 18,
+                      padding: 0,
                       cursor: 'pointer',
                       borderColor: sel ? 'var(--lagoon)' : 'var(--line)',
                       borderWidth: 2,
                       background: sel ? 'rgba(47, 184, 201, 0.06)' : 'var(--bone)',
+                      display: 'flex', flexDirection: 'column', overflow: 'hidden',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-                      {v.imageUrl && (
-                        <img
-                          src={v.imageUrl}
-                          alt={v.name}
-                          style={{
-                            width: 140, height: 94, objectFit: 'cover',
-                            borderRadius: 8, flexShrink: 0,
-                            border: '1px solid var(--line)', background: 'var(--bone-2)',
-                          }}
-                          loading="lazy"
-                        />
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <input type="radio" checked={sel} onChange={() => setSelectedVehicleId(v.vehicleId)} />
-                          <span style={{ fontWeight: 600, fontSize: 16 }}>{v.name}</span>
-                          <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 11 }}>
-                            {v.passengerCapacity} pax · {v.luggageCapacity} bags
-                          </span>
-                        </div>
-                        {v.vendorName && (
-                          <div className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10, marginTop: 4, marginLeft: 22 }}>
-                            {lang === 'en' ? 'Operated by' : 'Operado por'} {v.vendorName}
-                          </div>
-                        )}
+                    {v.imageUrl ? (
+                      <img
+                        src={v.imageUrl}
+                        alt={v.name}
+                        style={{
+                          width: '100%', aspectRatio: '3 / 2', objectFit: 'cover',
+                          background: 'var(--bone-2)',
+                          borderBottom: '1px solid var(--line)',
+                        }}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%', aspectRatio: '3 / 2',
+                          background: 'var(--bone-2)',
+                          borderBottom: '1px solid var(--line)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: 'var(--ink-soft)', fontSize: 11,
+                        }}
+                        className="mono"
+                      >
+                        {lang === 'en' ? 'NO PHOTO' : 'SIN FOTO'}
                       </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <div className="display" style={{ fontSize: 22 }}>${dollarsFromCents(priceCents)}</div>
+                    )}
+                    <div style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input type="radio" checked={sel} onChange={() => setSelectedVehicleId(v.vehicleId)} />
+                        <span style={{ fontWeight: 600, fontSize: 15, lineHeight: 1.1 }}>{v.name}</span>
+                      </div>
+                      <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 11, marginLeft: 22 }}>
+                        {v.passengerCapacity} pax · {v.luggageCapacity} bags
+                      </span>
+                      {v.vendorName && (
+                        <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10, marginLeft: 22 }}>
+                          {lang === 'en' ? 'Operated by' : 'Operado por'} {v.vendorName}
+                        </span>
+                      )}
+                      <div style={{ marginTop: 'auto', paddingTop: 10, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+                        <div className="display" style={{ fontSize: 22, lineHeight: 1 }}>${dollarsFromCents(priceCents)}</div>
                         <div className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10 }}>{v.currency} · {roundTrip ? 'RT' : 'OW'}</div>
                       </div>
                     </div>
-
-                    {/* Addons (only on selected vehicle) */}
-                    {sel && Array.isArray(v.addons) && v.addons.length > 0 && (
-                      <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-                        <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 8, fontSize: 11 }}>
-                          {lang === 'en' ? 'ADD-ONS' : 'EXTRAS'}
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
-                          {v.addons.map((a) => {
-                            const checked = selectedAddonIds.includes(a.addonId);
-                            return (
-                              <label
-                                key={a.addonId}
-                                style={{
-                                  display: 'flex', alignItems: 'center', gap: 8,
-                                  padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 8, cursor: 'pointer',
-                                  background: checked ? 'var(--bone-2)' : 'transparent',
-                                }}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedAddonIds([...selectedAddonIds, a.addonId]);
-                                    } else {
-                                      setSelectedAddonIds(selectedAddonIds.filter((id) => id !== a.addonId));
-                                    }
-                                  }}
-                                />
-                                <span style={{ flex: 1, fontSize: 13 }}>{a.name}</span>
-                                <span className="mono" style={{ fontSize: 11 }}>
-                                  {a.price === 0 ? (lang === 'en' ? 'incl.' : 'incl.') : `+$${dollarsFromCents(a.price)}`}
-                                </span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })}
             </div>
+
+            {/* Addons panel — outside the cards row so adding/removing the
+                panel doesn't change the size of the selected card and break
+                the 3-up grid alignment. */}
+            {selectedVehicle && Array.isArray(selectedVehicle.addons) && selectedVehicle.addons.length > 0 && (
+              <div className="card" style={{ marginTop: 12, padding: 16 }}>
+                <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 8, fontSize: 11 }}>
+                  {lang === 'en' ? 'ADD-ONS' : 'EXTRAS'}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+                  {selectedVehicle.addons.map((a) => {
+                    const checked = selectedAddonIds.includes(a.addonId);
+                    return (
+                      <label
+                        key={a.addonId}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8,
+                          padding: '8px 10px', border: '1px solid var(--line)', borderRadius: 8, cursor: 'pointer',
+                          background: checked ? 'var(--bone-2)' : 'transparent',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAddonIds([...selectedAddonIds, a.addonId]);
+                            } else {
+                              setSelectedAddonIds(selectedAddonIds.filter((id) => id !== a.addonId));
+                            }
+                          }}
+                        />
+                        <span style={{ flex: 1, fontSize: 13 }}>{a.name}</span>
+                        <span className="mono" style={{ fontSize: 11 }}>
+                          {a.price === 0 ? (lang === 'en' ? 'incl.' : 'incl.') : `+$${dollarsFromCents(a.price)}`}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Optional flight info */}
             {selectedVehicle && isAirportInvolved && (
