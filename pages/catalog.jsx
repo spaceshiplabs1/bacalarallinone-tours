@@ -91,21 +91,39 @@ const Catalog = ({ initialFilter }) => {
         </div>
       </section>
 
-      {/* Featured search bar overlapping the hero, like the transfers form. */}
-      <div className="container" style={{ marginTop: -36, position: 'relative' }}>
-        <div className="card" style={{ padding: 18, boxShadow: 'var(--shadow)' }}>
-          <div style={{ position: 'relative' }}>
-            <Icon d={icons.search} size={20} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: 'var(--ink-soft)' }}/>
-            <input
-              className="input"
-              placeholder={lang==='en'
-                ? 'Search by name, location, or tag — try "ruins", "lagoon", "ATV"…'
-                : 'Busca por nombre, lugar o tag — prueba "ruinas", "laguna", "ATV"…'}
-              value={query}
-              onChange={(e)=>setQuery(e.target.value)}
-              style={{ paddingLeft: 52, height: 56, fontSize: 16 }}
-            />
-          </div>
+      {/* Featured search bar overlapping the hero, like the transfers form.
+          Constrained max-width + centered so it doesn't run the full page. */}
+      <div className="container" style={{ marginTop: -32, position: 'relative' }}>
+        <div
+          className="card"
+          style={{
+            padding: '10px 16px',
+            boxShadow: 'var(--shadow)',
+            maxWidth: 640,
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <Icon d={icons.search} size={18} style={{ color: 'var(--ink-soft)', flexShrink: 0 }}/>
+          <input
+            placeholder={lang==='en'
+              ? 'Search tours — "ruins", "lagoon", "ATV"…'
+              : 'Busca tours — "ruinas", "laguna", "ATV"…'}
+            value={query}
+            onChange={(e)=>setQuery(e.target.value)}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: 15,
+              padding: '12px 0',
+              color: 'var(--ink)',
+              fontFamily: 'inherit',
+            }}
+          />
         </div>
       </div>
 
