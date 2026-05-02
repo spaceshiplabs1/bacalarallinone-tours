@@ -127,8 +127,9 @@
     const currency = tour.defaultCurrency || "USD";
     const subtotalCents = Math.max(0, Math.round(Number(line.subtotal) * 100));
     const passengers = {};
-    if (line.adults != null) passengers.adult = Number(line.adults) || 0;
-    if (line.kids   != null) passengers.child = Number(line.kids)   || 0;
+    if (line.adults  != null) passengers.adult  = Number(line.adults)  || 0;
+    if (line.kids    != null) passengers.child  = Number(line.kids)    || 0;
+    if (line.infants != null) passengers.infant = Number(line.infants) || 0;
     const titleEn = (tour.title && (tour.title.en || tour.title.es)) || tour.slug;
     const description = `${titleEn} · ${line.date} ${line.time}`.slice(0, 500);
     return {

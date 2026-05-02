@@ -544,6 +544,218 @@ const TourCardSkeleton = () => (
 );
 window.TourCardSkeleton = TourCardSkeleton;
 
+// ───────────────────────────────────────────── DatePicker
+// Month-grid calendar for tour booking. Honors the active schedule's
+// daysOfWeek + recurrence, blackoutDates, and cutoff window so the
+// user can't pick a date the operator hasn't released.
+//
+// Props:
+//   value         – selected ISO date string ("YYYY-MM-DD") or null
+//   onChange(iso) – fired when the user picks a valid day
+//   schedules     – array of tour.schedules (only `isActive !== false` is used)
+//   blackoutDates – array of ISO date strings the operator has flagged
+//   cutoffHours   – min hours-before-start required (defaults to 24)
+//   minMonths     – how many months to allow forward navigation (default 12)
+const DatePicker = ({ value, onChange, schedules = [], blackoutDates = [], cutoffHours = 24, minMonths = 12 }) => {
+  const { lang } = useT();
+  const today = useMemo(() => {
+    const d = new Date(); d.setHours(0,0,0,0); return d;
+  }, []);
+  const initial = value ? new Date(value + "T00:00:00") : today;
+  const [view, setView] = useState({ y: initial.getFullYear(), m: initial.getMonth() });
+
+  const blackoutSet = useMemo(() => new Set(blackoutDates), [blackoutDates]);
+  const activeSchedules = (schedules || []).filter((s) => s?.isActive !== false);
+
+  // Earliest allowed day taking cutoff into account (e.g. cutoff 24h means
+  // tomorrow is the first selectable date if it's already past midnight today).
+  const earliestAllowed = useMemo(() => {
+    const e = new Date();
+    e.setMinutes(e.getMinutes() + cutoffHours * 60);
+    e.setHours(0, 0, 0, 0); // round up to next full day
+    return e;
+  }, [cutoffHours]);
+
+  const lastViewableDate = useMemo(() => {
+    const d = new Date(today);
+    d.setMonth(d.getMonth() + minMonths);
+    return d;
+  }, [today, minMonths]);
+
+  function dayIsAllowedBySchedule(d) {
+    // No schedule rows at all → allow everything (legacy tours that haven't
+    // been seeded with schedules yet).
+    if (activeSchedules.length === 0) return true;
+    const iso = d.toISOString().slice(0, 10);
+    const dow = d.getDay();
+    return activeSchedules.some((s) => {
+      if (s.activeFrom && d < new Date(s.activeFrom)) return false;
+      if (s.activeTo   && d > new Date(s.activeTo))   return false;
+      if (s.recurrence === "daily") return true;
+      if (s.recurrence === "weekly") {
+        // daysOfWeek may come as a JSON array on the API. Treat empty/missing
+        // as "all days".
+        const dows = Array.isArray(s.daysOfWeek) ? s.daysOfWeek : [];
+        return dows.length === 0 || dows.includes(dow);
+      }
+      if (s.recurrence === "specific_dates") {
+        const list = (s.specificDates || []).map((x) => String(x).slice(0, 10));
+        return list.includes(iso);
+      }
+      return true;
+    });
+  }
+
+  function dayState(d) {
+    if (d < earliestAllowed) return "past";
+    if (d > lastViewableDate) return "far";
+    const iso = d.toISOString().slice(0, 10);
+    if (blackoutSet.has(iso)) return "blackout";
+    if (!dayIsAllowedBySchedule(d)) return "off-schedule";
+    return "ok";
+  }
+
+  // Build the visible month grid: 6 rows × 7 cols, padded with previous /
+  // next month days so the layout is stable.
+  const cells = useMemo(() => {
+    const first = new Date(view.y, view.m, 1);
+    // Calendar header order: Mon=0..Sun=6 (en/es local convention).
+    const startOffset = (first.getDay() + 6) % 7;
+    const start = new Date(first);
+    start.setDate(start.getDate() - startOffset);
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    });
+  }, [view]);
+
+  function step(delta) {
+    setView((v) => {
+      let y = v.y, m = v.m + delta;
+      if (m < 0) { m = 11; y -= 1; }
+      if (m > 11) { m = 0; y += 1; }
+      return { y, m };
+    });
+  }
+
+  const monthLabel = new Date(view.y, view.m, 1).toLocaleDateString(
+    lang === "en" ? "en-US" : "es-MX",
+    { month: "long", year: "numeric" }
+  );
+  const dowLabels = lang === "en"
+    ? ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    : ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+
+  // Disable nav buttons that would cross out of the allowed window.
+  const canPrev = (view.y > today.getFullYear()) ||
+                  (view.y === today.getFullYear() && view.m > today.getMonth());
+  const canNext = (view.y < lastViewableDate.getFullYear()) ||
+                  (view.y === lastViewableDate.getFullYear() && view.m < lastViewableDate.getMonth());
+
+  return (
+    <div className="datepicker" style={{ border: '1px solid var(--line)', borderRadius: 12, padding: 12, background: 'var(--bone)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <button
+          type="button"
+          onClick={() => canPrev && step(-1)}
+          disabled={!canPrev}
+          aria-label="Previous month"
+          style={{
+            width: 32, height: 32, borderRadius: 8, border: '1px solid var(--line)',
+            background: 'transparent', cursor: canPrev ? 'pointer' : 'not-allowed',
+            opacity: canPrev ? 1 : 0.35, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Icon d={icons.chevronLeft} size={14}/>
+        </button>
+        <div className="display" style={{ flex: 1, textAlign: 'center', fontSize: 17, textTransform: 'capitalize' }}>
+          {monthLabel}
+        </div>
+        <button
+          type="button"
+          onClick={() => canNext && step(1)}
+          disabled={!canNext}
+          aria-label="Next month"
+          style={{
+            width: 32, height: 32, borderRadius: 8, border: '1px solid var(--line)',
+            background: 'transparent', cursor: canNext ? 'pointer' : 'not-allowed',
+            opacity: canNext ? 1 : 0.35, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Icon d={icons.chevron} size={14}/>
+        </button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
+        {dowLabels.map((l) => (
+          <div key={l} className="mono" style={{ fontSize: 10, textAlign: 'center', color: 'var(--ink-soft)', padding: '4px 0' }}>{l}</div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        {cells.map((d) => {
+          const inMonth = d.getMonth() === view.m;
+          const iso = d.toISOString().slice(0, 10);
+          const state = dayState(d);
+          const selected = value === iso;
+          const disabled = state !== "ok" || !inMonth;
+          let bg = 'transparent', color = 'var(--ink)', border = '1px solid transparent';
+          if (!inMonth) color = 'var(--ink-soft)';
+          if (state === 'past' || state === 'far') { color = 'rgba(74,106,110,0.45)'; }
+          if (state === 'blackout' || state === 'off-schedule') {
+            color = 'rgba(74,106,110,0.55)';
+            border = '1px dashed var(--line)';
+          }
+          if (selected) { bg = 'var(--ink)'; color = 'var(--bone)'; border = '1px solid var(--ink)'; }
+          return (
+            <button
+              key={iso + '-' + d.getMonth()}
+              type="button"
+              onClick={() => !disabled && onChange(iso)}
+              disabled={disabled}
+              title={
+                state === 'blackout'      ? (lang === 'en' ? 'Unavailable date'           : 'Fecha no disponible') :
+                state === 'off-schedule'  ? (lang === 'en' ? 'Tour does not run that day' : 'El tour no opera ese día') :
+                state === 'past'          ? (lang === 'en' ? 'Past or before cutoff'      : 'Pasado o antes del cutoff') :
+                undefined
+              }
+              style={{
+                aspectRatio: '1 / 1',
+                borderRadius: 8,
+                background: bg,
+                color,
+                border,
+                fontSize: 13,
+                fontWeight: selected ? 700 : 500,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: !inMonth ? 0.3 : 1,
+                position: 'relative',
+                textDecoration: state === 'blackout' ? 'line-through' : 'none',
+              }}
+            >
+              {d.getDate()}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 10, color: 'var(--ink-soft)', flexWrap: 'wrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 2, background: 'var(--ink)' }}/>
+          {lang === 'en' ? 'Selected' : 'Seleccionado'}
+        </span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 2, border: '1px dashed var(--line-strong)' }}/>
+          {lang === 'en' ? 'Unavailable' : 'No disponible'}
+        </span>
+      </div>
+    </div>
+  );
+};
+window.DatePicker = DatePicker;
+
 // ───────────────────────────────────────────── Interactive Map
 const MiniMap = ({ onPinClick, selected }) => {
   const { t, lang } = useT();

@@ -4,6 +4,7 @@ const TourDetail = ({ tourId, prefill }) => {
   const tour = window.TOURS.find(x => x.id === tourId) || window.TOURS[0];
   const [adults, setAdults] = useState(2);
   const [kids, setKids] = useState(0);
+  const [infants, setInfants] = useState(0);
   const [selDate, setSelDate] = useState(prefill?.prefillDate || null);
   const [selTime, setSelTime] = useState(
     prefill?.prefillTime && tour.times && tour.times.includes(prefill.prefillTime)
@@ -25,6 +26,10 @@ const TourDetail = ({ tourId, prefill }) => {
     { k: 'lunch', label: lang==='en'?'Upgrade to premium lunch':'Upgrade almuerzo premium', price: 18 }
   ];
 
+  // Infants are free by default. If a tenant later wires up
+  // TourZonePrice rows with paxCategory='infant' the price calc will
+  // need updating, but for now they're a manifest-only count for the
+  // operator (so they know how many car seats / how full the boat is).
   const total = (tour.flat
     ? tour.priceAdult + Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0)*1,0)
     : adults * tour.priceAdult + kids * (tour.priceKid||0) + (adults+kids) * Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0),0)
@@ -32,12 +37,11 @@ const TourDetail = ({ tourId, prefill }) => {
 
   const tourReviews = window.REVIEWS.filter(r => r.tour === tour.id).concat(window.REVIEWS.filter(r => r.tour !== tour.id).slice(0,2));
 
-  // next 7 days
-  const dates = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return d;
-  });
+  // Pull schedule + blackout config straight off the loaded tour. The
+  // catalog API hydrates these when ensureDetail() runs (data-api.js),
+  // so by the time this page renders we usually have them. Defaults
+  // mean the picker degrades gracefully if they haven't arrived yet.
+  const cutoffHours = tour.schedules?.[0]?.cutoffHoursBefore ?? 24;
 
   const canBook = selDate && selTime && (tour.flat || adults > 0);
 
@@ -256,25 +260,17 @@ const TourDetail = ({ tourId, prefill }) => {
                 </label>
               )}
 
-              {/* Date picker */}
+              {/* Date picker — full month grid that respects the tour's
+                  active schedule, blackouts, and booking cutoff. */}
               <label className="field">
                 <span className="mono">{t.date}</span>
-                <div style={{ display:'flex', gap: 6, overflowX:'auto', paddingBottom: 4 }}>
-                  {dates.slice(0, 8).map((d,i) => {
-                    const iso = d.toISOString().slice(0,10);
-                    const isSel = selDate === iso;
-                    return (
-                      <button key={i} onClick={()=>setSelDate(iso)} style={{
-                        padding: '8px 10px', borderRadius: 10, border: `1.5px solid ${isSel ? 'var(--ink)' : 'var(--line)'}`,
-                        background: isSel ? 'var(--ink)' : 'transparent', color: isSel ? 'var(--bone)' : 'var(--ink)',
-                        cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', minWidth: 52, gap: 2
-                      }}>
-                        <span style={{ fontSize: 10, textTransform:'uppercase', opacity: 0.7 }}>{d.toLocaleDateString(lang==='en'?'en':'es', { weekday:'short' })}</span>
-                        <span style={{ fontWeight: 600 }}>{d.getDate()}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <DatePicker
+                  value={selDate}
+                  onChange={setSelDate}
+                  schedules={tour.schedules || []}
+                  blackoutDates={tour.blackoutDates || []}
+                  cutoffHours={cutoffHours}
+                />
               </label>
 
               {/* Time */}
@@ -295,19 +291,23 @@ const TourDetail = ({ tourId, prefill }) => {
                 </div>
               </label>
 
-              {/* People (not for flat vans) */}
+              {/* People (not for flat vans). Three tiers — adults / kids
+                  / infants — surfaced even when there's no kid/infant
+                  pricing so the operator gets an accurate manifest. */}
               {!tour.flat && (
                 <>
                   <label className="field" style={{ marginTop: 14 }}>
-                    <span className="mono">{t.adults}</span>
+                    <span className="mono">{t.adults} · {t.adultsAge}</span>
                     <Stepper value={adults} setValue={setAdults} min={1} max={12}/>
                   </label>
-                  {tour.priceKid !== null && (
-                    <label className="field" style={{ marginTop: 12 }}>
-                      <span className="mono">{t.kids} · {t.kidsAge}</span>
-                      <Stepper value={kids} setValue={setKids} min={0} max={10}/>
-                    </label>
-                  )}
+                  <label className="field" style={{ marginTop: 12 }}>
+                    <span className="mono">{t.kids} · {t.kidsAge}</span>
+                    <Stepper value={kids} setValue={setKids} min={0} max={10}/>
+                  </label>
+                  <label className="field" style={{ marginTop: 12 }}>
+                    <span className="mono">{t.infants} · {t.infantsAge}</span>
+                    <Stepper value={infants} setValue={setInfants} min={0} max={6}/>
+                  </label>
                 </>
               )}
 
@@ -332,11 +332,11 @@ const TourDetail = ({ tourId, prefill }) => {
               </div>
 
               <button disabled={!canBook} className="btn btn-sun btn-lg" style={{ width:'100%', marginTop: 14, opacity: canBook ? 1 : 0.5 }}
-                onClick={() => navigate('booking', { tourId: tour.id, adults, kids, addons, date: selDate, time: selTime, total, pickup })}>
+                onClick={() => navigate('booking', { tourId: tour.id, adults, kids, infants, addons, date: selDate, time: selTime, total, pickup })}>
                 {t.bookNowAlt || t.continue} <Icon d={icons.arrow} size={14}/>
               </button>
               <button disabled={!canBook} className="btn btn-outline" style={{ width:'100%', marginTop: 8, opacity: canBook ? 1 : 0.5 }}
-                onClick={() => addToCart({ tourId: tour.id, adults, kids, addons, date: selDate, time: selTime, subtotal: total, pickup })}>
+                onClick={() => addToCart({ tourId: tour.id, adults, kids, infants, addons, date: selDate, time: selTime, subtotal: total, pickup })}>
                 <Icon d={icons.bag} size={14}/> {t.addToCart}
               </button>
               <div style={{ textAlign:'center', marginTop: 10, fontSize: 11, color:'var(--ink-soft)' }}>

@@ -47,6 +47,7 @@ const Booking = ({ booking }) => {
         time: it.time,
         adults: it.adults || 0,
         kids: it.kids || 0,
+        infants: it.infants || 0,
         pickup: it.pickup,
         subtotal: Number(it.subtotal) || (Number(booking?.total) || 0),
       }));
@@ -229,7 +230,7 @@ const BookingSummary = ({ items, grandTotal, isCart }) => {
                   <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 10, marginTop: 2 }}>
                     {tr.flat
                       ? '1 van'
-                      : `${it.adults || 0} ${t.adults.toLowerCase()}${it.kids ? ` · ${it.kids} ${t.kids.toLowerCase()}` : ''}`
+                      : `${it.adults || 0} ${t.adults.toLowerCase()}${it.kids ? ` · ${it.kids} ${t.kids.toLowerCase()}` : ''}${it.infants ? ` · ${it.infants} ${t.infants.toLowerCase()}` : ''}`
                     }
                   </div>
                   {it.pickup && it.pickup.label && (
