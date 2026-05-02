@@ -261,6 +261,9 @@ const Transfers = () => {
               : 'Cotizaciones reales de operadores locales. Elige pickup + destino, escoge tu van y reservas.'}
           </p>
         </div>
+        {/* Lagoon waves anchoring the bottom-left corner — same brand
+            note as the /port hero so the two heroes feel related. */}
+        <WaveCorner placement="bottom-left" size={240} tone="lagoon"/>
       </section>
 
       {/* Search form */}

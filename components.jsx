@@ -107,63 +107,53 @@ const WaveMark = ({ color = 'sun', width = 88, height = 14, strokeWidth = 2.6 })
 };
 window.WaveMark = WaveMark;
 
-// Section divider — three layered horizontal sine waves in the lagoon
-// rampada, full-bleed across its container. Replaces flat <hr>-style
-// lines between sections so the page feels less editorial-rigid.
+// Section break — thin hairlines on each side of a brushy WaveMark
+// in the middle. Avoids the "stretched flat line" look of full-bleed
+// SVG waves: the wave is fixed-size (so it stays brushy) and the rest
+// of the row is filled with thin lagoon-pale rules.
 //   <WaveDivider/>                  // full
-//   <WaveDivider variant="subtle"/> // single hairline
-const WaveDivider = ({ variant = 'full', height = 56 }) => {
+//   <WaveDivider variant="subtle"/> // hairline only, no center wave
+const WaveDivider = ({ variant = 'full' }) => {
   if (variant === 'subtle') {
     return (
-      <svg
-        width="100%"
-        height={Math.round(height * 0.5)}
-        viewBox="0 0 1200 28"
-        preserveAspectRatio="none"
+      <div
         aria-hidden
-        style={{ display: 'block' }}
-      >
-        <path
-          d="M0 14 Q200 0 400 14 T800 14 T1200 14"
-          fill="none"
-          stroke="var(--lagoon-pale)"
-          strokeWidth="1.5"
-          opacity="0.85"
-        />
-      </svg>
+        style={{
+          height: 1,
+          background:
+            'linear-gradient(90deg, transparent 0%, var(--lagoon-pale) 25%, var(--lagoon-pale) 75%, transparent 100%)',
+        }}
+      />
     );
   }
   return (
-    <svg
-      width="100%"
-      height={height}
-      viewBox="0 0 1200 56"
-      preserveAspectRatio="none"
+    <div
       aria-hidden
-      style={{ display: 'block' }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 18,
+        padding: '12px 0',
+      }}
     >
-      <path
-        d="M0 22 Q200 6 400 22 T800 22 T1200 22"
-        fill="none"
-        stroke="var(--lagoon-darkest)"
-        strokeWidth="1.6"
-        opacity="0.45"
+      <div
+        style={{
+          flex: 1,
+          height: 1,
+          background:
+            'linear-gradient(90deg, transparent 0%, var(--lagoon-pale) 30%, var(--lagoon) 100%)',
+        }}
       />
-      <path
-        d="M0 30 Q200 14 400 30 T800 30 T1200 30"
-        fill="none"
-        stroke="var(--lagoon-deep)"
-        strokeWidth="1.6"
-        opacity="0.65"
+      <WaveMark color="lagoon-deep" width={88} height={14} strokeWidth={2.6}/>
+      <div
+        style={{
+          flex: 1,
+          height: 1,
+          background:
+            'linear-gradient(90deg, var(--lagoon) 0%, var(--lagoon-pale) 70%, transparent 100%)',
+        }}
       />
-      <path
-        d="M0 38 Q200 22 400 38 T800 38 T1200 38"
-        fill="none"
-        stroke="var(--lagoon)"
-        strokeWidth="1.6"
-        opacity="0.85"
-      />
-    </svg>
+    </div>
   );
 };
 window.WaveDivider = WaveDivider;
