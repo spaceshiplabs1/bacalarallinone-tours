@@ -62,6 +62,7 @@ const Logo = ({ size = 1 }) => (
   <img
     src="./images/logo-long.webp"
     alt="bacalarallinone.tours"
+    className="logo-img"
     style={{
       height: 44 * size,
       width: 'auto',
@@ -212,6 +213,114 @@ const WaveCorner = ({ placement = 'top-right', size = 220, tone = 'lagoon' }) =>
 };
 window.WaveCorner = WaveCorner;
 
+// Filled wavy color block — the "plasta" complement to the stroked
+// WaveDivider / WaveMark. Two variants:
+//   "band" — full-width horizontal gradient wave, used as a substantive
+//            section transition (instead of a thin hairline).
+//   "splash" — abstract wave splash for the corner of a photo / card.
+const WaveBlob = ({
+  variant = 'band',
+  height = 90,
+  size = 160,
+  placement = 'top-right',
+  tone = 'lagoon',
+  flip = false,
+}) => {
+  const ramp =
+    tone === 'sun'
+      ? ['var(--sun)', 'var(--sun-pale)', 'var(--bone)']
+      : ['var(--lagoon-darkest)', 'var(--lagoon-deep)', 'var(--lagoon)'];
+
+  if (variant === 'band') {
+    // Three nested wave bands — the gradient sweeps left→right echoing
+    // the logo's navy-to-turquoise script.
+    return (
+      <svg
+        width="100%"
+        height={height}
+        viewBox={`0 0 1200 ${height}`}
+        preserveAspectRatio="none"
+        aria-hidden
+        style={{ display: 'block' }}
+      >
+        <defs>
+          <linearGradient id={`wbBand-${tone}`} x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"  stopColor={ramp[0]}/>
+            <stop offset="55%" stopColor={ramp[1]}/>
+            <stop offset="100%" stopColor={ramp[2]}/>
+          </linearGradient>
+        </defs>
+        <path
+          d={`M0 ${height*0.35} Q 200 ${height*0.05}, 400 ${height*0.35} T 800 ${height*0.35} T 1200 ${height*0.35} V ${height} H 0 Z`}
+          fill={`url(#wbBand-${tone})`}
+          opacity="0.18"
+        />
+        <path
+          d={`M0 ${height*0.55} Q 200 ${height*0.25}, 400 ${height*0.55} T 800 ${height*0.55} T 1200 ${height*0.55} V ${height} H 0 Z`}
+          fill={`url(#wbBand-${tone})`}
+          opacity="0.32"
+        />
+        <path
+          d={`M0 ${height*0.75} Q 200 ${height*0.45}, 400 ${height*0.75} T 800 ${height*0.75} T 1200 ${height*0.75} V ${height} H 0 Z`}
+          fill={`url(#wbBand-${tone})`}
+          opacity="0.55"
+        />
+      </svg>
+    );
+  }
+
+  // Splash variant — three layered wavy fills tucked into the named
+  // corner of a position:relative parent. Use as a photo accent.
+  const flipX = placement.endsWith('left');
+  const flipY = placement.startsWith('bottom');
+  const styleByPlacement = {
+    'top-right':    { top: 0, right: 0 },
+    'top-left':     { top: 0, left: 0 },
+    'bottom-right': { bottom: 0, right: 0 },
+    'bottom-left':  { bottom: 0, left: 0 },
+  }[placement];
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 160 160"
+      aria-hidden
+      style={{
+        position: 'absolute',
+        ...styleByPlacement,
+        transform: `${flipX ? 'scaleX(-1) ' : ''}${flipY ? 'scaleY(-1)' : ''}`.trim() || 'none',
+        transformOrigin: 'center',
+        pointerEvents: 'none',
+        zIndex: 2,
+      }}
+    >
+      <defs>
+        <linearGradient id={`wbSplash-${tone}-${placement}`} x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0%"  stopColor={ramp[0]}/>
+          <stop offset="60%" stopColor={ramp[1]}/>
+          <stop offset="100%" stopColor={ramp[2]}/>
+        </linearGradient>
+      </defs>
+      <path
+        d="M160 0 C 130 30, 110 50, 90 70 C 60 100, 30 110, 0 130 L 0 160 L 160 160 Z"
+        fill={`url(#wbSplash-${tone}-${placement})`}
+        opacity="0.55"
+      />
+      <path
+        d="M160 30 C 135 60, 115 75, 95 95 C 70 120, 50 130, 30 145 L 30 160 L 160 160 Z"
+        fill={`url(#wbSplash-${tone}-${placement})`}
+        opacity="0.7"
+      />
+      <path
+        d="M160 60 C 140 85, 125 100, 110 115 C 90 135, 75 145, 65 160 L 160 160 Z"
+        fill={`url(#wbSplash-${tone}-${placement})`}
+        opacity="0.85"
+      />
+    </svg>
+  );
+};
+window.WaveBlob = WaveBlob;
+
 // ───────────────────────────────────────────── header
 const Header = ({ current }) => {
   const { t, lang, setLang, navigate, cartCount, openCart } = useT();
@@ -339,7 +448,7 @@ const Footer = () => {
   const linkStyle = { color:'inherit', textDecoration:'none', cursor:'pointer', background:'none', border:'none', padding:0, textAlign:'left', font:'inherit' };
   const FL = ({ onClick, children }) => <button style={linkStyle} onClick={onClick}>{children}</button>;
   return (
-    <footer style={{ marginTop: 80, borderTop: '1px solid var(--line)', padding: '48px 0', background: 'var(--bone-2)' }}>
+    <footer style={{ marginTop: 0, borderTop: '1px solid var(--line)', padding: '48px 0', background: 'var(--bone-2)' }}>
       <div className="container rg-footer" style={{ display:'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 40 }}>
         <div>
           <Logo />

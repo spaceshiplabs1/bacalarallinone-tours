@@ -113,6 +113,42 @@ body::before {
   letter-spacing: 0.005em;
   line-height: 1;
 }
+/* Section/heading text that fades from default ink at the start to
+   the lagoon palette at the end — a subtle navy-to-turquoise tide
+   echoing the logo's color sweep. Apply to display headings on
+   light backgrounds. */
+.display-tide {
+  background-image: linear-gradient(
+    90deg,
+    var(--ink) 0%,
+    var(--ink) 30%,
+    var(--lagoon-darkest) 70%,
+    var(--lagoon) 100%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
+}
+
+/* Logo hover wiggle — short tropical micro-bounce, fires once on
+   hover. Keeps the brand mark feeling alive without being noisy. */
+@keyframes logoWiggle {
+  0%   { transform: rotate(0deg)   translateY(0); }
+  18%  { transform: rotate(-3.5deg) translateY(-1px); }
+  38%  { transform: rotate(3deg)    translateY(-1px); }
+  56%  { transform: rotate(-2deg)   translateY(0); }
+  76%  { transform: rotate(1.4deg)  translateY(0); }
+  100% { transform: rotate(0deg)    translateY(0); }
+}
+.logo-img {
+  transition: transform 200ms ease;
+  transform-origin: 50% 70%;
+}
+.logo-img:hover { animation: logoWiggle 620ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .logo-img:hover { animation: none; }
+}
 .mono {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

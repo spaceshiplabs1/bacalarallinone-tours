@@ -83,8 +83,11 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Hero collage — rotations via CSS custom property so hover can straighten them */}
+          {/* Hero collage — rotations via CSS custom property so hover
+              can straighten them. A small lagoon WaveBlob splash sits
+              behind the bottom-left photo as a brand-color anchor. */}
           <div className="rg-hero-collage" style={{ position:'relative', aspectRatio:'5/6' }}>
+            <WaveBlob variant="splash" placement="bottom-left" size={170} tone="lagoon"/>
             <div onClick={()=>openLightbox(heroShots, 0)} className="hero-card c1"
               style={{ position:'absolute', inset: '0 20% 30% 0', borderRadius: 24, boxShadow: 'var(--shadow)', overflow:'hidden' }}>
               <window.Photo src={heroShots[0].src} label={heroShots[0].label} style={{ width:'100%', height:'100%' }}/>
@@ -120,7 +123,7 @@ const Home = () => {
           rhythm of their own. */}
       <section ref={pathSectionRef} className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
-          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
+          <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
         </div>
 
@@ -313,7 +316,7 @@ const Home = () => {
       {/* FEATURED TOURS */}
       <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
-          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
+          <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>{t.viewAll} <Icon d={icons.arrow} size={14}/></button>
         </div>
@@ -350,11 +353,18 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Filled wave band — substantive lagoon gradient that bridges
+          the page bone bg into the dark Why Us section, replacing the
+          empty 80px gap with a brand-aligned transition. */}
+      <div style={{ marginTop: 24 }}>
+        <WaveBlob variant="band" height={88}/>
+      </div>
+
       {/* WHY US */}
-      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 80 }}>
+      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 0 }}>
         <div className="container">
           <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 40 }}>
-            <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
+            <h2 className="display display-tide" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
             <div style={{ flex: 1, height: 1, background: 'rgba(245,240,230,0.2)' }}/>
           </div>
           <div className="rg-4" style={{ display:'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
