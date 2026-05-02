@@ -392,11 +392,20 @@ const TourCard = ({ tour, onClick, compact = false }) => {
               fontSize: 'clamp(36px, 3.6vw, 52px)',
               lineHeight: 0.98,
               textShadow: '0 2px 14px rgba(0,0,0,0.45)',
+              // hyphens:auto needs the lang attribute (set above) and the
+              // browser's hyphenation dictionary for that language.
+              // hyphenateLimitChars (min-word, before-hyphen, after-hyphen)
+              // overrides the conservative defaults so even 5-letter words
+              // can be cut, not just the long ones.
               hyphens: 'auto',
               WebkitHyphens: 'auto',
+              MsHyphens: 'auto',
+              hyphenateLimitChars: '5 2 2',
+              WebkitHyphenateLimitChars: '5 2 2',
+              // overflow-wrap is the last-resort fallback. Removed the older
+              // word-break:break-word — that one cut words mid-letter with
+              // NO hyphen, which often beat hyphens:auto to the punch.
               overflowWrap: 'break-word',
-              wordBreak: 'break-word',
-              textWrap: 'pretty',
             }}
           >
             {tour.title[lang]}
