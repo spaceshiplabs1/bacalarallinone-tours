@@ -42,7 +42,25 @@ const PortFlow = ({ navigate }) => {
           }}
         />
         <div className="container" style={{ position:'relative' }}>
-          <div className="mono" style={{ color: 'var(--sun)', marginBottom: 14, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>● PORT DAY · MAHAHUAL · COSTA MAYA</div>
+          <div
+            className="mono"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(12,42,46,0.55)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              color: 'var(--sun)',
+              padding: '6px 12px',
+              borderRadius: 999,
+              marginBottom: 14,
+              fontSize: 11,
+              letterSpacing: 1.6,
+            }}
+          >
+            ● PORT DAY · MAHAHUAL · COSTA MAYA
+          </div>
           <h1 className="display" style={{ fontSize: 'clamp(40px, 5vw, 72px)', margin: 0, lineHeight: 0.95, maxWidth: 900, textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
             {lang==='en'
               ? <>Off the ship at 9. <span style={{color:'var(--sun)'}}>Back by 2:30.</span> Nothing in-between wasted.</>
