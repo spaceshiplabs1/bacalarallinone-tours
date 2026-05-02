@@ -52,11 +52,11 @@ const Home = () => {
               {t.heroTitle}<br/>
               <span style={{ color: 'var(--clay)' }}>{t.heroTitleItalic}</span>
             </h1>
-            {/* Brush-script accent — short tropical pull-quote echoing
-                the "bacalar" stroke in the logo. */}
-            <div className="script hero-item d1" style={{ fontSize: 32, color: 'var(--lagoon-deep)', marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              <span>{lang==='en' ? 'seven colors, no rush' : 'siete colores, sin prisa'}</span>
-              <WaveMark color="lagoon" width={56} height={10} strokeWidth={2.4}/>
+            {/* Brush-script pull-quote — echoes the "bacalar" wordmark
+                in the logo. Stands alone; the squiggle would be one
+                wave too many here. */}
+            <div className="script hero-item d1" style={{ fontSize: 32, color: 'var(--lagoon-deep)', marginTop: 14 }}>
+              {lang==='en' ? 'seven colors, no rush' : 'siete colores, sin prisa'}
             </div>
             <p className="hero-item d2" style={{ fontSize: 18, color:'var(--ink-soft)', marginTop: 18, maxWidth: 520, lineHeight: 1.4 }}>
               {t.heroSub}
@@ -119,11 +119,8 @@ const Home = () => {
           glyph + brand-color background gives them a distinct visual
           rhythm of their own. */}
       <section ref={pathSectionRef} className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
-        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 16 }}>
-          <div>
-            <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
-            <WaveMark color="lagoon" width={96} height={12} strokeWidth={2.6}/>
-          </div>
+        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
+          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
         </div>
 
@@ -315,11 +312,8 @@ const Home = () => {
 
       {/* FEATURED TOURS */}
       <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
-        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 16 }}>
-          <div>
-            <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
-            <WaveMark color="sun" width={96} height={12} strokeWidth={2.6}/>
-          </div>
+        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
+          <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>{t.viewAll} <Icon d={icons.arrow} size={14}/></button>
         </div>
