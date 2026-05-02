@@ -77,7 +77,11 @@ const Home = () => {
         </div>
       </section>
 
-      {/* PICK YOUR PATH */}
+      {/* PICK YOUR PATH — color-blocked navigation tiles. No photos so
+          they don't compete with the photo-driven hero collage above
+          and the photo-dominant tour cards below. The big in-card
+          glyph + brand-color background gives them a distinct visual
+          rhythm of their own. */}
       <section className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
@@ -86,21 +90,86 @@ const Home = () => {
 
         <div className="rg-3" style={{ display:'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
           {[
-            { key: 'port', icon: icons.ship, title: t.pathPort, sub: t.pathPortSub, cta: t.enterPortFlow, target: 'port', photo: window.PHOTOS.chacchoben, phLabel: 'CRUISE PORT' },
-            { key: 'regular', icon: icons.anchor, title: t.pathRegular, sub: t.pathRegularSub, cta: t.enterCatalog, target: 'catalog', photo: window.PHOTOS.lagoonBoat, phLabel: 'REGULAR VISITOR' },
-            { key: 'transfer', icon: icons.compass, title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', photo: window.PHOTOS.van, phLabel: 'AIRPORT VAN' }
+            { key: 'port',     n: '01', icon: icons.ship,    title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      bg: 'var(--clay)',   ink: 'var(--bone)' },
+            { key: 'regular',  n: '02', icon: icons.anchor,  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   bg: 'var(--lagoon-deep)', ink: 'var(--bone)' },
+            { key: 'transfer', n: '03', icon: icons.van,     title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', bg: 'var(--jungle)', ink: 'var(--bone)' }
           ].map(path => (
-            <div key={path.key} className="card" onClick={() => navigate(path.target)} style={{ cursor:'pointer', display:'flex', flexDirection:'column' }}>
-              <window.Photo src={path.photo} label={path.phLabel} style={{ height: 140 }}/>
-              <div style={{ padding: 24, display:'flex', flexDirection:'column', gap: 12, flex: 1 }}>
-                <div style={{ width: 44, height: 44, borderRadius:'50%', background: 'var(--bone)', border:'1px solid var(--line)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <Icon d={path.icon} size={20}/>
-                </div>
-                <h3 className="display" style={{ fontSize: 24, margin: 0 }}>{path.title}</h3>
-                <p style={{ margin: 0, color:'var(--ink-soft)', fontSize: 14 }}>{path.sub}</p>
-                <button className="btn btn-outline btn-sm" style={{ marginTop: 'auto', alignSelf:'flex-start' }}>
-                  {path.cta} <Icon d={icons.arrow} size={14}/>
-                </button>
+            <div
+              key={path.key}
+              className="path-tile"
+              onClick={() => navigate(path.target)}
+              style={{
+                cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                background: path.bg,
+                color: path.ink,
+                borderRadius: 18,
+                padding: '32px 28px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+                minHeight: 320,
+                boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
+              }}
+            >
+              {/* Oversized ghost glyph in the corner — decorative, soft
+                  enough to not fight the title. */}
+              <div
+                aria-hidden
+                className="path-tile-glyph"
+                style={{
+                  position: 'absolute',
+                  top: -18, right: -18,
+                  width: 200, height: 200,
+                  opacity: 0.18,
+                  color: path.ink,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  pointerEvents: 'none',
+                }}
+              >
+                <Icon d={path.icon} size={200} stroke={1.4}/>
+              </div>
+
+              {/* Foreground icon — smaller, sits in a translucent square
+                  so it reads as a brand mark for the section. */}
+              <div
+                style={{
+                  width: 56, height: 56, borderRadius: 14,
+                  background: 'rgba(245,240,230,0.18)',
+                  border: '1px solid rgba(245,240,230,0.35)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'relative',
+                }}
+              >
+                <Icon d={path.icon} size={26} stroke={2}/>
+              </div>
+
+              <div className="mono" style={{ opacity: 0.78, letterSpacing: 1.4, fontSize: 11, position: 'relative' }}>
+                {path.n} / {path.title.toUpperCase()}
+              </div>
+
+              <h3
+                className="display"
+                style={{
+                  margin: 0,
+                  fontSize: 'clamp(28px, 2.6vw, 36px)',
+                  lineHeight: 1.02,
+                  position: 'relative',
+                }}
+              >
+                {path.title}
+              </h3>
+
+              <p style={{ margin: 0, opacity: 0.86, fontSize: 14, lineHeight: 1.5, position: 'relative' }}>
+                {path.sub}
+              </p>
+
+              <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14, position: 'relative' }} className="path-tile-cta">
+                <span>{path.cta}</span>
+                <Icon d={icons.arrow} size={16}/>
               </div>
             </div>
           ))}

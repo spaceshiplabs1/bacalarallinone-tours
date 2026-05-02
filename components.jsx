@@ -39,7 +39,8 @@ const icons = {
   credit: <><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></>,
   send: <><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></>,
   bag: <><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></>,
-  trash: <><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 13h10l1-13"/></>
+  trash: <><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 13h10l1-13"/></>,
+  van: <><path d="M2 17h2"/><path d="M20 17h2"/><path d="M4 17V8h11l5 4v5"/><path d="M15 8v4h5"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></>
 };
 
 window.Icon = Icon;
