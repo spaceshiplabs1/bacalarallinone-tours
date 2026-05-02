@@ -202,15 +202,52 @@ const Transfers = () => {
 
   return (
     <div className="fade-in">
-      {/* Hero */}
-      <section style={{ background: 'var(--jungle)', color: 'var(--bone)', padding: '48px 0 60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 18px)' }} />
+      {/* Hero — taller, with two backgrounds cross-fading every 7s. The dark
+          overlay keeps text legible regardless of which image is on top. */}
+      <section
+        style={{
+          color: 'var(--bone)',
+          padding: '110px 0 130px',
+          position: 'relative',
+          overflow: 'hidden',
+          background: 'var(--jungle)',
+          minHeight: 380,
+        }}
+      >
+        <div
+          aria-hidden
+          className="transfers-hero-bg transfers-hero-bg--a"
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(./images/transfer-hero-lagoon.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 60%',
+          }}
+        />
+        <div
+          aria-hidden
+          className="transfers-hero-bg transfers-hero-bg--b"
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(./images/transfer-hero-highway.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 50%',
+          }}
+        />
+        {/* Dim overlay so the headline + meta line stay readable */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.55) 100%)',
+          }}
+        />
         <div className="container" style={{ position: 'relative' }}>
           <div className="mono" style={{ color: 'var(--sun)', marginBottom: 14 }}>{lang === 'en' ? 'PRIVATE TRANSFERS · 24/7' : 'TRASLADOS PRIVADOS · 24/7'}</div>
-          <h1 className="display" style={{ fontSize: 'clamp(38px, 5vw, 64px)', margin: 0, lineHeight: 1, maxWidth: 800 }}>
+          <h1 className="display" style={{ fontSize: 'clamp(38px, 5vw, 64px)', margin: 0, lineHeight: 1, maxWidth: 800, textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}>
             {lang === 'en' ? <>Door-to-door, <span style={{ color: 'var(--sun)' }}>any hour.</span></> : <>De puerta a puerta, <span style={{ color: 'var(--sun)' }}>cualquier hora.</span></>}
           </h1>
-          <p style={{ fontSize: 16, opacity: 0.85, marginTop: 14, maxWidth: 620 }}>
+          <p style={{ fontSize: 16, opacity: 0.92, marginTop: 14, maxWidth: 620, textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
             {lang === 'en'
               ? 'Real quotes from local operators. Pick your pickup + drop-off, choose a van, and you\'re booked.'
               : 'Cotizaciones reales de operadores locales. Elige pickup + destino, escoge tu van y reservas.'}
@@ -222,28 +259,31 @@ const Transfers = () => {
       <div className="container" style={{ marginTop: -36, position: 'relative', paddingBottom: 60 }}>
         <div className="card" style={{ padding: 24, boxShadow: 'var(--shadow)' }}>
 
-          {/* Anchor chips: pickup */}
+          {/* Endpoints: pickup + drop-off side by side on desktop, stacked
+              under 768px via .rg-transfers-form responsive rule. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <EndpointPicker
-              which="origin"
-              label={lang === 'en' ? 'PICKUP' : 'PICKUP'}
-              endpoint={origin}
-              setText={(text) => {
-                if (!tryParseLatLng('origin', text)) setEndpointFromText('origin', text);
-              }}
-              setAnchor={(anchor) => setEndpointFromAnchor('origin', anchor)}
-              lang={lang}
-            />
-            <EndpointPicker
-              which="destination"
-              label={lang === 'en' ? 'DROP-OFF' : 'DESTINO'}
-              endpoint={destination}
-              setText={(text) => {
-                if (!tryParseLatLng('destination', text)) setEndpointFromText('destination', text);
-              }}
-              setAnchor={(anchor) => setEndpointFromAnchor('destination', anchor)}
-              lang={lang}
-            />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }} className="rg-transfers-form">
+              <EndpointPicker
+                which="origin"
+                label={lang === 'en' ? 'PICKUP' : 'PICKUP'}
+                endpoint={origin}
+                setText={(text) => {
+                  if (!tryParseLatLng('origin', text)) setEndpointFromText('origin', text);
+                }}
+                setAnchor={(anchor) => setEndpointFromAnchor('origin', anchor)}
+                lang={lang}
+              />
+              <EndpointPicker
+                which="destination"
+                label={lang === 'en' ? 'DROP-OFF' : 'DESTINO'}
+                endpoint={destination}
+                setText={(text) => {
+                  if (!tryParseLatLng('destination', text)) setEndpointFromText('destination', text);
+                }}
+                setAnchor={(anchor) => setEndpointFromAnchor('destination', anchor)}
+                lang={lang}
+              />
+            </div>
 
             {/* Pax + luggage + date + time row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }} className="rg-transfers-form">

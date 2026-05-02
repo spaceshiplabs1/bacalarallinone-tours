@@ -286,6 +286,33 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   0%   { opacity: 0; transform: rotate(var(--tilt, 0deg)) scale(0.9) translateY(16px); }
   100% { opacity: 1; transform: rotate(var(--tilt, 0deg)) scale(1)   translateY(0); }
 }
+
+/* Transfers page hero: two stacked background images that cross-fade.
+   Both layers tick on a 14s cycle (50%/50% visible). The B layer is
+   delayed 7s so they alternate. Slow Ken-Burns scale gives subtle
+   motion without being distracting. */
+@keyframes transfersHeroFadeA {
+  0%, 45%   { opacity: 1; }
+  50%, 95%  { opacity: 0; }
+  100%      { opacity: 1; }
+}
+@keyframes transfersHeroFadeB {
+  0%, 45%   { opacity: 0; }
+  50%, 95%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+.transfers-hero-bg {
+  animation-duration: 14s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+.transfers-hero-bg--a { animation-name: transfersHeroFadeA; }
+.transfers-hero-bg--b { animation-name: transfersHeroFadeB; opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .transfers-hero-bg { animation: none !important; }
+  .transfers-hero-bg--b { display: none; }
+}
+
 .hero-card {
   /* Resting state — explicit so hover can override once the intro animation ends */
   opacity: 1;
