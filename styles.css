@@ -429,29 +429,24 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 }
 .path-tile-cta { transition: transform 200ms ease; }
 .path-tile-cta svg { transition: transform 220ms ease; }
-.path-tile:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 22px 50px rgba(12,42,46,0.32);
-}
-.path-tile:hover .path-tile-glyph {
-  transform: translate(8px, -8px) scale(1.06);
-  opacity: 0.26;
-}
+/* No card backdrop, so hover lifts the illustration itself instead
+   of the whole column. The CTA arrow nudge is kept. */
 .path-tile-illo {
   transition: opacity 420ms ease,
-              transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+              transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1),
+              filter 320ms ease;
 }
-.path-tile:hover .path-tile-illo { transform: scale(1.04) translateY(-2px); }
+.path-tile:hover .path-tile-illo {
+  transform: scale(1.05) translateY(-4px);
+  filter: drop-shadow(0 14px 28px rgba(12,42,46,0.22));
+}
 .path-tile:hover .path-tile-cta svg { transform: translateX(6px); }
 @media (prefers-reduced-motion: reduce) {
   .path-tile,
-  .path-tile-glyph,
   .path-tile-illo,
   .path-tile-cta,
   .path-tile-cta svg { transition: none !important; }
-  .path-tile:hover { transform: none; }
-  .path-tile:hover .path-tile-glyph { transform: none; }
-  .path-tile:hover .path-tile-illo { transform: none; }
+  .path-tile:hover .path-tile-illo { transform: none; filter: none; }
   .path-tile:hover .path-tile-cta svg { transform: none; }
 }
 

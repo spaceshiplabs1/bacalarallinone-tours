@@ -91,11 +91,11 @@ const Home = () => {
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
         </div>
 
-        <div className="rg-3" style={{ display:'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+        <div className="rg-3" style={{ display:'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36 }}>
           {[
-            { key: 'port',     n: '01', illo: './images/path-port.png',     title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      bg: 'var(--clay)',        ink: 'var(--bone)' },
-            { key: 'regular',  n: '02', illo: './images/path-regular.png',  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   bg: 'var(--lagoon-deep)', ink: 'var(--bone)' },
-            { key: 'transfer', n: '03', illo: './images/path-transfer.png', title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', bg: 'var(--jungle)',      ink: 'var(--bone)' }
+            { key: 'port',     n: '01', illo: './images/path-port.png',     title: t.pathPort,     sub: t.pathPortSub,     cta: t.enterPortFlow, target: 'port',      accent: 'var(--clay)' },
+            { key: 'regular',  n: '02', illo: './images/path-regular.png',  title: t.pathRegular,  sub: t.pathRegularSub,  cta: t.enterCatalog,  target: 'catalog',   accent: 'var(--lagoon-deep)' },
+            { key: 'transfer', n: '03', illo: './images/path-transfer.png', title: t.pathTransfer, sub: t.pathTransferSub, cta: t.enterTransfer, target: 'transfers', accent: 'var(--jungle-2)' }
           ].map(path => {
             const loaded = !!loadedIllos[path.key];
             return (
@@ -106,29 +106,21 @@ const Home = () => {
                 style={{
                   cursor: 'pointer',
                   position: 'relative',
-                  overflow: 'hidden',
-                  background: path.bg,
-                  color: path.ink,
-                  borderRadius: 18,
-                  padding: '28px 28px 28px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 14,
-                  minHeight: 380,
-                  boxShadow: '0 10px 30px rgba(12,42,46,0.18)',
                 }}
               >
-                {/* Illustration. While the PNG is loading we show a
-                    shimmer skeleton inside the same dimensions so the
-                    layout doesn't shift on swap. */}
+                {/* Illustration sits free on the page — no card, no
+                    border, no colored backdrop. While the PNG loads
+                    we show a shimmer in the exact slot so layout
+                    doesn't shift on swap. */}
                 <div
                   className="path-tile-illo-wrap"
                   style={{
                     position: 'relative',
                     width: '100%',
                     aspectRatio: '800 / 687',
-                    borderRadius: 12,
-                    overflow: 'hidden',
                   }}
                 >
                   {!loaded && (
@@ -137,9 +129,9 @@ const Home = () => {
                       className="skeleton-shimmer"
                       style={{
                         position: 'absolute',
-                        inset: 0,
-                        background: 'rgba(245,240,230,0.18)',
-                        borderRadius: 12,
+                        inset: '8% 8%',
+                        background: 'rgba(12,42,46,0.06)',
+                        borderRadius: 24,
                       }}
                     />
                   )}
@@ -162,7 +154,7 @@ const Home = () => {
                   />
                 </div>
 
-                <div className="mono" style={{ opacity: 0.78, letterSpacing: 1.4, fontSize: 11 }}>
+                <div className="mono" style={{ color: path.accent, letterSpacing: 1.4, fontSize: 11 }}>
                   {path.n} / {path.title.toUpperCase()}
                 </div>
 
@@ -170,18 +162,30 @@ const Home = () => {
                   className="display"
                   style={{
                     margin: 0,
-                    fontSize: 'clamp(28px, 2.6vw, 36px)',
+                    fontSize: 'clamp(26px, 2.4vw, 32px)',
                     lineHeight: 1.02,
+                    color: 'var(--ink)',
                   }}
                 >
                   {path.title}
                 </h3>
 
-                <p style={{ margin: 0, opacity: 0.86, fontSize: 14, lineHeight: 1.5 }}>
+                <p style={{ margin: 0, color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.5 }}>
                   {path.sub}
                 </p>
 
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14 }} className="path-tile-cta">
+                <div
+                  style={{
+                    marginTop: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    color: path.accent,
+                  }}
+                  className="path-tile-cta"
+                >
                   <span>{path.cta}</span>
                   <Icon d={icons.arrow} size={16}/>
                 </div>
