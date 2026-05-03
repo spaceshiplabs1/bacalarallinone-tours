@@ -177,7 +177,11 @@ body::before {
    topmost wave's trough valleys — together this seals the cream
    gaps between the lagoon-pale crests. */
 .footer-wave--upper  { bottom: 70px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
-.footer-wave--lower  { bottom: 36px; z-index: 3; animation: waveDriftReverse 13s linear infinite; }
+/* Lower wave sinks all the way to the zone floor so its body sits
+   behind the bottom navy wave — no cream gap can peek through between
+   them. The curve still lands around its original CSS height because
+   the SVG itself is grown to compensate. */
+.footer-wave--lower  { bottom:  0px; height: 130px; z-index: 3; animation: waveDriftReverse 13s linear infinite; }
 .footer-wave--bottom { bottom:  0px; height: 100px; z-index: 4; animation: waveDrift 28s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
   .footer-wave { animation: none !important; }
