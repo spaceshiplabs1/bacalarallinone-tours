@@ -475,9 +475,11 @@ const Footer = () => {
           below; lighter blues stack above into the dark Why Us
           section creating the surface oleaje edge. */}
       <div className="footer-waves" aria-hidden="true">
-        <svg className="footer-wave footer-wave--top" viewBox="0 0 2880 80" preserveAspectRatio="none">
-          <path d={wavePath(36, 36)} fill="var(--lagoon-pale)"/>
-        </svg>
+        {/* The topmost pale layer is now provided by the zone's bg color
+            (var(--lagoon-pale)). Rendering an additional pale wave path
+            on top of a pale bg only created an anti-aliased seam along
+            its curve. Three explicit waves are enough — pale → lagoon
+            → lagoon-deep → navy-darkest. */}
         <svg className="footer-wave footer-wave--upper" viewBox="0 0 2880 80" preserveAspectRatio="none">
           <path d={wavePathTrough(38, 32)} fill="var(--lagoon)"/>
         </svg>

@@ -172,14 +172,10 @@ body::before {
   display: block;
   will-change: transform;
 }
-.footer-wave--top    { bottom: 70px;  z-index: 1; animation: waveDriftReverse 22s linear infinite; }
-/* Upper wave gets a taller SVG so its body fills more of the vertical
-   space, plus a phase-shifted path so its peaks line up with the
-   topmost wave's trough valleys — together this seals the cream
-   gaps between the lagoon-pale crests. */
-/* Upper wave also anchors at the floor so its body fills curve→0,
-   sealing the cream gap that opened up between upper's bottom (y=70)
-   and lower's curve when lower's trough x positions coincided. */
+/* Upper wave anchors at the floor with a tall SVG and phase-shifted
+   path so its peaks line up with the topmost layer's trough valleys.
+   The zone bg is lagoon-pale, providing the topmost layer color, so
+   no separate pale wave SVG is needed. */
 .footer-wave--upper  { bottom:  0px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
 /* Lower wave sinks all the way to the zone floor so its body sits
    behind the bottom navy wave — no cream gap can peek through between
