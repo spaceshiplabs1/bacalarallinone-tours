@@ -156,9 +156,13 @@ body::before {
      SVG only fills BELOW its curve, so above the topmost crest the
      bg shows. Setting bg = pale means that exposure blends invisibly
      into the top wave instead of revealing the cream Why Us section.
-     The zone top edge becomes a flat cream→pale "beachline" — the
-     transition between the beach above and the water mass below. */
-  height: 160px;
+     The zone top edge becomes a flat cream→pale "beachline".
+
+     Height is sized so the pale "sky" only peeks just above the
+     highest crest (upper wave peaks around CSS 120). At ~135 there
+     is a slim pale horizon strip without the big static-looking
+     pale slab that appears when the zone is too tall. */
+  height: 135px;
   overflow: hidden;
   background: var(--lagoon-pale);
   pointer-events: none;
