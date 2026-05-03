@@ -321,6 +321,95 @@ const WaveBlob = ({
 };
 window.WaveBlob = WaveBlob;
 
+// ───────────────────────────────────────────── wave debug overlay
+// Activate by adding `?debug=waves` to the URL. Lists every SVG +
+// element with "wave" or "blob" in its class. Each row has a
+// visibility toggle and a 🎯 button that scrolls the element into
+// view and flashes a red outline so you can spot it on the page.
+const WaveDebug = () => {
+  const isOn = typeof window !== 'undefined'
+    && /[\?&]debug=waves\b/.test(window.location.search);
+  const [items, setItems] = useState([]);
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!isOn) return;
+    const scan = () => {
+      const set = new Set();
+      const sels = [
+        '.footer-waves', '.footer-wave--top', '.footer-wave--upper',
+        '.footer-wave--lower', '.footer-wave--bottom',
+        '[class*="wave"]', '[class*="Wave"]',
+        '[class*="blob"]', '[class*="Blob"]',
+        'svg'
+      ];
+      sels.forEach(s => document.querySelectorAll(s).forEach(el => set.add(el)));
+      const arr = Array.from(set).map(el => {
+        const cls = typeof el.className === 'string'
+          ? el.className
+          : (el.className && el.className.baseVal) || '';
+        return { el, label: el.tagName.toLowerCase() + (cls ? '.' + cls.split(/\s+/).filter(Boolean).join('.') : '') };
+      });
+      setItems(arr);
+    };
+    scan();
+    const id = setInterval(scan, 1500);
+    return () => clearInterval(id);
+  }, [isOn]);
+
+  if (!isOn) return null;
+
+  const toggle = (item) => {
+    const el = item.el;
+    el.dataset.debugHidden = el.dataset.debugHidden === '1' ? '' : '1';
+    el.style.display = el.dataset.debugHidden === '1' ? 'none' : '';
+    setTick(t => t + 1);
+  };
+  const flash = (item) => {
+    const el = item.el;
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+    const prev = el.style.outline;
+    el.style.outline = '3px solid red';
+    el.style.outlineOffset = '2px';
+    setTimeout(() => { el.style.outline = prev; el.style.outlineOffset = ''; }, 1800);
+  };
+
+  return (
+    <div style={{
+      position:'fixed', top: 12, right: 12, zIndex: 99999,
+      width: 380, maxHeight: '85vh', overflow: 'auto',
+      background: 'rgba(255,255,255,0.97)', color: '#000',
+      padding: 12, borderRadius: 8, boxShadow: '0 6px 24px rgba(0,0,0,0.4)',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, lineHeight: 1.4
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 8 }}>
+        🔍 Wave debug · {items.length} elements
+      </div>
+      <div style={{ color:'#666', marginBottom: 8 }}>
+        ☐ hide · 🎯 flash + scroll
+      </div>
+      {items.map((item, i) => {
+        const hidden = item.el.dataset.debugHidden === '1';
+        return (
+          <div key={i} style={{ display:'flex', gap:6, alignItems:'center', marginBottom: 3 }}>
+            <input type="checkbox" checked={!hidden} onChange={() => toggle(item)} />
+            <button onClick={() => flash(item)}
+              style={{ fontSize: 10, padding:'2px 5px', cursor:'pointer', background:'#eee', border:'1px solid #ccc', borderRadius: 3 }}>
+              🎯
+            </button>
+            <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex: 1 }}
+              title={item.label}>
+              {item.label.length > 60 ? item.label.slice(0, 60) + '…' : item.label}
+            </span>
+          </div>
+        );
+      })}
+      {tick < 0 && null}
+    </div>
+  );
+};
+window.WaveDebug = WaveDebug;
+
 // ───────────────────────────────────────────── header
 const Header = ({ current }) => {
   const { t, lang, setLang, navigate, cartCount, openCart } = useT();
