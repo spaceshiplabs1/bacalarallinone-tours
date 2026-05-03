@@ -425,16 +425,13 @@ const Header = ({ current }) => {
   const link = (key, label, iconKey) => (
     <a onClick={(e) => { e.preventDefault(); navigate(key); }}
        href="#"
+       className={`nav-link${current === key ? ' is-current' : ''}`}
        style={{
-         color: current === key ? 'var(--ink)' : 'var(--ink-soft)',
          fontWeight: current === key ? 600 : 500,
-         fontSize: 14, textDecoration: 'none', padding: '8px 2px',
          borderBottom: current === key ? '2px solid var(--ink)' : '2px solid transparent',
-         cursor: 'pointer',
-         display: 'inline-flex', alignItems: 'center', gap: 7
        }}>
-       {iconKey && <Icon d={icons[iconKey]} size={15}/>}
-       {label}
+       {iconKey && <Icon d={icons[iconKey]} size={18}/>}
+       <span>{label}</span>
     </a>
   );
   return (

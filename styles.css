@@ -113,6 +113,36 @@ body::before {
   letter-spacing: 0.005em;
   line-height: 1;
 }
+
+/* Top-nav links — sized for legibility, with a soft hover that
+   lifts the icon and shifts the label color toward ink. The
+   underline stays reserved for the current page indicator. */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  text-decoration: none;
+  padding: 8px 4px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  transition: color 160ms ease, transform 160ms ease;
+}
+.nav-link.is-current { color: var(--ink); }
+.nav-link svg {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1), color 160ms ease;
+  color: var(--lagoon-deep);
+}
+.nav-link.is-current svg { color: var(--ink); }
+.nav-link:hover { color: var(--ink); }
+.nav-link:hover svg {
+  transform: translateY(-2px) rotate(-3deg);
+  color: var(--clay);
+}
+.nav-link:hover.is-current svg {
+  /* current page already has ink color; hover keeps it but still wiggles */
+  color: var(--ink);
+}
 /* Logo hover wiggle — short tropical micro-bounce, fires once on
    hover. Keeps the brand mark feeling alive without being noisy. */
 @keyframes logoWiggle {
