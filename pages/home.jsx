@@ -63,7 +63,7 @@ const Home = () => {
             </p>
             <div className="hero-item d3" style={{ display:'flex', gap: 12, marginTop: 32, flexWrap:'wrap' }}>
               <button className="btn btn-primary btn-lg" onClick={() => navigate('catalog')}>
-                {t.enterCatalog} <Icon d={icons.arrow} size={16}/>
+                <Icon d={icons.compass} size={16}/> {t.enterCatalog} <Icon d={icons.arrow} size={16}/>
               </button>
               <button className="btn btn-outline btn-lg" onClick={() => navigate('port')}>
                 <Icon d={icons.ship} size={16}/> {t.enterPortFlow}
@@ -321,7 +321,7 @@ const Home = () => {
         <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 6 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>{t.viewAll} <Icon d={icons.arrow} size={14}/></button>
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}><Icon d={icons.compass} size={14}/> {t.viewAll} <Icon d={icons.arrow} size={14}/></button>
         </div>
         <div className="script" style={{ fontSize: 26, color: 'var(--lagoon-deep)', marginBottom: 24 }}>
           {t.featuredScript}
@@ -355,7 +355,7 @@ const Home = () => {
                 : 'Siete destinos, dos aeropuertos, un puerto de cruceros. Toca un pin para ver qué hay ahí.'}
             </p>
             <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => navigate('map')}>
-              {t.navMap} <Icon d={icons.arrow} size={14}/>
+              <Icon d={icons.pin} size={14}/> {t.navMap} <Icon d={icons.arrow} size={14}/>
             </button>
           </div>
           <MiniMap onPinClick={(pin) => navigate('map', { focus: pin.id })}/>

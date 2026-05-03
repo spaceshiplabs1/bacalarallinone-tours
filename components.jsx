@@ -422,7 +422,7 @@ const Header = ({ current }) => {
 
   const go = (key) => { setOpen(false); navigate(key); };
 
-  const link = (key, label) => (
+  const link = (key, label, iconKey) => (
     <a onClick={(e) => { e.preventDefault(); navigate(key); }}
        href="#"
        style={{
@@ -430,8 +430,12 @@ const Header = ({ current }) => {
          fontWeight: current === key ? 600 : 500,
          fontSize: 14, textDecoration: 'none', padding: '8px 2px',
          borderBottom: current === key ? '2px solid var(--ink)' : '2px solid transparent',
-         cursor: 'pointer'
-       }}>{label}</a>
+         cursor: 'pointer',
+         display: 'inline-flex', alignItems: 'center', gap: 7
+       }}>
+       {iconKey && <Icon d={icons[iconKey]} size={15}/>}
+       {label}
+    </a>
   );
   return (
     <header style={{
@@ -445,10 +449,10 @@ const Header = ({ current }) => {
           <Logo />
         </a>
         <nav className="header-nav-desktop" style={{ display:'flex', gap: 28, alignItems:'center' }}>
-          {link('catalog', t.navTours)}
-          {link('map', t.navMap)}
-          {link('port', t.navPort)}
-          {link('transfers', t.navTransfers)}
+          {link('catalog',   t.navTours,     'compass')}
+          {link('map',       t.navMap,       'pin')}
+          {link('port',      t.navPort,      'ship')}
+          {link('transfers', t.navTransfers, 'bus')}
         </nav>
         <div className="header-actions-desktop" style={{ display:'flex', gap: 10, alignItems:'center' }}>
           <button className="btn btn-ghost btn-sm" onClick={() => setLang(lang === 'en' ? 'es' : 'en')} title={t.language}>
@@ -502,11 +506,11 @@ const Header = ({ current }) => {
           }}>
           <div className="container" style={{ paddingTop: 24, paddingBottom: 40, display:'flex', flexDirection:'column', gap: 4 }} onClick={(e)=>e.stopPropagation()}>
             {[
-              ['catalog',   t.navTours],
-              ['map',       t.navMap],
-              ['port',      t.navPort],
-              ['transfers', t.navTransfers]
-            ].map(([k, label]) => (
+              ['catalog',   t.navTours,     'compass'],
+              ['map',       t.navMap,       'pin'],
+              ['port',      t.navPort,      'ship'],
+              ['transfers', t.navTransfers, 'bus']
+            ].map(([k, label, iconKey]) => (
               <button key={k}
                 onClick={() => go(k)}
                 style={{
@@ -517,7 +521,11 @@ const Header = ({ current }) => {
                   fontFamily:'Bricolage Grotesque, sans-serif',
                   cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center'
                 }}>
-                {label} <Icon d={icons.arrow} size={16}/>
+                <span style={{ display:'inline-flex', alignItems:'center', gap: 12 }}>
+                  <Icon d={icons[iconKey]} size={20}/>
+                  {label}
+                </span>
+                <Icon d={icons.arrow} size={16}/>
               </button>
             ))}
             <button className="btn btn-primary btn-lg" style={{ width:'100%', marginTop: 24 }} onClick={() => go('catalog')}>
