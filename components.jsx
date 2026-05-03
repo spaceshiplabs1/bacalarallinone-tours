@@ -1,6 +1,21 @@
 // Shared UI components — header, footer, tour cards, icons, map
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
+// Render a string with " · " segment separators wrapped in a span
+// so they can take a contrasting color. Many of our tour titles
+// follow a "category · detail" shape (e.g. "Cenotes · Azul, Negro
+// & Cocalitos") — coloring just the dot adds rhythm without
+// fragmenting the typography.
+const accentDots = (text, color) => {
+  const parts = text.split(' · ');
+  return parts.map((part, i) => (
+    <React.Fragment key={i}>
+      {part}
+      {i < parts.length - 1 && <span style={{ color }}> · </span>}
+    </React.Fragment>
+  ));
+};
+
 // ───────────────────────────────────────────── icons
 const Icon = ({ d, size = 18, stroke = 1.7 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
@@ -737,11 +752,14 @@ const TourCard = ({ tour, onClick, compact = false }) => {
           </div>
         </div>
 
-        {/* Bottom overlay: title only, oversized — owns the lower half of
-            the tile. text-wrap: pretty avoids orphan last lines so the
-            base ends with a fuller line of words rather than a single
-            stranded word. lang-aware hyphens keep long compound names
-            from overflowing on narrower cards. */}
+        {/* Bottom overlay: oversized title + a one-line tagline subtitle
+            below it. Tagline is sourced from the existing tour.tagline
+            field (already in EN/ES) — fills the visual space when titles
+            are short and gives the card a stronger pitch at a glance.
+            The middle-dot " · " separators in the title are colored sun
+            so multi-segment titles read with a rhythm instead of a flat
+            monochrome run. text-wrap + lang-aware hyphens keep long
+            compound names from overflowing on narrower cards. */}
         <div
           style={{
             position: 'absolute',
@@ -758,24 +776,32 @@ const TourCard = ({ tour, onClick, compact = false }) => {
               fontSize: 'clamp(36px, 3.6vw, 52px)',
               lineHeight: 0.98,
               textShadow: '0 2px 14px rgba(0,0,0,0.45)',
-              // hyphens:auto needs the lang attribute (set above) and the
-              // browser's hyphenation dictionary for that language.
-              // hyphenateLimitChars (min-word, before-hyphen, after-hyphen)
-              // overrides the conservative defaults so even 5-letter words
-              // can be cut, not just the long ones.
               hyphens: 'auto',
               WebkitHyphens: 'auto',
               MsHyphens: 'auto',
               hyphenateLimitChars: '5 2 2',
               WebkitHyphenateLimitChars: '5 2 2',
-              // overflow-wrap is the last-resort fallback. Removed the older
-              // word-break:break-word — that one cut words mid-letter with
-              // NO hyphen, which often beat hyphens:auto to the punch.
               overflowWrap: 'break-word',
             }}
           >
-            {tour.title[lang]}
+            {accentDots(tour.title[lang], 'var(--sun)')}
           </h3>
+          {tour.tagline && tour.tagline[lang] && (
+            <p
+              style={{
+                margin: '12px 0 0',
+                fontSize: 14,
+                lineHeight: 1.35,
+                color: 'rgba(245,240,230,0.86)',
+                textShadow: '0 1px 8px rgba(0,0,0,0.45)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {tour.tagline[lang]}
+            </p>
+          )}
         </div>
 
         {/* Pinned Book Now strip at the very bottom of the card. */}
