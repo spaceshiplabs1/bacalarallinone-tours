@@ -152,14 +152,15 @@ body::before {
 .footer-waves {
   position: relative;
   width: 100%;
-  /* Compact wave band. The bg matches the cream Why Us section above
-     (var(--bone)) so the cream surface flows into the wave zone and
-     the lagoon waves emerge from the beach. The bottom-most wave
-     (lagoon-darkest) fills the zone's lower band and merges into
-     the footer body navy seamlessly. */
+  /* Zone bg matches the topmost wave color (lagoon-pale). Each wave
+     SVG only fills BELOW its curve, so above the topmost crest the
+     bg shows. Setting bg = pale means that exposure blends invisibly
+     into the top wave instead of revealing the cream Why Us section.
+     The zone top edge becomes a flat cream→pale "beachline" — the
+     transition between the beach above and the water mass below. */
   height: 160px;
   overflow: hidden;
-  background: var(--bone);
+  background: var(--lagoon-pale);
   pointer-events: none;
   margin-bottom: -1px; /* hide subpixel seam against footer body */
 }
