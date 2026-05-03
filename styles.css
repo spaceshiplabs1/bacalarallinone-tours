@@ -176,7 +176,10 @@ body::before {
    space, plus a phase-shifted path so its peaks line up with the
    topmost wave's trough valleys — together this seals the cream
    gaps between the lagoon-pale crests. */
-.footer-wave--upper  { bottom: 70px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
+/* Upper wave also anchors at the floor so its body fills curve→0,
+   sealing the cream gap that opened up between upper's bottom (y=70)
+   and lower's curve when lower's trough x positions coincided. */
+.footer-wave--upper  { bottom:  0px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
 /* Lower wave sinks all the way to the zone floor so its body sits
    behind the bottom navy wave — no cream gap can peek through between
    them. The curve still lands around its original CSS height because
