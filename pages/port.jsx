@@ -81,7 +81,74 @@ const PortFlow = ({ navigate }) => {
         </div>
       </section>
 
-      <div className="container port-stepper-wrap" style={{ marginTop: -40, position:'relative', paddingBottom: 60 }}>
+      {/* Cruise lines we serve. The 4 mass-market lines drive ~80–90%
+          of Mahahual port volume; premium and luxury follow with
+          fewer ships but higher per-pax spend. Showing the
+          full lineup positions us as the independent alternative
+          to ship excursions across every tier of cruise passenger. */}
+      <section style={{ background: 'var(--bone)', padding: '56px 0 32px' }}>
+        <div className="container">
+          <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 8 }}>
+            <div className="mono" style={{ color: 'var(--lagoon-deep)', fontSize: 12, letterSpacing: 1.6 }}>
+              {lang === 'en' ? 'WE PICK UP FROM EVERY SHIP CALLING MAHAHUAL' : 'RECOGEMOS DE CADA BARCO QUE LLEGA A MAHAHUAL'}
+            </div>
+          </div>
+          <h2 className="display" style={{ fontSize: 'clamp(28px, 3.4vw, 42px)', margin: 0, lineHeight: 1.05, maxWidth: 880 }}>
+            {lang === 'en'
+              ? <>The independent alternative to <span style={{color:'var(--clay)'}}>ship excursions</span> — smaller, sharper, more authentic.</>
+              : <>La alternativa independiente a las <span style={{color:'var(--clay)'}}>excursiones del barco</span> — más íntima, más auténtica.</>}
+          </h2>
+          <p style={{ color:'var(--ink-soft)', fontSize: 15, marginTop: 14, maxWidth: 720, lineHeight: 1.55 }}>
+            {lang === 'en'
+              ? 'Mahahual sees 1.2M cruise passengers a year across these lines. Our guides know each ship\'s schedule by heart and run tours that finish early — so you\'re back on board with margin to spare.'
+              : 'Mahahual recibe 1.2M de cruceristas al año en estas líneas. Nuestros guías conocen el horario de cada barco al dedillo y los tours terminan con margen — vuelves a bordo sin prisas.'}
+          </p>
+
+          <div className="rg-cruise-logos" style={{
+            display:'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: 12,
+            marginTop: 28
+          }}>
+            {window.CRUISE_LINES.map(line => (
+              <div key={line.logo}
+                title={line.name}
+                style={{
+                  background: '#fff',
+                  border: '1px solid var(--line)',
+                  borderRadius: 12,
+                  padding: 16,
+                  aspectRatio: '1 / 1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative'
+                }}>
+                <img
+                  src={`./images/cruise-logos/${line.logo}.png`}
+                  alt={line.name}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+                {line.tier !== 'mass' && (
+                  <span className="mono" style={{
+                    position:'absolute', top: 8, right: 8,
+                    fontSize: 9, letterSpacing: 1.2,
+                    color: line.tier === 'luxury' ? 'var(--clay)' : 'var(--lagoon-deep)',
+                    background: 'var(--bone-2)',
+                    padding: '2px 6px', borderRadius: 4
+                  }}>
+                    {line.tier === 'luxury'
+                      ? (lang === 'en' ? 'BOUTIQUE' : 'BOUTIQUE')
+                      : (lang === 'en' ? 'PREMIUM' : 'PREMIUM')}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="container port-stepper-wrap" style={{ marginTop: 16, position:'relative', paddingBottom: 60 }}>
         {/* Stepper card */}
         <div className="card" style={{ padding: 28, boxShadow: 'var(--shadow)' }}>
           <div style={{ display:'flex', gap: 6, marginBottom: 28 }}>
@@ -108,11 +175,25 @@ const PortFlow = ({ navigate }) => {
                     background: ship?.name === s.name ? 'var(--bone-2)' : 'transparent',
                     cursor:'pointer'
                   }}>
-                    <div style={{ display:'flex', alignItems:'center', gap: 8 }}>
-                      <Icon d={icons.ship} size={18}/>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{s.name}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap: 10 }}>
+                      {s.logo ? (
+                        <div style={{
+                          width: 40, height: 40, flexShrink: 0,
+                          background: '#fff',
+                          border: '1px solid var(--line)',
+                          borderRadius: 8,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 4
+                        }}>
+                          <img src={`./images/cruise-logos/${s.logo}.png`} alt={s.line}
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}/>
+                        </div>
+                      ) : (
+                        <Icon d={icons.ship} size={18}/>
+                      )}
+                      <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.25 }}>{s.name}</div>
                     </div>
-                    <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 8 }}>
+                    <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 10 }}>
                       IN {s.arrive} · OUT {s.depart}
                     </div>
                   </button>

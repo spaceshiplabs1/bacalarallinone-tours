@@ -778,6 +778,9 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
   /* Port flow step-3 tour grid → single col */
   .rg-port-tours { grid-template-columns: 1fr !important; }
 
+  /* Cruise lines logo grid: 5-col desktop → 3-col tablet */
+  .rg-cruise-logos { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+
   /* Transfers search form → stack */
   .rg-transfers-form { grid-template-columns: 1fr !important; }
 
@@ -802,6 +805,7 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 
   .rg-cards, .rg-3, .rg-form { grid-template-columns: 1fr !important; }
   .rg-4 { grid-template-columns: 1fr 1fr !important; }
+  .rg-cruise-logos { grid-template-columns: repeat(2, 1fr) !important; }
 
   /* Catalog filter bar scrolls horizontally on narrow */
   .rg-filter-bar { overflow-x: auto; flex-wrap: nowrap !important; scrollbar-width: none; padding-bottom: 4px; }

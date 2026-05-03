@@ -246,11 +246,35 @@ window.I18N = {
   }
 };
 
+// Cruise ship data — `logo` is the filename slug under
+// images/cruise-logos/<slug>.png. `tier` is one of
+// "mass" | "premium" | "luxury", matching our 3-tier
+// segmentation of cruise lines calling at Mahahual.
 window.CRUISE_SHIPS = [
-  { name: "Carnival Horizon", arrive: "07:00", depart: "16:00", line: "Carnival" },
-  { name: "MSC Seashore", arrive: "08:00", depart: "17:30", line: "MSC" },
-  { name: "Norwegian Joy", arrive: "07:30", depart: "16:30", line: "NCL" },
-  { name: "Royal Caribbean · Allure", arrive: "08:00", depart: "17:00", line: "RCL" },
-  { name: "Celebrity Reflection", arrive: "08:30", depart: "18:00", line: "Celebrity" },
-  { name: "Disney Fantasy", arrive: "07:00", depart: "15:30", line: "Disney" }
+  { name: "Royal Caribbean · Icon of the Seas", arrive: "07:00", depart: "16:00", line: "Royal Caribbean", logo: "royal-caribbean", tier: "mass" },
+  { name: "Carnival Jubilee",                   arrive: "08:00", depart: "16:30", line: "Carnival",        logo: "carnival",         tier: "mass" },
+  { name: "MSC Seascape",                       arrive: "08:00", depart: "17:30", line: "MSC",             logo: "msc",              tier: "mass" },
+  { name: "Norwegian Viva",                     arrive: "07:30", depart: "16:30", line: "Norwegian",       logo: "norwegian",        tier: "mass" },
+  { name: "Celebrity Reflection",               arrive: "08:30", depart: "18:00", line: "Celebrity",       logo: "celebrity",        tier: "premium" },
+  { name: "Princess · Caribbean Princess",      arrive: "07:00", depart: "16:00", line: "Princess",        logo: "princess",         tier: "premium" }
+];
+
+// All cruise lines that regularly call Mahahual / Costa Maya, in
+// frequency order. Used by the port page's "Lines we serve" band
+// to communicate scale + reassure cruise passengers we know their
+// schedule. Tier informs tour-mix recommendations downstream.
+window.CRUISE_LINES = [
+  // Big 4 — mass market, 80–90% of port volume
+  { name: "Royal Caribbean", logo: "royal-caribbean", tier: "mass" },
+  { name: "Carnival",        logo: "carnival",        tier: "mass" },
+  { name: "MSC Cruises",     logo: "msc",             tier: "mass" },
+  { name: "Norwegian",       logo: "norwegian",       tier: "mass" },
+  // Premium — lower volume, higher per-pax spend
+  { name: "Celebrity",       logo: "celebrity",       tier: "premium" },
+  { name: "Princess",        logo: "princess",        tier: "premium" },
+  // Luxury / niche — boutique, high margin
+  { name: "Oceania",         logo: "oceania",         tier: "luxury" },
+  { name: "Holland America", logo: "holland-america", tier: "luxury" },
+  { name: "Virgin Voyages",  logo: "virgin-voyages",  tier: "luxury" },
+  { name: "Cunard",          logo: "cunard",          tier: "luxury" }
 ];
