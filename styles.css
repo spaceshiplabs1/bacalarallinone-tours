@@ -128,6 +128,9 @@ body::before {
   transform-origin: 50% 70%;
 }
 .logo-img:hover { animation: logoWiggle 620ms ease; }
+/* White silhouette variant — for use on dark backgrounds (footer)
+   where the multicolor wordmark would lose contrast. */
+.logo-img--light { filter: brightness(0) invert(1); }
 @media (prefers-reduced-motion: reduce) {
   .logo-img:hover { animation: none; }
 }
@@ -149,7 +152,11 @@ body::before {
 .footer-waves {
   position: relative;
   width: 100%;
-  height: 156px;
+  /* 138 = 156 - 18 (the gap between SVG top and the quadratic-bezier
+     peak of the topmost wave). Trims the navy strip that was sticking
+     out above the topmost crests, so the surface oleaje touches the
+     dark Why Us section directly. */
+  height: 138px;
   overflow: hidden;
   background: var(--lagoon-darkest);
   pointer-events: none;
@@ -288,6 +295,18 @@ body::before {
 .input:focus, .select:focus { border-color: var(--lagoon-deep); }
 label.field { display: block; }
 label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px; }
+/* Bolder, brand-tinted form labels with inline icons. Used in the
+   transfers form to set a clearer visual hierarchy than the muted
+   ink-soft default mono labels. */
+.field-label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  color: var(--lagoon-deep);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
 
 /* Scrollbar soft */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

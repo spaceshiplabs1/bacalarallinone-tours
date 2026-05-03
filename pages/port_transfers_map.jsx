@@ -277,6 +277,8 @@ const Transfers = () => {
               <EndpointPicker
                 which="origin"
                 label={lang === 'en' ? 'PICKUP' : 'PICKUP'}
+                icon={icons.pin}
+                tone="var(--lagoon-deep)"
                 endpoint={origin}
                 setText={(text) => {
                   if (!tryParseLatLng('origin', text)) setEndpointFromText('origin', text);
@@ -287,6 +289,8 @@ const Transfers = () => {
               <EndpointPicker
                 which="destination"
                 label={lang === 'en' ? 'DROP-OFF' : 'DESTINO'}
+                icon={icons.pin}
+                tone="var(--clay)"
                 endpoint={destination}
                 setText={(text) => {
                   if (!tryParseLatLng('destination', text)) setEndpointFromText('destination', text);
@@ -296,22 +300,32 @@ const Transfers = () => {
               />
             </div>
 
-            {/* Pax + luggage + date + time row */}
+            {/* Pax + luggage + date + time row — each label gets a small
+                lagoon-tinted icon + bolder weight to set a clear hierarchy
+                against the form's body text. */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }} className="rg-transfers-form">
               <label className="field">
-                <span className="mono">PAX</span>
+                <span className="mono field-label">
+                  <Icon d={icons.users} size={13}/> PAX
+                </span>
                 <Stepper value={pax} setValue={setPax} min={1} max={30} />
               </label>
               <label className="field">
-                <span className="mono">{lang === 'en' ? 'LUGGAGE' : 'EQUIPAJE'}</span>
+                <span className="mono field-label">
+                  <Icon d={icons.bag} size={13}/> {lang === 'en' ? 'LUGGAGE' : 'EQUIPAJE'}
+                </span>
                 <Stepper value={luggage} setValue={setLuggage} min={0} max={30} />
               </label>
               <label className="field">
-                <span className="mono">{t.date || (lang === 'en' ? 'DATE' : 'FECHA')}</span>
+                <span className="mono field-label">
+                  <Icon d={icons.calendar} size={13}/> {t.date || (lang === 'en' ? 'DATE' : 'FECHA')}
+                </span>
                 <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </label>
               <label className="field">
-                <span className="mono">{t.time || (lang === 'en' ? 'TIME' : 'HORA')}</span>
+                <span className="mono field-label">
+                  <Icon d={icons.clock} size={13}/> {t.time || (lang === 'en' ? 'TIME' : 'HORA')}
+                </span>
                 <input className="input" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
               </label>
             </div>
@@ -582,11 +596,20 @@ const Transfers = () => {
 // component that calls the geocoder and writes lat/lng directly. Until
 // then the chips populate lat/lng and the input is freeform / accepts
 // "lat,lng" as a debug bridge.
-const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang }) => {
+const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon, tone }) => {
+  // tone defaults to lagoon-deep so origin and destination can pass
+  // distinct accent colors (cool teal vs warm clay) and the icon +
+  // label feel visually paired.
+  const accent = tone || 'var(--lagoon-deep)';
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span className="mono" style={{ color: 'var(--ink-soft)' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span
+          className="mono field-label"
+          style={{ color: accent }}
+        >
+          {icon && <Icon d={icon} size={13}/>} {label}
+        </span>
         {endpoint.lat != null && endpoint.lng != null && (
           <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10 }}>
             {endpoint.lat.toFixed(4)}, {endpoint.lng.toFixed(4)}

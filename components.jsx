@@ -58,11 +58,11 @@ window.useT = () => React.useContext(window.AppCtx);
 // Brand wordmark image — script "bacalarallinone.tours" with wave
 // underline. Background chroma-keyed to transparent so it sits on
 // any color cleanly.
-const Logo = ({ size = 1 }) => (
+const Logo = ({ size = 1, tone }) => (
   <img
     src="./images/logo-long.webp"
     alt="bacalarallinone.tours"
-    className="logo-img"
+    className={`logo-img${tone === 'light' ? ' logo-img--light' : ''}`}
     style={{
       height: 44 * size,
       width: 'auto',
@@ -483,7 +483,7 @@ const Footer = () => {
       <div style={{ padding: '40px 0 48px' }}>
       <div className="container rg-footer" style={{ display:'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 40 }}>
         <div>
-          <Logo />
+          <Logo tone="light" />
           <p style={{ color: softText, marginTop: 16, fontSize: 14, maxWidth: 320 }}>{t.footerTag}</p>
           <p className="mono" style={{ color: dimText, marginTop: 20 }}>Av. 5 s/n · Bacalar, Q.Roo</p>
         </div>
