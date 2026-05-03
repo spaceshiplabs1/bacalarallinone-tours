@@ -152,19 +152,15 @@ body::before {
 .footer-waves {
   position: relative;
   width: 100%;
-  /* Zone bg matches the topmost wave color (lagoon-pale). Each wave
-     SVG only fills BELOW its curve, so above the topmost crest the
-     bg shows. Setting bg = pale means that exposure blends invisibly
-     into the top wave instead of revealing the cream Why Us section.
-     The zone top edge becomes a flat cream→pale "beachline".
-
-     Height is sized so the pale "sky" only peeks just above the
-     highest crest (upper wave peaks around CSS 120). At ~135 there
-     is a slim pale horizon strip without the big static-looking
-     pale slab that appears when the zone is too tall. */
+  /* Bg is transparent so the parent footer's navy bleeds through
+     wherever no wave paints. Everything above the highest wave
+     crest reads as navy continuous with the footer body, rather
+     than as a flat pale slab that looked like a static / malformed
+     SVG artifact. Cream Why Us section transitions to navy at
+     the zone top edge — the wave crests soften that boundary. */
   height: 135px;
   overflow: hidden;
-  background: var(--lagoon-pale);
+  background: transparent;
   pointer-events: none;
   margin-bottom: -1px; /* hide subpixel seam against footer body */
 }
