@@ -119,7 +119,7 @@ const Catalog = ({ initialFilter }) => {
           <div className="mono" style={{ color: 'var(--sun)', marginBottom: 14 }}>
             02 / CATALOG · {filtered.length} {lang==='en'?'experiences':'experiencias'}
           </div>
-          <h1 className="display" style={{ fontSize: 'clamp(38px, 5vw, 64px)', margin: 0, lineHeight: 1, maxWidth: 800, textShadow: '0 2px 16px rgba(0,0,0,0.45)' }}>
+          <h1 className="display" style={{ fontSize: 'clamp(40px, 5vw, 72px)', margin: 0, lineHeight: 0.95, maxWidth: 900, textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
             {lang==='en' ? <>Tours <span style={{ color: 'var(--sun)' }}>& adventures.</span></> : <>Tours <span style={{ color: 'var(--sun)' }}>y aventuras.</span></>}
           </h1>
           <p style={{ fontSize: 16, opacity: 0.92, marginTop: 14, maxWidth: 620, textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
