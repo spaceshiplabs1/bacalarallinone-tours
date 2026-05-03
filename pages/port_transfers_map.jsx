@@ -68,14 +68,13 @@ const Transfers = () => {
     return 'point_to_point';
   })();
 
-  const setEndpointFromAnchor = (which, anchor) => {
+  // Set lat/lng on an existing endpoint without touching the address —
+  // used by Places Autocomplete after setText has already written the
+  // formatted address. Setting anchorId to null because the place came
+  // from Google, not one of our hard-coded TRANSFER_ANCHORS chips.
+  const setEndpointCoords = (which, coords) => {
     const setter = which === 'origin' ? setOrigin : setDestination;
-    setter({
-      address: anchor.label[lang] || anchor.label.en,
-      lat: anchor.lat,
-      lng: anchor.lng,
-      anchorId: anchor.id,
-    });
+    setter((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng, anchorId: null }));
   };
 
   const setEndpointFromText = (which, text) => {
@@ -283,7 +282,7 @@ const Transfers = () => {
                 setText={(text) => {
                   if (!tryParseLatLng('origin', text)) setEndpointFromText('origin', text);
                 }}
-                setAnchor={(anchor) => setEndpointFromAnchor('origin', anchor)}
+                setAnchor={(coords) => setEndpointCoords('origin', coords)}
                 lang={lang}
               />
               <EndpointPicker
@@ -295,7 +294,7 @@ const Transfers = () => {
                 setText={(text) => {
                   if (!tryParseLatLng('destination', text)) setEndpointFromText('destination', text);
                 }}
-                setAnchor={(anchor) => setEndpointFromAnchor('destination', anchor)}
+                setAnchor={(coords) => setEndpointCoords('destination', coords)}
                 lang={lang}
               />
             </div>
