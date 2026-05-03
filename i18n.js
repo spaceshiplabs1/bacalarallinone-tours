@@ -120,7 +120,13 @@ window.I18N = {
     continueShopping: "Keep browsing",
     bookNowAlt: "Book just this",
     multipleTours: "Multiple tours",
-    bookingSummary: "Order summary"
+    bookingSummary: "Order summary",
+    // Brush-script subtitles echoing the hero's "seven colors, no rush"
+    // — one per major home section, in the same brand voice.
+    pathScript: "where do we start?",
+    featuredScript: "the crowd-pleasers",
+    regionScript: "every shade of blue",
+    whyScript: "small team, big lagoon"
   },
   es: {
     brand: "bacalartodoenuno",
@@ -242,7 +248,13 @@ window.I18N = {
     continueShopping: "Seguir viendo",
     bookNowAlt: "Reservar solo este",
     multipleTours: "Varios tours",
-    bookingSummary: "Resumen del pedido"
+    bookingSummary: "Resumen del pedido",
+    // Subtítulos en script tipo brocha — eco del "siete colores, sin
+    // prisa" del hero, mismo tono de marca.
+    pathScript: "¿por dónde empezamos?",
+    featuredScript: "los favoritos",
+    regionScript: "cada tono de azul",
+    whyScript: "equipo pequeño, laguna grande"
   }
 };
 

@@ -122,9 +122,12 @@ const Home = () => {
           glyph + brand-color background gives them a distinct visual
           rhythm of their own. */}
       <section ref={pathSectionRef} className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
-        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
+        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 6 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.pickPath}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
+        </div>
+        <div className="script" style={{ fontSize: 26, color: 'var(--lagoon-deep)', marginBottom: 24 }}>
+          {t.pathScript}
         </div>
 
         <div className="rg-3" style={{ display:'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36 }}>
@@ -315,10 +318,13 @@ const Home = () => {
 
       {/* FEATURED TOURS */}
       <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
-        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 28 }}>
+        <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 6 }}>
           <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.featuredTitle}</h2>
           <div style={{ flex: 1, height: 1, background:'var(--line)' }}/>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>{t.viewAll} <Icon d={icons.arrow} size={14}/></button>
+        </div>
+        <div className="script" style={{ fontSize: 26, color: 'var(--lagoon-deep)', marginBottom: 24 }}>
+          {t.featuredScript}
         </div>
         <div className="rg-3" style={{ display:'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
           {featured.map(tour => (
@@ -340,7 +346,10 @@ const Home = () => {
             <h2 className="display" style={{ fontSize: 'clamp(44px, 5.4vw, 72px)', margin: 0, lineHeight: 0.95 }}>
               {lang === 'en' ? <>From Cancún to Chetumal — we <span style={{color:'var(--clay)'}}>cover it.</span></> : <>De Cancún a Chetumal — lo <span style={{color:'var(--clay)'}}>cubrimos.</span></>}
             </h2>
-            <p style={{ color:'var(--ink-soft)', fontSize: 17, marginTop: 24, lineHeight: 1.55 }}>
+            <div className="script" style={{ fontSize: 30, color: 'var(--lagoon-deep)', marginTop: 14 }}>
+              {t.regionScript}
+            </div>
+            <p style={{ color:'var(--ink-soft)', fontSize: 17, marginTop: 18, lineHeight: 1.55 }}>
               {lang === 'en'
                 ? 'Seven destinations, two airports, one cruise port. Tap a pin to see what\'s there.'
                 : 'Siete destinos, dos aeropuertos, un puerto de cruceros. Toca un pin para ver qué hay ahí.'}
@@ -357,9 +366,12 @@ const Home = () => {
           no longer collides with the navy footer below. */}
       <section style={{ background: 'var(--bone)', color: 'var(--ink)', padding: '80px 0', marginTop: 40 }}>
         <div className="container">
-          <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 40 }}>
+          <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 6 }}>
             <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
             <div style={{ flex: 1, height: 1, background: 'var(--line)' }}/>
+          </div>
+          <div className="script" style={{ fontSize: 26, color: 'var(--lagoon-deep)', marginBottom: 36 }}>
+            {t.whyScript}
           </div>
           <div className="rg-4" style={{ display:'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
             {[
