@@ -557,18 +557,17 @@ const Footer = () => {
   const dimText = 'rgba(245, 240, 230, 0.55)';
   const softLine = 'rgba(245, 240, 230, 0.16)';
   return (
-    <footer style={{ marginTop: 0, padding: 0, background: 'var(--lagoon-darkest)', color: 'var(--bone)' }}>
-      {/* Animated lagoon waves — 4 layered SVGs drift at different
-          speeds. The front-most wave matches the footer body color
-          (lagoon-darkest) so it blends invisibly into the water mass
-          below; lighter blues stack above into the dark Why Us
-          section creating the surface oleaje edge. */}
+    {/* Outer footer is transparent so the page bg (cream) continues
+        through the wave zone — the cream Why Us section flows into
+        the wave area and the waves carve a wavy boundary into it.
+        The navy lives only on the inner content div below the
+        waves, so it starts exactly where the bottom-most wave
+        "lands". */}
+    <footer style={{ marginTop: 0, padding: 0, background: 'transparent', color: 'var(--bone)' }}>
       <div className="footer-waves" aria-hidden="true">
-        {/* The topmost pale layer is now provided by the zone's bg color
-            (var(--lagoon-pale)). Rendering an additional pale wave path
-            on top of a pale bg only created an anti-aliased seam along
-            its curve. Three explicit waves are enough — pale → lagoon
-            → lagoon-deep → navy-darkest. */}
+        {/* Three waves — lagoon → lagoon-deep → navy-darkest. The
+            zone bg is transparent so cream shows above the crests
+            and carves into the cream from below via the wave shapes. */}
         <svg className="footer-wave footer-wave--upper" viewBox="0 0 2880 80" preserveAspectRatio="none">
           <path d={wavePathTrough(38, 32)} fill="var(--lagoon)"/>
         </svg>
@@ -579,7 +578,7 @@ const Footer = () => {
           <path d={wavePath(48, 24)} fill="var(--lagoon-darkest)"/>
         </svg>
       </div>
-      <div style={{ padding: '40px 0 48px' }}>
+      <div style={{ padding: '40px 0 48px', background: 'var(--lagoon-darkest)', marginTop: '-1px' }}>
       <div className="container rg-footer" style={{ display:'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 40 }}>
         <div>
           <Logo tone="light" />
