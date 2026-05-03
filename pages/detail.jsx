@@ -183,7 +183,13 @@ const TourDetail = ({ tourId, prefill }) => {
             <h1 className="display" style={{ fontSize: 56, margin: 0, lineHeight: 0.95, letterSpacing: '-0.03em' }}>
               {tour.title[lang]}
             </h1>
-            <p style={{ fontSize: 20, color: 'var(--ink-soft)', marginTop: 16 }}>{tour.tagline[lang]}</p>
+            {/* Brush-script tagline — same treatment as the home-page
+                section subtitles ("seven colors, no rush"). Keeps the
+                tour-detail hero tied to the brand voice instead of a
+                generic ink-soft paragraph. */}
+            <div className="script" style={{ fontSize: 30, color: 'var(--lagoon-deep)', marginTop: 14, lineHeight: 1.1 }}>
+              {tour.tagline[lang]}
+            </div>
 
             <div style={{ display:'flex', gap: 24, marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--line)', flexWrap:'wrap' }}>
               <div>
