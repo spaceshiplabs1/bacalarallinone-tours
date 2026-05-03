@@ -556,13 +556,12 @@ const Footer = () => {
   const softText = 'rgba(245, 240, 230, 0.7)';
   const dimText = 'rgba(245, 240, 230, 0.55)';
   const softLine = 'rgba(245, 240, 230, 0.16)';
+  // Outer footer is transparent so the page bg (cream) continues
+  // through the wave zone — the cream Why Us section flows into
+  // the wave area and the waves carve a wavy boundary into it.
+  // The navy lives only on the inner content div below the
+  // waves, so it starts exactly where the bottom-most wave lands.
   return (
-    {/* Outer footer is transparent so the page bg (cream) continues
-        through the wave zone — the cream Why Us section flows into
-        the wave area and the waves carve a wavy boundary into it.
-        The navy lives only on the inner content div below the
-        waves, so it starts exactly where the bottom-most wave
-        "lands". */}
     <footer style={{ marginTop: 0, padding: 0, background: 'transparent', color: 'var(--bone)' }}>
       <div className="footer-waves" aria-hidden="true">
         {/* Three waves — lagoon → lagoon-deep → navy-darkest. The
