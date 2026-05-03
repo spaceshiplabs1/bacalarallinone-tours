@@ -172,7 +172,7 @@ body::before {
   display: block;
   will-change: transform;
 }
-.footer-wave--top    { bottom: 100px; z-index: 1; animation: waveDriftReverse 22s linear infinite; }
+.footer-wave--top    { bottom: 70px;  z-index: 1; animation: waveDriftReverse 22s linear infinite; }
 /* Upper wave gets a taller SVG so its body fills more of the vertical
    space, plus a phase-shifted path so its peaks line up with the
    topmost wave's trough valleys — together this seals the cream
