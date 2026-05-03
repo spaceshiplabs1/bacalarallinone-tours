@@ -455,6 +455,14 @@ const Footer = () => {
     const peakY = mid - amp;
     return `M0,${mid} Q180,${peakY} 360,${mid} T720,${mid} T1080,${mid} T1440,${mid} T1800,${mid} T2160,${mid} T2520,${mid} T2880,${mid} L2880,80 L0,80 Z`;
   };
+  // Phase-shifted variant — first arch dips into a trough, next rises
+  // into a peak. Paired with wavePath, the layered wave's peaks line
+  // up with the previous wave's trough valleys, sealing the cream
+  // gaps where the bg used to peek through.
+  const wavePathTrough = (mid, amp) => {
+    const troughCtrlY = mid + amp;
+    return `M0,${mid} Q180,${troughCtrlY} 360,${mid} T720,${mid} T1080,${mid} T1440,${mid} T1800,${mid} T2160,${mid} T2520,${mid} T2880,${mid} L2880,80 L0,80 Z`;
+  };
   // Soft cream tones for text on the dark lagoon footer bg.
   const softText = 'rgba(245, 240, 230, 0.7)';
   const dimText = 'rgba(245, 240, 230, 0.55)';
@@ -471,7 +479,7 @@ const Footer = () => {
           <path d={wavePath(36, 36)} fill="var(--lagoon-pale)"/>
         </svg>
         <svg className="footer-wave footer-wave--upper" viewBox="0 0 2880 80" preserveAspectRatio="none">
-          <path d={wavePath(38, 32)} fill="var(--lagoon)"/>
+          <path d={wavePathTrough(38, 32)} fill="var(--lagoon)"/>
         </svg>
         <svg className="footer-wave footer-wave--lower" viewBox="0 0 2880 80" preserveAspectRatio="none">
           <path d={wavePath(42, 28)} fill="var(--lagoon-deep)"/>
