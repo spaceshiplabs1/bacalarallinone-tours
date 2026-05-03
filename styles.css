@@ -152,14 +152,14 @@ body::before {
 .footer-waves {
   position: relative;
   width: 100%;
-  /* Compact wave band. The bg matches the Why Us section above
-     (var(--ink)) so any space above the topmost crests is visually
-     part of Why Us — no navy strip floats above the waves. The
-     bottom-most wave (lagoon-darkest) fills the zone's lower band
-     and merges seamlessly into the footer body color. */
+  /* Compact wave band. The bg matches the cream Why Us section above
+     (var(--bone)) so the cream surface flows into the wave zone and
+     the lagoon waves emerge from the beach. The bottom-most wave
+     (lagoon-darkest) fills the zone's lower band and merges into
+     the footer body navy seamlessly. */
   height: 120px;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--bone);
   pointer-events: none;
   margin-bottom: -1px; /* hide subpixel seam against footer body */
 }

@@ -353,12 +353,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* WHY US */}
-      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 40 }}>
+      {/* WHY US — same cream bg as the rest of the home so the section
+          no longer collides with the navy footer below. */}
+      <section style={{ background: 'var(--bone)', color: 'var(--ink)', padding: '80px 0', marginTop: 40 }}>
         <div className="container">
           <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 40 }}>
             <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
-            <div style={{ flex: 1, height: 1, background: 'rgba(245,240,230,0.2)' }}/>
+            <div style={{ flex: 1, height: 1, background: 'var(--line)' }}/>
           </div>
           <div className="rg-4" style={{ display:'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
             {[
@@ -367,12 +368,12 @@ const Home = () => {
               { icon: icons.spark, title: t.whyPrice, sub: t.whyPriceSub },
               { icon: icons.clock, title: t.whyFlex, sub: t.whyFlexSub }
             ].map((w,i) => (
-              <div key={i} style={{ borderTop: '1px solid rgba(245,240,230,0.2)', paddingTop: 20 }}>
+              <div key={i} style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
                 <div style={{ width: 40, height: 40, borderRadius:'50%', background: 'var(--sun)', color: 'var(--ink)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom: 16 }}>
                   <Icon d={w.icon} size={18}/>
                 </div>
-                <h3 className="display" style={{ fontSize: 20, margin: '0 0 8px', color: 'var(--bone)' }}>{w.title}</h3>
-                <p style={{ fontSize: 13, color: 'rgba(245,240,230,0.7)', margin: 0, lineHeight: 1.5 }}>{w.sub}</p>
+                <h3 className="display" style={{ fontSize: 20, margin: '0 0 8px', color: 'var(--ink)' }}>{w.title}</h3>
+                <p style={{ fontSize: 13, color: 'var(--ink-soft)', margin: 0, lineHeight: 1.5 }}>{w.sub}</p>
               </div>
             ))}
           </div>
