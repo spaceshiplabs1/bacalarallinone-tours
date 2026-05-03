@@ -157,7 +157,7 @@ body::before {
      the lagoon waves emerge from the beach. The bottom-most wave
      (lagoon-darkest) fills the zone's lower band and merges into
      the footer body navy seamlessly. */
-  height: 120px;
+  height: 160px;
   overflow: hidden;
   background: var(--bone);
   pointer-events: none;
@@ -171,14 +171,14 @@ body::before {
   display: block;
   will-change: transform;
 }
-.footer-wave--top    { bottom: 76px; z-index: 1; animation: waveDriftReverse 22s linear infinite; }
+.footer-wave--top    { bottom: 100px; z-index: 1; animation: waveDriftReverse 22s linear infinite; }
 /* Upper wave gets a taller SVG so its body fills more of the vertical
    space, plus a phase-shifted path so its peaks line up with the
    topmost wave's trough valleys — together this seals the cream
    gaps between the lagoon-pale crests. */
-.footer-wave--upper  { bottom: 50px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
-.footer-wave--lower  { bottom: 26px; z-index: 3; animation: waveDriftReverse 13s linear infinite; }
-.footer-wave--bottom { bottom:  0px; z-index: 4; animation: waveDrift 28s linear infinite; }
+.footer-wave--upper  { bottom: 70px; height: 130px; z-index: 2; animation: waveDrift 17s linear infinite; }
+.footer-wave--lower  { bottom: 36px; z-index: 3; animation: waveDriftReverse 13s linear infinite; }
+.footer-wave--bottom { bottom:  0px; height: 100px; z-index: 4; animation: waveDrift 28s linear infinite; }
 @media (prefers-reduced-motion: reduce) {
   .footer-wave { animation: none !important; }
 }
