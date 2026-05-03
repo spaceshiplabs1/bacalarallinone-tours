@@ -306,25 +306,25 @@ const Transfers = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }} className="rg-transfers-form">
               <label className="field">
                 <span className="mono field-label">
-                  <Icon d={icons.users} size={13}/> PAX
+                  <Icon d={icons.users} size={16}/> PAX
                 </span>
                 <Stepper value={pax} setValue={setPax} min={1} max={30} />
               </label>
               <label className="field">
                 <span className="mono field-label">
-                  <Icon d={icons.bag} size={13}/> {lang === 'en' ? 'LUGGAGE' : 'EQUIPAJE'}
+                  <Icon d={icons.bag} size={16}/> {lang === 'en' ? 'LUGGAGE' : 'EQUIPAJE'}
                 </span>
                 <Stepper value={luggage} setValue={setLuggage} min={0} max={30} />
               </label>
               <label className="field">
                 <span className="mono field-label">
-                  <Icon d={icons.calendar} size={13}/> {t.date || (lang === 'en' ? 'DATE' : 'FECHA')}
+                  <Icon d={icons.calendar} size={16}/> {t.date || (lang === 'en' ? 'DATE' : 'FECHA')}
                 </span>
                 <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
               </label>
               <label className="field">
                 <span className="mono field-label">
-                  <Icon d={icons.clock} size={13}/> {t.time || (lang === 'en' ? 'TIME' : 'HORA')}
+                  <Icon d={icons.clock} size={16}/> {t.time || (lang === 'en' ? 'TIME' : 'HORA')}
                 </span>
                 <input className="input" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
               </label>
@@ -608,7 +608,7 @@ const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon
           className="mono field-label"
           style={{ color: accent }}
         >
-          {icon && <Icon d={icon} size={13}/>} {label}
+          {icon && <Icon d={icon} size={16}/>} {label}
         </span>
         {endpoint.lat != null && endpoint.lng != null && (
           <span className="mono" style={{ color: 'var(--ink-soft)', fontSize: 10 }}>
@@ -619,26 +619,18 @@ const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon
       <input
         className="input"
         type="text"
-        placeholder={lang === 'en' ? 'Hotel name, address, or pick a chip below' : 'Nombre del hotel, dirección, o elige un chip abajo'}
+        placeholder={lang === 'en' ? 'Cancún airport, your hotel, or address' : 'Aeropuerto de Cancún, tu hotel o dirección'}
         value={endpoint.address}
         onChange={(e) => setText(e.target.value)}
         autoComplete="off"
       />
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-        {TRANSFER_ANCHORS.map((a) => {
-          const active = endpoint.anchorId === a.id;
-          return (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => setAnchor(a)}
-              className={`chip ${active ? 'active' : ''}`}
-              style={{ border: 'none', cursor: 'pointer', fontSize: 11, opacity: active ? 1 : 0.85 }}
-            >
-              {a.label[lang] || a.label.en}
-            </button>
-          );
-        })}
+      {/* Lightweight examples line — replaces the old chip wall while
+          still hinting at what users can type. Anchor lat/lng selection
+          will return via Google Places autocomplete on the input above. */}
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 8, fontStyle: 'italic' }}>
+        {lang === 'en'
+          ? 'e.g. Cancún airport (CUN), Tulum airport, Hotel Akalki, Bacalar centro'
+          : 'Ej. Aeropuerto Cancún (CUN), Aeropuerto Tulum, Hotel Akalki, Bacalar centro'}
       </div>
     </div>
   );

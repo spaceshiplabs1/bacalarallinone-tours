@@ -353,15 +353,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Filled wave band — substantive lagoon gradient that bridges
-          the page bone bg into the dark Why Us section, replacing the
-          empty 80px gap with a brand-aligned transition. */}
-      <div style={{ marginTop: 24 }}>
-        <WaveBlob variant="band" height={88}/>
-      </div>
-
       {/* WHY US */}
-      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 0 }}>
+      <section style={{ background: 'var(--ink)', color: 'var(--bone)', padding: '80px 0', marginTop: 40 }}>
         <div className="container">
           <div style={{ display:'flex', alignItems:'baseline', gap: 16, marginBottom: 40 }}>
             <h2 className="display" style={{ fontSize: 36, margin: 0 }}>{t.whySection}</h2>
