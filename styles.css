@@ -158,7 +158,7 @@ body::before {
      than as a flat pale slab that looked like a static / malformed
      SVG artifact. Cream Why Us section transitions to navy at
      the zone top edge — the wave crests soften that boundary. */
-  height: 135px;
+  height: 100px;
   overflow: hidden;
   background: transparent;
   pointer-events: none;
