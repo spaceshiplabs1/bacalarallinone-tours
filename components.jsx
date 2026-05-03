@@ -1,6 +1,36 @@
 // Shared UI components — header, footer, tour cards, icons, map
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
+// Lazy Google Maps JS SDK loader. Returns a single shared promise so
+// repeat callers don't trigger multiple <script> injections. Used by
+// the transfers form's address autocomplete. Key is read from
+// window.GOOGLE_MAPS_API_KEY (set in index.html), restricted by
+// allowed-referrers on the Google Cloud side.
+let _googleMapsPromise = null;
+function loadGoogleMaps() {
+  if (window.google && window.google.maps && window.google.maps.places) {
+    return Promise.resolve(window.google.maps);
+  }
+  if (_googleMapsPromise) return _googleMapsPromise;
+  const key = window.GOOGLE_MAPS_API_KEY;
+  if (!key) return Promise.reject(new Error('GOOGLE_MAPS_API_KEY not set'));
+  _googleMapsPromise = new Promise((resolve, reject) => {
+    const cbName = '__gmapsLoaded_' + Math.random().toString(36).slice(2);
+    window[cbName] = () => {
+      delete window[cbName];
+      resolve(window.google.maps);
+    };
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&loading=async&callback=${cbName}`;
+    s.async = true;
+    s.defer = true;
+    s.onerror = (err) => { _googleMapsPromise = null; reject(err); };
+    document.head.appendChild(s);
+  });
+  return _googleMapsPromise;
+}
+window.loadGoogleMaps = loadGoogleMaps;
+
 // Render a string with " · " segment separators wrapped in a span
 // so they can take a contrasting color. Many of our tour titles
 // follow a "category · detail" shape (e.g. "Cenotes · Azul, Negro

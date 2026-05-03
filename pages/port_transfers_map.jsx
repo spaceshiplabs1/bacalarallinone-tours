@@ -591,16 +591,58 @@ const Transfers = () => {
   );
 };
 
-// EndpointPicker — text input + chip-quick-select row.
-// When Google Places lands, swap the input element for an autocomplete
-// component that calls the geocoder and writes lat/lng directly. Until
-// then the chips populate lat/lng and the input is freeform / accepts
-// "lat,lng" as a debug bridge.
+// EndpointPicker — text input wired to Google Places Autocomplete,
+// biased to the Yucatán peninsula. Selecting a suggestion writes
+// both the formatted address and lat/lng back to parent state via
+// setText / setAnchor. Free typing is still allowed for debug + the
+// "lat,lng" parser used by the map page.
 const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon, tone }) => {
-  // tone defaults to lagoon-deep so origin and destination can pass
-  // distinct accent colors (cool teal vs warm clay) and the icon +
-  // label feel visually paired.
   const accent = tone || 'var(--lagoon-deep)';
+  const inputRef = useRef(null);
+  // Hold the latest setters in refs so we can attach the autocomplete
+  // listener once with stable callbacks even though the parent re-renders.
+  const setTextRef = useRef(setText);
+  const setAnchorRef = useRef(setAnchor);
+  useEffect(() => { setTextRef.current = setText; setAnchorRef.current = setAnchor; }, [setText, setAnchor]);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    let listener = null;
+    let cancelled = false;
+    window.loadGoogleMaps().then((maps) => {
+      if (cancelled || !inputRef.current) return;
+      const ac = new maps.places.Autocomplete(inputRef.current, {
+        // SW + NE corners covering the Yucatán peninsula and the
+        // Mayan Riviera coast — biases suggestions to local hotels,
+        // airports, and addresses while still allowing further-afield
+        // results if the user types something specific.
+        bounds: new maps.LatLngBounds(
+          { lat: 17.5, lng: -89.5 },
+          { lat: 22.0, lng: -85.5 }
+        ),
+        strictBounds: false,
+        fields: ['formatted_address', 'name', 'geometry', 'place_id'],
+      });
+      listener = ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place || !place.geometry || !place.geometry.location) return;
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        const text = place.formatted_address || place.name || '';
+        setTextRef.current(text);
+        setAnchorRef.current({ lat, lng });
+      });
+    }).catch((err) => {
+      // SDK failure shouldn't break the form — input still works as
+      // a freeform field with the lat,lng debug bridge.
+      console.warn('[EndpointPicker] Google Maps SDK load failed', err);
+    });
+    return () => {
+      cancelled = true;
+      if (listener && listener.remove) listener.remove();
+    };
+  }, []);
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -617,6 +659,7 @@ const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon
         )}
       </div>
       <input
+        ref={inputRef}
         className="input"
         type="text"
         placeholder={lang === 'en' ? 'Cancún airport, your hotel, or address' : 'Aeropuerto de Cancún, tu hotel o dirección'}
@@ -624,9 +667,6 @@ const EndpointPicker = ({ which, label, endpoint, setText, setAnchor, lang, icon
         onChange={(e) => setText(e.target.value)}
         autoComplete="off"
       />
-      {/* Lightweight examples line — replaces the old chip wall while
-          still hinting at what users can type. Anchor lat/lng selection
-          will return via Google Places autocomplete on the input above. */}
       <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 8, fontStyle: 'italic' }}>
         {lang === 'en'
           ? 'e.g. Cancún airport (CUN), Tulum airport, Hotel Akalki, Bacalar centro'

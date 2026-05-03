@@ -114,6 +114,17 @@ body::before {
   line-height: 1;
 }
 
+/* Google Places Autocomplete dropdown — bump z-index above sticky
+   header (50) and any modal scaffolding so suggestions never get
+   clipped by parent overflow:hidden / lower stacks. */
+.pac-container {
+  z-index: 99999;
+  font-family: 'Inter', -apple-system, sans-serif;
+  border-radius: 10px;
+  margin-top: 4px;
+  box-shadow: 0 12px 32px rgba(12, 42, 46, 0.18);
+}
+
 /* Top-nav links — sized for legibility, with a soft hover that
    lifts the icon and shifts the label color toward ink. The
    underline stays reserved for the current page indicator. */
