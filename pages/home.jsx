@@ -336,11 +336,11 @@ const Home = () => {
       <section className="container" style={{ paddingTop: 24, paddingBottom: 40 }}>
         <div className="rg" style={{ display:'grid', gridTemplateColumns: '1fr 1.6fr', gap: 40, alignItems:'center' }}>
           <div>
-            <div className="mono" style={{ color:'var(--ink-soft)', marginBottom: 12 }}>01 / THE REGION</div>
-            <h2 className="display" style={{ fontSize: 48, margin: 0, lineHeight: 0.95 }}>
+            <div className="mono" style={{ color:'var(--lagoon-deep)', marginBottom: 16, fontSize: 13, letterSpacing: 1.6 }}>01 / THE REGION</div>
+            <h2 className="display" style={{ fontSize: 'clamp(44px, 5.4vw, 72px)', margin: 0, lineHeight: 0.95 }}>
               {lang === 'en' ? <>From Cancún to Chetumal — we <span style={{color:'var(--clay)'}}>cover it.</span></> : <>De Cancún a Chetumal — lo <span style={{color:'var(--clay)'}}>cubrimos.</span></>}
             </h2>
-            <p style={{ color:'var(--ink-soft)', fontSize: 16, marginTop: 20, lineHeight: 1.5 }}>
+            <p style={{ color:'var(--ink-soft)', fontSize: 17, marginTop: 24, lineHeight: 1.55 }}>
               {lang === 'en'
                 ? 'Seven destinations, two airports, one cruise port. Tap a pin to see what\'s there.'
                 : 'Siete destinos, dos aeropuertos, un puerto de cruceros. Toca un pin para ver qué hay ahí.'}

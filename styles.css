@@ -131,6 +131,46 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .logo-img:hover { animation: none; }
 }
+
+/* Footer wave header — 4 stacked SVG bands drift left/right at
+   different speeds, creating a layered oleaje effect at the top
+   of the footer. The zone bg matches the footer body (deep navy
+   lagoon) so the front-most wave blends invisibly into the body,
+   making the footer feel like a continuous mass of water. The
+   topmost wave (pale) sits against the dark Why Us section above. */
+@keyframes waveDrift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes waveDriftReverse {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.footer-waves {
+  position: relative;
+  width: 100%;
+  height: 156px;
+  overflow: hidden;
+  background: var(--lagoon-darkest);
+  pointer-events: none;
+  margin-bottom: -1px; /* hide subpixel seam against footer body */
+}
+.footer-wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 80px;
+  display: block;
+  will-change: transform;
+}
+.footer-wave--top    { bottom: 76px; z-index: 1; animation: waveDriftReverse 22s linear infinite; }
+.footer-wave--upper  { bottom: 50px; z-index: 2; animation: waveDrift 17s linear infinite; }
+.footer-wave--lower  { bottom: 26px; z-index: 3; animation: waveDriftReverse 13s linear infinite; }
+.footer-wave--bottom { bottom:  0px; z-index: 4; animation: waveDrift 28s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .footer-wave { animation: none !important; }
+}
+
 .mono {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

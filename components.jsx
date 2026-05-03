@@ -447,16 +447,48 @@ const Footer = () => {
   const { t, lang, navigate } = useT();
   const linkStyle = { color:'inherit', textDecoration:'none', cursor:'pointer', background:'none', border:'none', padding:0, textAlign:'left', font:'inherit' };
   const FL = ({ onClick, children }) => <button style={linkStyle} onClick={onClick}>{children}</button>;
+  // Wave path generator — one full sine cycle every `period` px,
+  // four cycles total spanning 0..2880 so a translateX(-50%) loop
+  // is seamless. Variations in amplitude/midline give each layer
+  // its own visual cadence.
+  const wavePath = (mid, amp) => {
+    const peakY = mid - amp;
+    return `M0,${mid} Q180,${peakY} 360,${mid} T720,${mid} T1080,${mid} T1440,${mid} T1800,${mid} T2160,${mid} T2520,${mid} T2880,${mid} L2880,80 L0,80 Z`;
+  };
+  // Soft cream tones for text on the dark lagoon footer bg.
+  const softText = 'rgba(245, 240, 230, 0.7)';
+  const dimText = 'rgba(245, 240, 230, 0.55)';
+  const softLine = 'rgba(245, 240, 230, 0.16)';
   return (
-    <footer style={{ marginTop: 0, borderTop: '1px solid var(--line)', padding: '48px 0', background: 'var(--bone-2)' }}>
+    <footer style={{ marginTop: 0, padding: 0, background: 'var(--lagoon-darkest)', color: 'var(--bone)' }}>
+      {/* Animated lagoon waves — 4 layered SVGs drift at different
+          speeds. The front-most wave matches the footer body color
+          (lagoon-darkest) so it blends invisibly into the water mass
+          below; lighter blues stack above into the dark Why Us
+          section creating the surface oleaje edge. */}
+      <div className="footer-waves" aria-hidden="true">
+        <svg className="footer-wave footer-wave--top" viewBox="0 0 2880 80" preserveAspectRatio="none">
+          <path d={wavePath(36, 36)} fill="var(--lagoon-pale)"/>
+        </svg>
+        <svg className="footer-wave footer-wave--upper" viewBox="0 0 2880 80" preserveAspectRatio="none">
+          <path d={wavePath(38, 32)} fill="var(--lagoon)"/>
+        </svg>
+        <svg className="footer-wave footer-wave--lower" viewBox="0 0 2880 80" preserveAspectRatio="none">
+          <path d={wavePath(42, 28)} fill="var(--lagoon-deep)"/>
+        </svg>
+        <svg className="footer-wave footer-wave--bottom" viewBox="0 0 2880 80" preserveAspectRatio="none">
+          <path d={wavePath(48, 24)} fill="var(--lagoon-darkest)"/>
+        </svg>
+      </div>
+      <div style={{ padding: '40px 0 48px' }}>
       <div className="container rg-footer" style={{ display:'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: 40 }}>
         <div>
           <Logo />
-          <p style={{ color:'var(--ink-soft)', marginTop: 16, fontSize: 14, maxWidth: 320 }}>{t.footerTag}</p>
-          <p className="mono" style={{ color: 'var(--ink-soft)', marginTop: 20 }}>Av. 5 s/n · Bacalar, Q.Roo</p>
+          <p style={{ color: softText, marginTop: 16, fontSize: 14, maxWidth: 320 }}>{t.footerTag}</p>
+          <p className="mono" style={{ color: dimText, marginTop: 20 }}>Av. 5 s/n · Bacalar, Q.Roo</p>
         </div>
         <div>
-          <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 12 }}>EXPLORE</div>
+          <div className="mono" style={{ color: 'var(--lagoon-pale)', marginBottom: 12 }}>EXPLORE</div>
           <div style={{ display:'flex', flexDirection:'column', gap: 8, fontSize: 14 }}>
             <FL onClick={()=>navigate('catalog', { filter: 'lagoon' })}>{lang==='en'?'Lagoon tours':'Tours de laguna'}</FL>
             <FL onClick={()=>navigate('catalog', { filter: 'ruins' })}>{lang==='en'?'Mayan ruins':'Ruinas mayas'}</FL>
@@ -466,7 +498,7 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 12 }}>CRUISE GUESTS</div>
+          <div className="mono" style={{ color: 'var(--lagoon-pale)', marginBottom: 12 }}>CRUISE GUESTS</div>
           <div style={{ display:'flex', flexDirection:'column', gap: 8, fontSize: 14 }}>
             <FL onClick={()=>navigate('port')}>{lang==='en'?'Mahahual port':'Puerto Mahahual'}</FL>
             <FL onClick={()=>navigate('port')}>{lang==='en'?'Back-to-ship guarantee':'Garantía de regreso al barco'}</FL>
@@ -475,7 +507,7 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 12 }}>COMPANY</div>
+          <div className="mono" style={{ color: 'var(--lagoon-pale)', marginBottom: 12 }}>COMPANY</div>
           <div style={{ display:'flex', flexDirection:'column', gap: 8, fontSize: 14 }}>
             <FL onClick={()=>navigate('home')}>{lang==='en'?'About':'Nosotros'}</FL>
             <a href="mailto:hola@bacalarallinone.tours" style={linkStyle}>hola@bacalarallinone.tours</a>
@@ -483,12 +515,13 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="container" style={{ marginTop: 40, paddingTop: 20, borderTop: '1px solid var(--line)', display:'flex', justifyContent:'space-between', alignItems:'center', fontSize: 12, color:'var(--ink-soft)', gap: 12 }}>
+      <div className="container" style={{ marginTop: 40, paddingTop: 20, borderTop: `1px solid ${softLine}`, display:'flex', justifyContent:'space-between', alignItems:'center', fontSize: 12, color: dimText, gap: 12 }}>
         <span>© 2026 bacalarallinone.tours</span>
         <div style={{ display:'flex', gap: 14, alignItems:'center' }}>
           <button onClick={()=>navigate('map-debug')} style={{ ...linkStyle, fontFamily:'JetBrains Mono, monospace', fontSize: 10, opacity: 0.7 }} title="Dev: drag pins to calibrate MAP_PINS">PIN DEBUG</button>
           <span className="mono">MADE IN BACALAR · 18.68° N, 88.38° W</span>
         </div>
+      </div>
       </div>
     </footer>
   );
