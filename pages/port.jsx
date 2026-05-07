@@ -261,7 +261,8 @@ const PortFlow = ({ navigate }) => {
                           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginTop: 12 }}>
                             <div>
                               <span className="display" style={{ fontSize: 22 }}>${tour.priceAdult}</span>
-                              <span style={{ color:'var(--ink-soft)', fontSize: 12, marginLeft: 4 }}>/ pax</span>
+                              <span style={{ color:'var(--ink-soft)', fontSize: 12, marginLeft: 4 }}>{tour.defaultCurrency || 'USD'}</span>
+                              <span style={{ color:'var(--ink-soft)', fontSize: 12, marginLeft: 4 }}>{tour.priceUnit === 'per_booking' ? (lang==='en'?'/ group':'/ grupo') : '/ pax'}</span>
                             </div>
                             <span className="badge" style={{ background: fits.ok ? 'var(--lagoon)' : 'var(--clay)', color: fits.ok?'var(--ink)':'var(--bone)' }}>
                               {fits.back}

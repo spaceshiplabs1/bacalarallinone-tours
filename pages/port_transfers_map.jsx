@@ -767,7 +767,11 @@ const MapPage = ({ focus }) => {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}>{tour.title[lang]}</div>
                     <div className="mono" style={{ color:'var(--ink-soft)', marginTop: 4, fontSize: 10 }}>
-                      ${tour.priceAdult}{!tour.flat ? ` · ${tour.duration}h` : ' · ' + (t.perVan || 'per van')}
+                      ${tour.priceAdult} {tour.defaultCurrency || 'USD'}{tour.flat
+                        ? ' · ' + (t.perVan || 'per van')
+                        : tour.priceUnit === 'per_booking'
+                          ? ' · ' + (t.perGroup || (lang==='en'?'/group':'/grupo'))
+                          : ` · ${tour.duration}h`}
                     </div>
                   </div>
                   <Icon d={icons.arrow} size={14}/>

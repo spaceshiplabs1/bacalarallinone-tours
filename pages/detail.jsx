@@ -325,10 +325,31 @@ const TourDetail = ({ tourId, prefill }) => {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap: 12, flexWrap:'wrap' }}>
                 <div style={{ minWidth: 0 }}>
                   <span className="mono" style={{ color:'var(--ink-soft)' }}>{t.from}</span>
-                  <div className="display" style={{ fontSize: 40 }}>${tour.priceAdult}</div>
-                  <div className="mono" style={{ color:'var(--ink-soft)' }}>{tour.flat ? t.perVan : t.perPerson}</div>
+                  <div className="display" style={{ fontSize: 40 }}>
+                    ${tour.priceAdult} <span style={{ fontSize: 16, opacity: 0.6 }}>{tour.defaultCurrency || 'USD'}</span>
+                  </div>
+                  <div className="mono" style={{ color:'var(--ink-soft)' }}>
+                    {tour.flat
+                      ? t.perVan
+                      : tour.priceUnit === 'per_booking'
+                        ? (t.perGroup || t.perVan)
+                        : t.perPerson}
+                  </div>
+                  {tour.priceKid > 0 && tour.priceUnit !== 'per_booking' && (
+                    <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 12, marginTop: 4 }}>
+                      {lang==='en' ? 'Child' : 'Niño'}
+                      {tour.childMinAge != null && tour.childMaxAge != null
+                        ? ` (${tour.childMinAge}–${tour.childMaxAge}) `
+                        : ' '}
+                      ${tour.priceKid} {tour.defaultCurrency || 'USD'}
+                    </div>
+                  )}
                 </div>
-                <span className="badge lagoon dot" style={{ flexShrink: 0 }}>{lang==='en'?'available today':'disponible hoy'}</span>
+                <span className="badge lagoon dot" style={{ flexShrink: 0 }}>
+                  {tour.isRequestOnly
+                    ? (t.requestOnly || (lang==='en'?'On request':'Bajo cotización'))
+                    : (lang==='en'?'available today':'disponible hoy')}
+                </span>
               </div>
 
               <div style={{ height: 1, background:'var(--line)', margin: '20px 0' }}/>

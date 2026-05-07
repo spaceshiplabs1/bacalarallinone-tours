@@ -160,11 +160,27 @@
       location: t.category?.name ?? "",
       duration: Math.max(1, Math.round(t.durationMinutes / 60)),
       durationMinutes: t.durationMinutes,
-      priceAdult: t.basePrice ? Math.round(t.basePrice / 100) : 0,
-      priceKid:
-        t.isKidFriendly && t.basePrice
-          ? Math.round((t.basePrice / 100) * 0.5)
-          : 0,
+      // Prefer the default rate's prices (real Bokun figures) over the
+      // tour-level basePrice (computed snapshot of the same default rate).
+      // For per_booking flat tours the displayed price comes from
+      // bookingPriceCents, not adultPriceCents.
+      priceAdult: (() => {
+        const dr = t.defaultRate;
+        if (dr) {
+          if (dr.priceUnit === "per_booking") return dr.bookingPriceCents != null ? Math.round(dr.bookingPriceCents / 100) : 0;
+          if (dr.adultPriceCents != null) return Math.round(dr.adultPriceCents / 100);
+        }
+        return t.basePrice ? Math.round(t.basePrice / 100) : 0;
+      })(),
+      priceKid: (() => {
+        const dr = t.defaultRate;
+        if (dr && dr.childPriceCents != null) return Math.round(dr.childPriceCents / 100);
+        // Fallback: half of adult only when the tour is kid-friendly and we
+        // have no real child price. Imported tours always carry the real
+        // child figure (often $0 = free), so this fallback only fires for
+        // legacy seed rows.
+        return t.isKidFriendly && t.basePrice ? Math.round((t.basePrice / 100) * 0.5) : 0;
+      })(),
       rating: 4.8,
       reviews: 0,
       tags: (t.tags || []).map((x) => x.slug),
@@ -180,6 +196,16 @@
         },
       ],
       coverUrl: t.coverImage?.url ?? null,
+      // priceUnit drives the "/persona" vs "/grupo" suffix on the price.
+      // `flat` is kept for the transfer flow (vans), where the same flag
+      // also gates "per van" rendering. priceUnit takes precedence.
+      priceUnit: t.priceUnit || "per_person",
+      hasMultipleRates: !!t.hasMultipleRates,
+      defaultRate: t.defaultRate || null,
+      adultMinAge: t.adultMinAge ?? null,
+      adultMaxAge: t.adultMaxAge ?? null,
+      childMinAge: t.childMinAge ?? null,
+      childMaxAge: t.childMaxAge ?? null,
       flat: t.category?.slug === "transfer",
       _gallery: t.coverImage?.url
         ? [{ src: t.coverImage.url, label: "" }]
@@ -242,6 +268,13 @@
         tour.schedules = en.schedules || [];
         tour.blackoutDates = en.blackoutDates || [];
         tour.zonePrices = en.zonePrices || [];
+        tour.rates = en.rates || [];
+        tour.isRequestOnly = !!en.isRequestOnly;
+        tour.priceUnit = en.priceUnit || tour.priceUnit;
+        tour.adultMinAge = en.adultMinAge ?? tour.adultMinAge;
+        tour.adultMaxAge = en.adultMaxAge ?? tour.adultMaxAge;
+        tour.childMinAge = en.childMinAge ?? tour.childMinAge;
+        tour.childMaxAge = en.childMaxAge ?? tour.childMaxAge;
         if (en.translation?.inclusionsHtml) {
           tour.includes = parseInclusionsHtml(en.translation.inclusionsHtml);
         }

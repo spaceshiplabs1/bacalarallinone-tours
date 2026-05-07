@@ -688,7 +688,9 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         </div>
         <div style={{ padding: 16, display:'flex', flexDirection:'column', gap: 6 }}>
           <h3 className="display" style={{ margin: 0, fontSize: 18 }}>{tour.title[lang]}</h3>
-          <div className="display" style={{ fontSize: 18 }}>${tour.priceAdult}</div>
+          <div className="display" style={{ fontSize: 18 }}>
+            ${tour.priceAdult} <span style={{ fontSize: 11, opacity: 0.7, fontWeight: 500 }}>{tour.defaultCurrency || 'USD'}</span>
+          </div>
         </div>
       </div>
     );
@@ -881,10 +883,14 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         }}
       >
         <span className="display" style={{ fontSize: 20, lineHeight: 1 }}>
-          ${tour.priceAdult}
+          ${tour.priceAdult} <span style={{ fontSize: 11, opacity: 0.7 }}>{tour.defaultCurrency || 'USD'}</span>
         </span>
         <span style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 500 }}>
-          {tour.flat ? t.perVan : t.perPerson}
+          {tour.flat
+            ? t.perVan
+            : tour.priceUnit === 'per_booking'
+              ? (t.perGroup || t.perVan)
+              : t.perPerson}
         </span>
       </div>
     </div>
@@ -1402,9 +1408,11 @@ const SEOHead = () => {
           provider: { '@type': 'TravelAgency', name: SEO_SITE.name, url: SEO_SITE.origin },
           offers: {
             '@type': 'Offer',
-            priceCurrency: 'USD',
+            priceCurrency: tour.defaultCurrency || 'USD',
             price: tour.priceAdult,
-            availability: 'https://schema.org/InStock',
+            availability: tour.isRequestOnly
+              ? 'https://schema.org/InStoreOnly'
+              : 'https://schema.org/InStock',
             url
           },
           aggregateRating: tour.rating && tour.reviews ? {
