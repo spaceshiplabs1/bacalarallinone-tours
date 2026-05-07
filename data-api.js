@@ -133,13 +133,14 @@
     cultural: "ruins",
   };
 
-  // Some Bokun titles ship with a "[NEW]" or "[NEW TOUR]" / "[NEW EXPERIENCE]"
-  // prefix. We strip it from the rendered text and surface a standalone
-  // `isNew` flag so the storefront can show a ribbon/badge instead of inline
-  // brackets.
+  // Some Bokun titles ship with a "[NEW]" / "[NEW TOUR]" / "[NEW EXPERIENCE]"
+  // prefix in EN, and "[NUEVO]" / "[NUEVO TOUR]" in ES. The two are not
+  // always mirrored — Laguna Lumina has the prefix in ES only — so we strip
+  // both forms independently and OR the resulting isNew flag, so a single
+  // "NUEVO/NEW" badge fires regardless of which translation carries it.
   function stripNewPrefix(name) {
     if (!name) return { name, isNew: false };
-    const m = name.match(/^\s*\[\s*NEW(?:\s+(?:TOUR|EXPERIENCE|ROUTE))?\s*\]\s*/i);
+    const m = name.match(/^\s*\[\s*(?:NEW|NUEVO|NUEVA)(?:\s+(?:TOUR|EXPERIENCE|ROUTE|EXPERIENCIA|RUTA))?\s*\]\s*/i);
     return m
       ? { name: name.slice(m[0].length).trim(), isNew: true }
       : { name, isNew: false };
