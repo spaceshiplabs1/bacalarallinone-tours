@@ -182,14 +182,15 @@ const TourDetail = ({ tourId, prefill }) => {
               {tour.isNew && (
                 <span
                   style={{
-                    background: 'var(--sun)',
-                    color: 'var(--ink)',
+                    background: '#ef2d56',
+                    color: '#ffffff',
                     fontSize: 11,
-                    letterSpacing: 1.4,
-                    padding: '5px 10px',
+                    letterSpacing: 1.6,
+                    padding: '5px 11px',
                     borderRadius: 999,
                     textTransform: 'uppercase',
-                    fontWeight: 700,
+                    fontWeight: 800,
+                    boxShadow: '0 3px 10px rgba(239,45,86,0.45)',
                   }}
                 >
                   {lang === 'en' ? 'NEW' : 'NUEVO'}

@@ -765,15 +765,15 @@ const TourCard = ({ tour, onClick, compact = false }) => {
             {tour.isNew && (
               <span
                 style={{
-                  background: 'var(--sun)',
-                  color: 'var(--ink)',
+                  background: '#ef2d56',
+                  color: '#ffffff',
                   fontSize: 11,
-                  letterSpacing: 1.4,
-                  padding: '5px 10px',
+                  letterSpacing: 1.6,
+                  padding: '5px 11px',
                   borderRadius: 999,
                   textTransform: 'uppercase',
-                  fontWeight: 700,
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                  fontWeight: 800,
+                  boxShadow: '0 3px 10px rgba(239,45,86,0.45), 0 0 0 1px rgba(255,255,255,0.5)',
                 }}
               >
                 {lang === 'en' ? 'NEW' : 'NUEVO'}
