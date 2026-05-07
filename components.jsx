@@ -96,7 +96,7 @@ window.Icon = Icon;
 window.icons = icons;
 
 // ───────────────────────────────────────────── context
-window.AppCtx = React.createContext({ lang: 'en', t: {}, setLang: () => {}, theme: 'tropical', setTheme: () => {}, navigate: () => {} });
+window.AppCtx = React.createContext({ lang: 'en', t: {}, setLang: () => {}, theme: 'tropical', setTheme: () => {}, navigate: () => {}, displayCurrency: null, setDisplayCurrency: () => {} });
 window.useT = () => React.useContext(window.AppCtx);
 
 // ───────────────────────────────────────────── logo
@@ -457,7 +457,7 @@ window.WaveDebug = WaveDebug;
 
 // ───────────────────────────────────────────── header
 const Header = ({ current }) => {
-  const { t, lang, setLang, navigate, cartCount, openCart } = useT();
+  const { t, lang, setLang, navigate, cartCount, openCart, displayCurrency, setDisplayCurrency } = useT();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -501,6 +501,18 @@ const Header = ({ current }) => {
             <Icon d={icons.globe} size={16}/>
             <span className="lang-text" style={{ fontFamily:'JetBrains Mono, monospace', fontSize:11, letterSpacing:'0.1em' }}>{lang.toUpperCase()}</span>
           </button>
+          {displayCurrency ? (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setDisplayCurrency(displayCurrency === 'USD' ? 'MXN' : 'USD')}
+              title={lang === 'es' ? 'Mostrar precios en otra moneda' : 'Show prices in another currency'}
+              style={{ minWidth: 56 }}
+            >
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, letterSpacing: '0.1em', fontWeight: 700 }}>
+                {displayCurrency}
+              </span>
+            </button>
+          ) : null}
           <button
             onClick={openCart}
             title={t.cart}
@@ -676,8 +688,24 @@ const Footer = () => {
 window.Footer = Footer;
 
 // ───────────────────────────────────────────── tour card
+// Convert tour.priceAdult from its source currency to the user-toggled
+// display currency. Falls back to source amount + source code when no FX
+// rate is wired (rather than hiding the price). Returns whole-unit values
+// suitable for inline rendering — call sites add the leading "$".
+function priceForDisplay(tour, displayCurrency) {
+  const src = tour.defaultCurrency || 'USD';
+  const dst = displayCurrency || src;
+  if (src === dst || !window.tagcConvertPrice) {
+    return { amount: tour.priceAdult, currency: src };
+  }
+  const converted = window.tagcConvertPrice(tour.priceAdult, src, dst);
+  if (converted == null) return { amount: tour.priceAdult, currency: src };
+  return { amount: Math.round(converted), currency: dst };
+}
+
 const TourCard = ({ tour, onClick, compact = false }) => {
-  const { t, lang } = useT();
+  const { t, lang, displayCurrency } = useT();
+  const price = priceForDisplay(tour, displayCurrency);
   // Compact stays close to the old layout — used by detail page "related" rail.
   if (compact) {
     return (
@@ -689,7 +717,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         <div style={{ padding: 16, display:'flex', flexDirection:'column', gap: 6 }}>
           <h3 className="display" style={{ margin: 0, fontSize: 18 }}>{tour.title[lang]}</h3>
           <div className="display" style={{ fontSize: 18 }}>
-            ${tour.priceAdult} <span style={{ fontSize: 11, opacity: 0.7, fontWeight: 500 }}>{tour.defaultCurrency || 'USD'}</span>
+            ${price.amount} <span style={{ fontSize: 11, opacity: 0.7, fontWeight: 500 }}>{price.currency}</span>
           </div>
         </div>
       </div>
@@ -900,7 +928,7 @@ const TourCard = ({ tour, onClick, compact = false }) => {
         }}
       >
         <span className="display" style={{ fontSize: 20, lineHeight: 1 }}>
-          ${tour.priceAdult} <span style={{ fontSize: 11, opacity: 0.7 }}>{tour.defaultCurrency || 'USD'}</span>
+          ${price.amount} <span style={{ fontSize: 11, opacity: 0.7 }}>{price.currency}</span>
         </span>
         <span style={{ fontSize: 11, color: 'var(--ink-2)', fontWeight: 500 }}>
           {tour.flat

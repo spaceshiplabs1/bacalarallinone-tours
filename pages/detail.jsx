@@ -1,6 +1,20 @@
 // Tour detail page — gallery, specs, reviews, booking panel
 const TourDetail = ({ tourId, prefill }) => {
-  const { t, lang, navigate, addToCart, openLightbox } = useT();
+  const { t, lang, navigate, addToCart, openLightbox, displayCurrency } = useT();
+  // Convert source-currency prices to the user-toggled display currency.
+  // Falls back to source amount + source code when no rate is wired so the
+  // panel never blanks out.
+  const _convPrice = (amt, src) => {
+    const dst = displayCurrency || src || 'USD';
+    if (amt == null) return { amount: 0, currency: dst };
+    if (!window.tagcConvertPrice) return { amount: amt, currency: src || 'USD' };
+    if ((src || 'USD') === dst) return { amount: amt, currency: dst };
+    const conv = window.tagcConvertPrice(amt, src || 'USD', dst);
+    if (conv == null) return { amount: amt, currency: src || 'USD' };
+    return { amount: Math.round(conv), currency: dst };
+  };
+  const _adultPrice = _convPrice(tour.priceAdult, tour.defaultCurrency);
+  const _kidPrice = _convPrice(tour.priceKid, tour.defaultCurrency);
   const tour = window.TOURS.find(x => x.id === tourId) || window.TOURS[0];
   const [adults, setAdults] = useState(2);
   const [kids, setKids] = useState(0);
@@ -343,7 +357,7 @@ const TourDetail = ({ tourId, prefill }) => {
                 <div style={{ minWidth: 0 }}>
                   <span className="mono" style={{ color:'var(--ink-soft)' }}>{t.from}</span>
                   <div className="display" style={{ fontSize: 40 }}>
-                    ${tour.priceAdult} <span style={{ fontSize: 16, opacity: 0.6 }}>{tour.defaultCurrency || 'USD'}</span>
+                    ${_adultPrice.amount} <span style={{ fontSize: 16, opacity: 0.6 }}>{_adultPrice.currency}</span>
                   </div>
                   <div className="mono" style={{ color:'var(--ink-soft)' }}>
                     {tour.flat
@@ -358,7 +372,7 @@ const TourDetail = ({ tourId, prefill }) => {
                       {tour.childMinAge != null && tour.childMaxAge != null
                         ? ` (${tour.childMinAge}–${tour.childMaxAge}) `
                         : ' '}
-                      ${tour.priceKid} {tour.defaultCurrency || 'USD'}
+                      ${_kidPrice.amount} {_kidPrice.currency}
                     </div>
                   )}
                 </div>

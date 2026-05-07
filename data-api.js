@@ -261,6 +261,45 @@
     return enList.map((t) => shapeListItem(t, esBySlug[t.slug]));
   }
 
+  // Fetch the resolved agency (branding, default currency, FX rates).
+  // Storefront stores the result on window.AGENCY so TourCard / detail can
+  // convert prices on the fly when the user toggles USD ↔ MXN. FX rates use
+  // multiplier semantics: dst_amount = src_amount * rate.
+  async function loadAgency() {
+    try {
+      const res = await fetch(`${API}/api/agency`, {
+        credentials: "include",
+        headers: API_HEADERS,
+      });
+      if (!res.ok) {
+        console.warn("[tagc] /api/agency", res.status);
+        return null;
+      }
+      const a = await res.json();
+      window.AGENCY = a;
+      return a;
+    } catch (e) {
+      console.warn("[tagc] loadAgency failed", e);
+      return null;
+    }
+  }
+
+  // Convert a price between currencies using the active agency's FX policy.
+  // Returns null when no rate is wired for the pair (caller falls back to
+  // the source amount + source currency code). Identity case (src===dst)
+  // returns the input amount unchanged.
+  window.tagcConvertPrice = function (amount, srcCurrency, dstCurrency) {
+    if (amount == null || !Number.isFinite(amount)) return null;
+    if (!srcCurrency || !dstCurrency) return null;
+    if (srcCurrency === dstCurrency) return amount;
+    const rates = (window.AGENCY && window.AGENCY.fxRates) || [];
+    const r = rates.find(
+      (x) => x.fromCurrency === srcCurrency && x.toCurrency === dstCurrency,
+    );
+    if (!r) return null;
+    return amount * r.rate;
+  };
+
   // Fill in detail-only fields (full gallery, schedules, pickup zones,
   // long-form translations) on first navigation to a tour. Caches on the
   // tour object so subsequent reads are free.
@@ -363,6 +402,10 @@
   };
 
   window.tagcEnsureDetail = ensureDetail;
+
+  // Initial agency + catalog load. Agency is fetched in parallel — failures
+  // there shouldn't block the catalog from rendering.
+  loadAgency();
 
   // Initial catalog load. Re-render the page when ready.
   loadCatalog()

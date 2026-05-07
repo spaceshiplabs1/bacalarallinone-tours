@@ -121,6 +121,13 @@ const App = () => {
   });
 
   const [lang, setLangState] = React.useState(saved.lang || TWEAK_DEFAULTS.lang);
+  // Display currency for prices on the storefront. Defaults to the agency's
+  // configured currency (resolved async via window.AGENCY); user can toggle
+  // and the choice persists. Source-of-truth currency on each tour stays
+  // tour.defaultCurrency — this is purely a display knob.
+  const [displayCurrency, setDisplayCurrencyState] = React.useState(
+    saved.displayCurrency || null
+  );
   const [theme, setThemeState] = React.useState(TWEAK_DEFAULTS.theme); // tropical only
   const [route, setRoute] = React.useState(() => {
     // URL hash wins on load; fall back to persisted route
@@ -136,11 +143,30 @@ const App = () => {
 
   const setLang = (l) => { setLangState(l); persist({ lang: l }); };
   const setTheme = (th) => { setThemeState(th); persist({ theme: th }); };
+  const setDisplayCurrency = (c) => { setDisplayCurrencyState(c); persist({ displayCurrency: c }); };
 
   const persist = (patch) => {
-    const next = { lang, theme, route, cart, favorites, ...patch };
+    const next = { lang, theme, route, cart, favorites, displayCurrency, ...patch };
     try { localStorage.setItem(loadKey, JSON.stringify(next)); } catch(e) {}
   };
+
+  // Once the agency loads, seed displayCurrency from agency.defaultCurrency
+  // unless the user already picked one (persisted in localStorage).
+  React.useEffect(() => {
+    let cancelled = false;
+    const trySeed = () => {
+      if (cancelled) return;
+      if (window.AGENCY && window.AGENCY.defaultCurrency) {
+        setDisplayCurrencyState((prev) => prev || window.AGENCY.defaultCurrency);
+        return true;
+      }
+      return false;
+    };
+    if (trySeed()) return;
+    const id = setInterval(() => { if (trySeed()) clearInterval(id); }, 250);
+    setTimeout(() => clearInterval(id), 5000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
 
   const toggleFav = (tourId) => {
     const next = favorites.includes(tourId)
@@ -247,6 +273,7 @@ const App = () => {
   const t = window.I18N[lang];
   const ctx = {
     lang, setLang, theme, setTheme, navigate, t,
+    displayCurrency, setDisplayCurrency,
     cart, cartCount, cartTotal, addToCart, removeFromCart, clearCart,
     cartOpen, openCart, closeCart,
     favorites, toggleFav, isFav,
