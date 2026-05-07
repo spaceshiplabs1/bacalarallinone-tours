@@ -762,6 +762,23 @@ const TourCard = ({ tour, onClick, compact = false }) => {
             </span>
           )}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {tour.isNew && (
+              <span
+                style={{
+                  background: 'var(--sun)',
+                  color: 'var(--ink)',
+                  fontSize: 11,
+                  letterSpacing: 1.4,
+                  padding: '5px 10px',
+                  borderRadius: 999,
+                  textTransform: 'uppercase',
+                  fontWeight: 700,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                }}
+              >
+                {lang === 'en' ? 'NEW' : 'NUEVO'}
+              </span>
+            )}
             {tour.audience.includes('port') && <span className="badge clay dot">{t.filterPort}</span>}
             {tour.flat && <span className="badge jungle">PRIVATE VAN</span>}
             <span

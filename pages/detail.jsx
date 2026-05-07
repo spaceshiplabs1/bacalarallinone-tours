@@ -179,6 +179,22 @@ const TourDetail = ({ tourId, prefill }) => {
                   Max {tour.maxPax} pax
                 </span>
               )}
+              {tour.isNew && (
+                <span
+                  style={{
+                    background: 'var(--sun)',
+                    color: 'var(--ink)',
+                    fontSize: 11,
+                    letterSpacing: 1.4,
+                    padding: '5px 10px',
+                    borderRadius: 999,
+                    textTransform: 'uppercase',
+                    fontWeight: 700,
+                  }}
+                >
+                  {lang === 'en' ? 'NEW' : 'NUEVO'}
+                </span>
+              )}
             </div>
             <h1 className="display" style={{ fontSize: 56, margin: 0, lineHeight: 0.95, letterSpacing: '-0.03em' }}>
               {tour.title[lang]}

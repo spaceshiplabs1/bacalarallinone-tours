@@ -133,9 +133,23 @@
     cultural: "ruins",
   };
 
+  // Some Bokun titles ship with a "[NEW]" or "[NEW TOUR]" / "[NEW EXPERIENCE]"
+  // prefix. We strip it from the rendered text and surface a standalone
+  // `isNew` flag so the storefront can show a ribbon/badge instead of inline
+  // brackets.
+  function stripNewPrefix(name) {
+    if (!name) return { name, isNew: false };
+    const m = name.match(/^\s*\[\s*NEW(?:\s+(?:TOUR|EXPERIENCE|ROUTE))?\s*\]\s*/i);
+    return m
+      ? { name: name.slice(m[0].length).trim(), isNew: true }
+      : { name, isNew: false };
+  }
+
   function shapeListItem(en, es) {
     const t = en;
     const e = es || null;
+    const enName = stripNewPrefix(t.translation.name);
+    const esName = stripNewPrefix(e?.translation?.name ?? t.translation.name);
     return {
       // Existing components find tours by `id`; we use slug as the canonical
       // id since slug is unique per tenant and stable. The real API UUID is
@@ -145,9 +159,10 @@
       slug: t.slug,
       apiId: t.id,
       title: {
-        en: t.translation.name,
-        es: e?.translation?.name ?? t.translation.name,
+        en: enName.name,
+        es: esName.name,
       },
+      isNew: enName.isNew || esName.isNew,
       tagline: {
         en: t.translation.shortDescription || "",
         es:
@@ -300,7 +315,9 @@
       }
       if (esRes.ok) {
         const es = await esRes.json();
-        tour.title.es = es.translation?.name || tour.title.es;
+        const cleaned = stripNewPrefix(es.translation?.name);
+        tour.title.es = cleaned.name || tour.title.es;
+        if (cleaned.isNew) tour.isNew = true;
         tour.tagline.es =
           es.translation?.shortDescription || tour.tagline.es;
         tour.descriptionHtml.es = es.translation?.descriptionHtml || tour.descriptionHtml.es;
