@@ -89,7 +89,9 @@ const icons = {
   send: <><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></>,
   bag: <><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></>,
   trash: <><path d="M4 7h16M10 11v6M14 11v6M9 7V4h6v3M6 7l1 13h10l1-13"/></>,
-  van: <><rect x="3" y="9" width="18" height="8" rx="1.5"/><path d="M9 9v4M15 9v4"/><path d="M3 13h18"/><circle cx="7" cy="17.5" r="1.8" fill="currentColor" stroke="none"/><circle cx="17" cy="17.5" r="1.8" fill="currentColor" stroke="none"/></>
+  van: <><rect x="3" y="9" width="18" height="8" rx="1.5"/><path d="M9 9v4M15 9v4"/><path d="M3 13h18"/><circle cx="7" cy="17.5" r="1.8" fill="currentColor" stroke="none"/><circle cx="17" cy="17.5" r="1.8" fill="currentColor" stroke="none"/></>,
+  // taxi — lucide.dev "car-taxi" path; checker-style top with sedan body
+  taxi: <><path d="M10 2h4"/><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/></>
 };
 
 window.Icon = Icon;

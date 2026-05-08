@@ -84,11 +84,12 @@ const TourDetail = ({ tourId, prefill }) => {
 
   const gallery = window.tourGallery(tour);
 
-  const addonList = [
-    { k: 'hotel', label: lang==='en'?'Hotel pickup':'Traslado hotel', price: 15 },
-    { k: 'photo', label: lang==='en'?'Pro photo pack (50 photos)':'Pack de fotos pro (50)', price: 25 },
-    { k: 'lunch', label: lang==='en'?'Upgrade to premium lunch':'Upgrade almuerzo premium', price: 18 }
-  ];
+  // Tour add-ons aren't sourced from anywhere yet — Bokun import doesn't
+  // capture extras. Optional taxi pickup now lives in the dedicated
+  // "Optional transport" section above (sourced from tour_transport_options).
+  // Leaving the slot empty until a real source of add-ons (tour-level
+  // upsells: photo pack, premium lunch, etc.) is wired through the API.
+  const addonList = [];
 
   // Infants are free by default. If a tenant later wires up
   // TourZonePrice rows with paxCategory='infant' the price calc will
@@ -516,7 +517,8 @@ const TourDetail = ({ tourId, prefill }) => {
                 </div>
               )}
 
-              {/* Add-ons */}
+              {/* Add-ons (only rendered when there's something to show). */}
+              {addonList.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <span className="mono" style={{ color:'var(--ink-soft)', display:'block', marginBottom: 8 }}>{t.addOns}</span>
                 <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
@@ -543,6 +545,7 @@ const TourDetail = ({ tourId, prefill }) => {
                   })}
                 </div>
               </div>
+              )}
 
               {/* Optional transport. Each option is a route_price priced
                   by a vendor (e.g., Taxis Bacalar). Selecting one unlocks
@@ -587,6 +590,13 @@ const TourDetail = ({ tourId, prefill }) => {
                       const dirLabel = opt.defaultDirection === 'round_trip' ? t.transportRoundTrip : t.transportOneWay;
                       const labelText = opt.label?.[lang] || opt.label?.en || opt.vehicle?.name || 'Pickup';
                       const descText = opt.description?.[lang] || opt.description?.en || '';
+                      // Pick the right vehicle icon + accent color from
+                      // serviceType. Taxi gets the lucide taxi glyph in
+                      // the brand sun yellow so it stands out at a glance.
+                      const svc = opt.vehicle?.serviceType;
+                      const iconKey = svc === 'taxi' ? 'taxi' : svc === 'shuttle' ? 'bus' : 'van';
+                      const iconBg  = svc === 'taxi' ? 'var(--sun)'    : 'var(--bone-2)';
+                      const iconFg  = svc === 'taxi' ? 'var(--ink)'    : 'var(--ink-soft)';
                       return (
                         <label
                           key={opt.id}
@@ -606,8 +616,29 @@ const TourDetail = ({ tourId, prefill }) => {
                             onChange={()=>{ setSelectedTransport(opt); setPickupAddressTouched(false); }}
                             style={{ marginTop: 3 }}
                           />
+                          <div
+                            aria-hidden
+                            style={{
+                              width: 36, height: 36, borderRadius: 8,
+                              background: iconBg, color: iconFg,
+                              display:'flex', alignItems:'center', justifyContent:'center',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Icon d={icons[iconKey]} size={20}/>
+                          </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 600 }}>{labelText}</div>
+                            <div style={{ display:'flex', alignItems:'center', gap: 6, flexWrap:'wrap' }}>
+                              <span style={{ fontSize: 13, fontWeight: 600 }}>{labelText}</span>
+                              {svc === 'taxi' && (
+                                <span style={{
+                                  fontSize: 9, fontFamily:'var(--font-mono)',
+                                  letterSpacing:'0.08em', textTransform:'uppercase',
+                                  background:'var(--sun)', color:'var(--ink)',
+                                  padding:'2px 6px', borderRadius: 4, fontWeight: 700,
+                                }}>Taxi</span>
+                              )}
+                            </div>
                             {descText && (
                               <div style={{ fontSize: 11, color:'var(--ink-soft)', marginTop: 2 }}>{descText}</div>
                             )}
