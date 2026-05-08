@@ -13,22 +13,42 @@ const TourDetail = ({ tourId, prefill }) => {
     if (conv == null) return { amount: amt, currency: src || 'USD' };
     return { amount: Math.round(conv), currency: dst };
   };
-  const _adultPrice = _convPrice(tour.priceAdult, tour.defaultCurrency);
-  const _kidPrice = _convPrice(tour.priceKid, tour.defaultCurrency);
   const tour = window.TOURS.find(x => x.id === tourId) || window.TOURS[0];
+
+  // Hooks must run on every render in the same order — call them all up
+  // front with safe `tour?.…` access, THEN early-return if tour isn't
+  // ready. Otherwise React's rules-of-hooks fire when window.TOURS is
+  // still empty on first paint.
   const [adults, setAdults] = useState(2);
   const [kids, setKids] = useState(0);
   const [infants, setInfants] = useState(0);
   const [selDate, setSelDate] = useState(prefill?.prefillDate || null);
   const [selTime, setSelTime] = useState(
-    prefill?.prefillTime && tour.times && tour.times.includes(prefill.prefillTime)
+    prefill?.prefillTime && tour?.times && tour.times.includes(prefill.prefillTime)
       ? prefill.prefillTime
       : null
   );
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [addons, setAddons] = useState({});
-  const hasPickups = Array.isArray(tour.pickupPoints) && tour.pickupPoints.length > 1;
   const [pickupIdx, setPickupIdx] = useState(0);
+  const [selectedTransport, setSelectedTransport] = useState(null);
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
+
+  // window.TOURS may be empty during the initial paint (data-api hasn't
+  // populated it yet). Render a tiny shell rather than crashing on
+  // tour.title[lang] / tour.audience etc. further down.
+  if (!tour) {
+    return (
+      <div className="container" style={{ paddingTop: 60, textAlign: 'center', color: 'var(--ink-soft)' }}>
+        <div className="mono">Loading…</div>
+      </div>
+    );
+  }
+
+  const _adultPrice = _convPrice(tour.priceAdult, tour.defaultCurrency);
+  const _kidPrice = _convPrice(tour.priceKid, tour.defaultCurrency);
+  const hasPickups = Array.isArray(tour.pickupPoints) && tour.pickupPoints.length > 1;
   const pickup = (Array.isArray(tour.pickupPoints) && tour.pickupPoints[pickupIdx]) || null;
   const pickupSurcharge = pickup?.surcharge || 0;
 
@@ -36,9 +56,6 @@ const TourDetail = ({ tourId, prefill }) => {
   // taxi pickup from any hotel inside a service zone). selectedTransport
   // = null means "no pickup, customer goes to the meeting point".
   const transportOptions = Array.isArray(tour.transportOptions) ? tour.transportOptions : [];
-  const [selectedTransport, setSelectedTransport] = useState(null);
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
 
   // Convert a transport option's price (in option.pricing.currency, cents)
   // into the tour's default currency so the cart total can stay in a
