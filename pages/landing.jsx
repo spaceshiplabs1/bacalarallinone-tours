@@ -71,6 +71,21 @@ const Landing = ({ slug, locale }) => {
   const tourBySlug = {};
   TOURS.forEach((t) => { if (t && t.slug) tourBySlug[t.slug] = t; });
 
+  // Tours referenced inline via {{tour:slug}} — used to (a) feed the poker
+  // stack with non-overlapping fillers and (b) decide what to show in the
+  // end-of-article "more tours" rail.
+  const inlineSlugs = new Set();
+  segments.forEach((s) => { if (s.kind === 'tour' && s.slug) inlineSlugs.add(s.slug); });
+
+  const pickStackFillers = (primarySlug, n) => {
+    const pool = TOURS.filter((t) => t && t.slug && t.slug !== primarySlug);
+    return pool.slice(0, n);
+  };
+
+  const moreTours = TOURS
+    .filter((t) => t && t.slug && !inlineSlugs.has(t.slug))
+    .slice(0, 6);
+
   // SEO — Article + breadcrumb + alternates pointing to the other locale.
   const _seoCtx = window.tagcSchema.ctxFor(
     { page: 'landing', params: { slug, locale } },
@@ -136,7 +151,7 @@ const Landing = ({ slug, locale }) => {
   return (
     <div className="fade-in landing">
       <window.PageSeo
-        title={frontmatter.metaTitle || frontmatter.title}
+        title={frontmatter.metaTitle || frontmatter.titlePlain || frontmatter.title.replace(/<[^>]+>/g, '')}
         description={frontmatter.metaDescription || ''}
         image={frontmatter.hero}
         type="article"
@@ -144,26 +159,18 @@ const Landing = ({ slug, locale }) => {
         jsonLd={_seoJsonLd}
       />
 
-      {/* Breadcrumb — Home → Guías/Guides → landing title. */}
-      <div className="container">
-        <window.Breadcrumbs
-          items={[
-            { label: lang === 'es' ? 'Inicio' : 'Home', page: 'home' },
-            { label: lang === 'es' ? 'Guías' : 'Guides' },
-            { label: frontmatter.title }
-          ]}
-        />
-      </div>
-
-      {/* Hero */}
+      {/* Hero — full-bleed, ~88vh. Breadcrumb sits at the top inside the hero
+          so it reads on the image (white text), not on the page bone bg. */}
       <section
         className="landing-hero"
         style={{
           position: 'relative',
-          minHeight: 480,
+          minHeight: 'min(88vh, 820px)',
           background: '#0c1a2a',
           overflow: 'hidden',
-          marginBottom: 40
+          marginBottom: 56,
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         {frontmatter.hero && (
@@ -183,38 +190,101 @@ const Landing = ({ slug, locale }) => {
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.65) 100%)'
+            background:
+              'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.78) 100%)'
           }}
         />
-        <div className="container" style={{ position: 'relative', zIndex: 1, padding: '110px 0 70px', color: '#fff' }}>
-          {frontmatter.kicker && (
-            <div className="mono" style={{ fontSize: 12, letterSpacing: '0.18em', opacity: 0.85, textTransform: 'uppercase', marginBottom: 16 }}>
-              {frontmatter.kicker}
-            </div>
-          )}
-          <h1
-            className="display"
-            style={{
-              fontSize: 'clamp(36px, 6vw, 60px)',
-              lineHeight: 1.05,
-              maxWidth: 880,
-              margin: 0,
-              letterSpacing: '-0.01em'
-            }}
-          >
-            {frontmatter.title}
-          </h1>
-          {frontmatter.subtitle && (
-            <p style={{
-              fontSize: 'clamp(17px, 2vw, 21px)',
-              lineHeight: 1.45,
-              marginTop: 18,
-              maxWidth: 760,
-              opacity: 0.94
-            }}>
-              {frontmatter.subtitle}
-            </p>
-          )}
+        {/* Breadcrumb at top — over the image, white text. */}
+        <div
+          className="container"
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            padding: '20px 0 0'
+          }}
+        >
+          <div style={{ maxWidth: 880, margin: '0 auto' }}>
+            <window.Breadcrumbs
+              light
+              items={[
+                { label: lang === 'es' ? 'Inicio' : 'Home', page: 'home' },
+                { label: lang === 'es' ? 'Guías' : 'Guides' },
+                { label: frontmatter.titlePlain || frontmatter.title.replace(/<[^>]+>/g, '') }
+              ]}
+            />
+          </div>
+        </div>
+
+        {/* Title block at the bottom of the hero. */}
+        <div
+          className="container"
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            width: '100%',
+            marginTop: 'auto',
+            padding: '0 0 80px',
+            color: '#fff'
+          }}
+        >
+          <div style={{ maxWidth: 880, margin: '0 auto' }}>
+            {frontmatter.kicker && (
+              <div
+                className="mono"
+                style={{
+                  fontSize: 12,
+                  letterSpacing: '0.22em',
+                  opacity: 0.95,
+                  textTransform: 'uppercase',
+                  marginBottom: 22,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 10
+                }}
+              >
+                <span aria-hidden style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--sun)', display: 'inline-block' }}/>
+                {frontmatter.kicker}
+              </div>
+            )}
+            <h1
+              className="display"
+              style={{
+                fontSize: 'clamp(40px, 6.4vw, 72px)',
+                lineHeight: 1.02,
+                margin: 0,
+                letterSpacing: '-0.022em',
+                fontWeight: 700
+              }}
+              dangerouslySetInnerHTML={{ __html: frontmatter.title }}
+            />
+            {frontmatter.flourish && (
+              <div
+                className="script"
+                style={{
+                  fontSize: 'clamp(26px, 3vw, 36px)',
+                  color: 'var(--sun)',
+                  marginTop: 16,
+                  letterSpacing: '0.005em'
+                }}
+              >
+                {frontmatter.flourish}
+              </div>
+            )}
+            {frontmatter.subtitle && (
+              <p style={{
+                fontSize: 'clamp(18px, 1.9vw, 22px)',
+                lineHeight: 1.5,
+                marginTop: 22,
+                maxWidth: 720,
+                opacity: 0.96,
+                fontFamily: "'Lora', Georgia, serif",
+                fontStyle: 'italic'
+              }}>
+                {frontmatter.subtitle}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -230,12 +300,16 @@ const Landing = ({ slug, locale }) => {
             if (seg.kind === 'tour') {
               const tour = tourBySlug[seg.slug];
               if (!tour) return null;
-              return <window.TourCardHorizontal key={'tour-' + i} tour={tour}/>;
+              const fillers = pickStackFillers(seg.slug, 2);
+              return <window.TourCardStack key={'tour-' + i} tours={[tour, ...fillers]}/>;
             }
             if (seg.kind === 'map') return renderMap(seg, 'map-' + i);
             if (seg.kind === 'quote') return renderQuote(seg, 'quote-' + i);
             return null;
           })}
+          {moreTours.length > 0 && (
+            <window.MoreTours tours={moreTours.slice(0, 3)} lang={lang}/>
+          )}
         </div>
       </article>
     </div>

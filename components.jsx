@@ -1070,12 +1070,29 @@ window.TourCard = TourCard;
 
 // Horizontal variant for inline-in-article use on landings. Image left,
 // content right, single-line title + short description + price + CTA.
-const TourCardHorizontal = ({ tour, onClick }) => {
+// `flat`: skip the internal hover transform/margin so a wrapper (e.g. TourCardStack)
+// can own movement instead.
+const TourCardHorizontal = ({ tour, onClick, flat = false }) => {
   const { t, lang, navigate, displayCurrency } = useT();
   if (!tour) return null;
   const price = priceForDisplay(tour, displayCurrency);
   const tagline = tour.tagline?.[lang] || tour.shortDescription?.[lang] || '';
   const handleClick = onClick || (() => navigate('detail', { tourId: tour.id }));
+  const durationMin = tour.durationMinutes;
+  const hours = durationMin ? Math.round(durationMin / 60) : null;
+  const durationLabel = hours
+    ? (lang === 'es' ? `${hours} h` : `${hours} hr`)
+    : null;
+  const hoverHandlers = flat ? {} : {
+    onMouseEnter: (e) => {
+      e.currentTarget.style.boxShadow = '0 10px 28px rgba(0,0,0,0.12)';
+      e.currentTarget.style.transform = 'translateY(-2px)';
+    },
+    onMouseLeave: (e) => {
+      e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+      e.currentTarget.style.transform = 'translateY(0)';
+    }
+  };
   return (
     <a
       onClick={(e) => { e.preventDefault(); handleClick(); }}
@@ -1083,28 +1100,21 @@ const TourCardHorizontal = ({ tour, onClick }) => {
       className="tour-inline fade-in"
       style={{
         display: 'grid',
-        gridTemplateColumns: '240px 1fr',
+        gridTemplateColumns: 'minmax(0, 56%) 1fr',
         gap: 0,
-        background: 'var(--bone)',
+        background: '#fff',
         border: '1px solid var(--line)',
-        borderRadius: 16,
+        borderRadius: 14,
         overflow: 'hidden',
         textDecoration: 'none',
         color: 'inherit',
-        margin: '36px 0',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.02)',
+        margin: flat ? 0 : '36px 0',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
         transition: 'box-shadow 200ms ease, transform 200ms ease'
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.10)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 0 rgba(0,0,0,0.02)';
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
+      {...hoverHandlers}
     >
-      <div style={{ position: 'relative', minHeight: 180, background: '#0c1a2a' }}>
+      <div style={{ position: 'relative', minHeight: 260, background: '#0c1a2a' }}>
         <img
           src={window.tourPhoto(tour)}
           alt=""
@@ -1112,20 +1122,23 @@ const TourCardHorizontal = ({ tour, onClick }) => {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
       </div>
-      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 10 }}>
-        <div>
-          <h3 className="display" style={{ margin: 0, fontSize: 22, lineHeight: 1.18 }}>
-            {tour.title?.[lang] || tour.title?.en || ''}
-          </h3>
-          {tagline && (
-            <p style={{
-              margin: '8px 0 0', fontSize: 14, lineHeight: 1.5,
-              color: 'var(--ink-soft)',
-              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-            }}>{tagline}</p>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10 }}>
+        {durationLabel && (
+          <div className="mono" style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--ink-soft)' }}>
+            {durationLabel}{tour.location ? ` · ${tour.location}` : ''}
+          </div>
+        )}
+        <h3 className="display" style={{ margin: 0, fontSize: 22, lineHeight: 1.2 }}>
+          {tour.title?.[lang] || tour.title?.en || ''}
+        </h3>
+        {tagline && (
+          <p style={{
+            margin: 0, fontSize: 14, lineHeight: 1.55,
+            color: 'var(--ink-soft)',
+            display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+          }}>{tagline}</p>
+        )}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginTop: 6 }}>
           <div className="display" style={{ fontSize: 22 }}>
             ${price.amount} <span style={{ fontSize: 12, opacity: 0.7, fontWeight: 500 }}>{price.currency}</span>
             {tour.priceUnit !== 'per_booking' && (
@@ -1144,6 +1157,78 @@ const TourCardHorizontal = ({ tour, onClick }) => {
   );
 };
 window.TourCardHorizontal = TourCardHorizontal;
+
+// Poker-style stack of horizontal tour cards. The primary tour sits in front,
+// 1–2 fillers fan out behind. Hovering the wrapper cycles the order so the
+// next card slides up to the front and the previous one rotates to the back.
+const TourCardStack = ({ tours }) => {
+  const list = (tours || []).filter(Boolean);
+  const [topIdx, setTopIdx] = useState(0);
+  if (list.length === 0) return null;
+  if (list.length === 1) return <TourCardHorizontal tour={list[0]}/>;
+
+  const handleEnter = () => setTopIdx((i) => (i + 1) % list.length);
+
+  return (
+    <div className="tour-stack" onMouseEnter={handleEnter}>
+      {list.map((tour, i) => {
+        const slot = (i - topIdx + list.length) % list.length;
+        return (
+          <div key={tour.slug || tour.id || i} className={'tour-stack-card slot-' + slot}>
+            <TourCardHorizontal tour={tour} flat/>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+window.TourCardStack = TourCardStack;
+
+// Compact square tour tile used in the "more tours" rail at the end of an
+// editorial landing. Square photo + 2-line title + price; rounded border.
+const TourCardSquare = ({ tour }) => {
+  const { lang, navigate, displayCurrency } = useT();
+  if (!tour) return null;
+  const price = priceForDisplay(tour, displayCurrency);
+  const title = tour.title?.[lang] || tour.title?.en || '';
+  return (
+    <a
+      onClick={(e) => { e.preventDefault(); navigate('detail', { tourId: tour.id }); }}
+      href={'/tour/' + (tour.slug || tour.id)}
+      className="tour-square-card"
+    >
+      <div className="tour-square-image">
+        <img src={window.tourPhoto(tour)} alt="" loading="lazy"/>
+      </div>
+      <div className="tour-square-body">
+        <h4>{title}</h4>
+        <div className="tour-square-price">
+          ${price.amount} <span>{price.currency}</span>
+          {tour.priceUnit !== 'per_booking' && (
+            <span className="tour-square-pp"> / {lang === 'es' ? 'p' : 'pp'}</span>
+          )}
+        </div>
+      </div>
+    </a>
+  );
+};
+window.TourCardSquare = TourCardSquare;
+
+// Grid of TourCardSquare shown at the end of an editorial landing.
+const MoreTours = ({ tours, lang }) => {
+  if (!tours || !tours.length) return null;
+  return (
+    <section className="more-tours">
+      <h2 className="display">
+        {lang === 'es' ? 'Más tours en Bacalar' : 'More Bacalar tours'}
+      </h2>
+      <div className="more-tours-grid">
+        {tours.map((t) => <TourCardSquare key={t.slug || t.id} tour={t}/>)}
+      </div>
+    </section>
+  );
+};
+window.MoreTours = MoreTours;
 
 // Skeleton tile that mirrors TourCard's footprint while the catalog
 // is still loading. Matches the 4:5 aspect ratio + 16px radius so
@@ -1758,9 +1843,13 @@ window.SEOHead = SeoOutlet;
 //   [{ label: 'Home', page: 'home', params: {} },
 //    { label: 'Tours', page: 'catalog' },
 //    { label: 'Sailing Tour' }]   // last item: no page → rendered as text
-const Breadcrumbs = ({ items }) => {
+const Breadcrumbs = ({ items, light = false }) => {
   const { navigate } = useT();
   if (!items || items.length === 0) return null;
+  // Light variant inverts colors so the breadcrumb reads on a dark hero image.
+  const mutedColor = light ? 'rgba(255,255,255,0.78)' : 'var(--ink-soft)';
+  const currentColor = light ? '#fff' : 'var(--ink)';
+  const underlineColor = light ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.18)';
   return (
     <nav
       className="breadcrumbs"
@@ -1770,7 +1859,7 @@ const Breadcrumbs = ({ items }) => {
         alignItems: 'center',
         flexWrap: 'wrap',
         gap: 6,
-        color: 'var(--ink-soft)',
+        color: mutedColor,
         fontSize: 13,
         padding: '14px 0 4px'
       }}
@@ -1786,11 +1875,11 @@ const Breadcrumbs = ({ items }) => {
           cursor: 'pointer',
           textDecoration: 'underline',
           textUnderlineOffset: 3,
-          textDecorationColor: 'rgba(0,0,0,0.18)',
+          textDecorationColor: underlineColor,
           font: 'inherit'
         };
         const node = last ? (
-          <span aria-current="page" style={{ color: 'var(--ink)' }}>{item.label}</span>
+          <span aria-current="page" style={{ color: currentColor }}>{item.label}</span>
         ) : item.page ? (
           <button onClick={() => navigate(item.page, item.params || {})} style={linkStyle}>
             {item.label}

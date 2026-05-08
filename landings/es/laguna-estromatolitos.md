@@ -1,16 +1,18 @@
 ---
-title: Laguna de Bacalar y los estromatolitos vivos
+title: 'Laguna de Bacalar y los <em><span class="clay">estromatolitos vivos</span></em>'
+titlePlain: Laguna de Bacalar y los estromatolitos vivos
+flourish: tres mil quinientos millones de años, intactos
 subtitle: Una guía honesta a la Laguna de los 7 Colores y a los fósiles vivos más antiguos del planeta — qué son, dónde verlos, y cómo elegir un tour que no los destruya.
 kicker: Guía editorial · Bacalar
 metaTitle: Estromatolitos en Bacalar — guía completa de la Laguna de los 7 Colores
 metaDescription: Qué son los estromatolitos, por qué la Laguna de Bacalar es uno de los pocos lugares del mundo donde verlos, y cómo elegir un tour responsable que los respete.
-hero: /images/hero-lagoon-1600.webp
+hero: /images/pontoon-rapids-1600.webp
 alternateSlug: lagoon-stromatolites
 publishedAt: 2026-05-08
 updatedAt: 2026-05-08
 ---
 
-Los siete colores de la laguna son reales y tienen una explicación geológica concreta. Bacalar se asienta sobre roca caliza que el agua ha disuelto durante miles de años, formando profundidades que cambian abruptamente: zonas muy someras de fondo claro y arenoso, cenotes profundos donde el fondo se pierde en azul oscuro, y bancos cubiertos de microorganismos que tiñen el agua de un verde pálido. Cuando el sol cae sobre esa topografía, los tonos se separan en franjas de turquesa, esmeralda, azul cobalto y casi negro.
+Los <span class="lagoon">siete colores</span> de la laguna son reales y tienen una explicación geológica concreta. Bacalar se asienta sobre roca caliza que el agua ha disuelto durante miles de años, formando profundidades que cambian abruptamente: zonas muy someras de fondo claro y arenoso, cenotes profundos donde el fondo se pierde en azul oscuro, y bancos cubiertos de microorganismos que tiñen el agua de un verde pálido. Cuando el sol cae sobre esa topografía, los tonos se separan en franjas de turquesa, esmeralda, azul cobalto y casi negro.
 
 No hay corales aquí. La laguna es agua dulce alimentada por cenotes y manantiales subterráneos. Lo que parece arrecife — esos montículos grises o cafés en aguas poco profundas — es algo mucho más antiguo y mucho más raro.
 
@@ -18,7 +20,7 @@ No hay corales aquí. La laguna es agua dulce alimentada por cenotes y manantial
 
 Los estromatolitos son colonias de cianobacterias que crecen en capas sobre el sustrato. Cada capa es una generación: las bacterias atrapan sedimento, lo cementan, mueren, y la siguiente capa crece encima. El proceso es extraordinariamente lento — un montículo del tamaño de una mesa puede haber tardado **siglos o miles de años** en formarse.
 
-Estos organismos llevan haciendo lo mismo desde hace **3.500 millones de años**. Son responsables, literalmente, de que la atmósfera de la Tierra tenga oxígeno: durante el primer evento de oxigenación del planeta — hace unos 2.400 millones de años — fueron los estromatolitos los que lo produjeron. Sin ellos, no estarías leyendo esto.
+Estos organismos llevan haciendo lo mismo desde hace <span class="clay">3.500 millones de años</span>. Son responsables, literalmente, de que la atmósfera de la Tierra tenga oxígeno: durante el primer evento de oxigenación del planeta — hace unos 2.400 millones de años — fueron los estromatolitos los que lo produjeron. Sin ellos, no estarías leyendo esto.
 
 {{quote:Sin autor|Los estromatolitos vivos son rarísimos. Solo se encuentran en un puñado de lugares hipersalinos o de química inusual — y aquí, en Bacalar, uno de los arrecifes de agua dulce más grandes del planeta.}}
 

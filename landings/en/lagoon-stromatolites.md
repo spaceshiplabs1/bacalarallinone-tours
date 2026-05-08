@@ -1,16 +1,18 @@
 ---
-title: Bacalar Lagoon and the living stromatolites
+title: 'Bacalar Lagoon and the <em><span class="clay">living stromatolites</span></em>'
+titlePlain: Bacalar Lagoon and the living stromatolites
+flourish: three and a half billion years, intact
 subtitle: An honest guide to the Lagoon of Seven Colors and the oldest living fossils on Earth — what they are, where to see them, and how to pick a tour that doesn't destroy them.
 kicker: Editorial guide · Bacalar
 metaTitle: Stromatolites in Bacalar — full guide to the Lagoon of Seven Colors
 metaDescription: What stromatolites are, why Bacalar Lagoon is one of the few places on Earth where you can see them alive, and how to pick a tour that respects them.
-hero: /images/hero-lagoon-1600.webp
+hero: /images/pontoon-rapids-1600.webp
 alternateSlug: laguna-estromatolitos
 publishedAt: 2026-05-08
 updatedAt: 2026-05-08
 ---
 
-The seven colors of the lagoon are real, and there's a concrete geological reason for them. Bacalar sits on a limestone bed that water has dissolved over thousands of years, creating depths that change abruptly: shallow zones with bright sandy bottoms, deep cenotes where the floor disappears into dark blue, and shoals covered in microorganisms that tint the water pale green. When the sun hits that topography, the tones split into bands of turquoise, emerald, cobalt, and near-black.
+The <span class="lagoon">seven colors</span> of the lagoon are real, and there's a concrete geological reason for them. Bacalar sits on a limestone bed that water has dissolved over thousands of years, creating depths that change abruptly: shallow zones with bright sandy bottoms, deep cenotes where the floor disappears into dark blue, and shoals covered in microorganisms that tint the water pale green. When the sun hits that topography, the tones split into bands of turquoise, emerald, cobalt, and near-black.
 
 There is no coral here. Bacalar Lagoon is freshwater, fed by cenotes and underground springs. What looks like reef — those gray and brown mounds in shallow water — is something far older and far rarer.
 
@@ -18,7 +20,7 @@ There is no coral here. Bacalar Lagoon is freshwater, fed by cenotes and undergr
 
 Stromatolites are colonies of cyanobacteria that grow in stacked layers. Each layer is a generation: the bacteria trap sediment, cement it, die, and the next layer grows on top. The process is extraordinarily slow — a mound the size of a coffee table can take **centuries or millennia** to form.
 
-These organisms have been doing the same thing for **3.5 billion years**. They are, literally, the reason Earth's atmosphere has oxygen: during the planet's Great Oxygenation Event, around 2.4 billion years ago, stromatolites were the producers. Without them, you wouldn't be reading this.
+These organisms have been doing the same thing for <span class="clay">3.5 billion years</span>. They are, literally, the reason Earth's atmosphere has oxygen: during the planet's Great Oxygenation Event, around 2.4 billion years ago, stromatolites were the producers. Without them, you wouldn't be reading this.
 
 {{quote:Anonymous|Living stromatolites are extremely rare. They survive only in a handful of unusually saline or chemically distinctive places — and here, in Bacalar, one of the largest freshwater stromatolite reefs in the world.}}
 

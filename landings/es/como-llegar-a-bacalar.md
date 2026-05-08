@@ -1,10 +1,12 @@
 ---
-title: Cómo llegar a Bacalar
+title: 'Cómo llegar a <em><span class="clay">Bacalar</span></em>'
+titlePlain: Cómo llegar a Bacalar
+flourish: del aeropuerto a la laguna
 subtitle: Desde Cancún, Tulum o Chetumal — qué tarda cada ruta, cuánto cuesta cada opción, y por qué casi siempre conviene reservar el traslado privado antes de aterrizar.
 kicker: Guía editorial · Logística
 metaTitle: Cómo llegar a Bacalar — desde Cancún, Tulum y Chetumal
 metaDescription: Guía honesta de cómo llegar a Bacalar desde los aeropuertos cercanos. Tiempos de traslado, opciones de transporte, costos aproximados y por qué reservar privado suele salir mejor.
-hero: /images/hero-lagoon-1600.webp
+hero: /images/transfer-cun-1600.webp
 alternateSlug: how-to-get-to-bacalar
 publishedAt: 2026-05-08
 updatedAt: 2026-05-08
