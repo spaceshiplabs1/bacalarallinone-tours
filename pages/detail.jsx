@@ -181,7 +181,10 @@ const TourDetail = ({ tourId, prefill }) => {
   const transportAddressOk =
     !selectedTransport ||
     (pickupAddress.trim().length > 0 && !pickupOutOfZone);
-  const canBook = selDate && selTime && (tour.flat || adults > 0) && transportAddressOk;
+  // Tours with no scheduled startTimes (Bokun request-only) skip the
+  // time requirement; the date alone + the request CTA is enough.
+  const hasTimeSlots = Array.isArray(tour.times) && tour.times.length > 0;
+  const canBook = selDate && (!hasTimeSlots || selTime) && (tour.flat || adults > 0) && transportAddressOk;
 
   return (
     <div className="fade-in">
@@ -536,7 +539,10 @@ const TourDetail = ({ tourId, prefill }) => {
                 />
               </label>
 
-              {/* Time */}
+              {/* Time picker — only shown when the tour exposes one or
+                  more startTimes. Tours with no schedule (Bokun "request
+                  only") fall back to the date picker + a request CTA. */}
+              {Array.isArray(tour.times) && tour.times.length > 0 && (
               <label className="field" style={{ marginTop: 14 }}>
                 <span className="mono">{t.time}</span>
                 <div style={{ display:'flex', gap: 6, flexWrap:'wrap' }}>
@@ -560,6 +566,7 @@ const TourDetail = ({ tourId, prefill }) => {
                   })}
                 </div>
               </label>
+              )}
 
               {/* People (not for flat vans). Three tiers in one row to
                   conserve vertical space — labels stack above each
