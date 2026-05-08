@@ -33,7 +33,52 @@ const TourDetail = ({ tourId, prefill }) => {
   const [pickupIdx, setPickupIdx] = useState(0);
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [pickupAddress, setPickupAddress] = useState('');
+  const [pickupCoords, setPickupCoords] = useState(null); // {lat, lng} once a Place is picked
   const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
+  const pickupInputRef = useRef(null);
+
+  // Bind Google Places Autocomplete to the pickup input once the
+  // customer chooses a transport option and the input is mounted. Bounds
+  // bias suggestions to the southern Yucatán + Mayan Riviera so a
+  // customer typing "Hotel La Aldea" gets the Bacalar one first. Same
+  // pattern as port_transfers_map.jsx's EndpointPicker.
+  useEffect(() => {
+    if (!selectedTransport || !pickupInputRef.current) return;
+    if (typeof window.loadGoogleMaps !== 'function') return;
+    let listener = null;
+    let cancelled = false;
+    window.loadGoogleMaps().then((maps) => {
+      if (cancelled || !pickupInputRef.current) return;
+      const ac = new maps.places.Autocomplete(pickupInputRef.current, {
+        bounds: new maps.LatLngBounds(
+          { lat: 17.5, lng: -89.5 },
+          { lat: 22.0, lng: -85.5 }
+        ),
+        strictBounds: false,
+        fields: ['formatted_address', 'name', 'geometry', 'place_id'],
+      });
+      listener = ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if (!place) return;
+        const text = place.formatted_address || place.name || '';
+        if (text) setPickupAddress(text);
+        if (place.geometry?.location) {
+          setPickupCoords({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+        } else {
+          setPickupCoords(null);
+        }
+      });
+    }).catch((err) => {
+      console.warn('[detail] Google Maps SDK load failed', err);
+    });
+    return () => {
+      cancelled = true;
+      if (listener?.remove) listener.remove();
+    };
+  }, [selectedTransport]);
 
   // window.TOURS may be empty during the initial paint (data-api hasn't
   // populated it yet). Render a tiny shell rather than crashing on
@@ -660,22 +705,33 @@ const TourDetail = ({ tourId, prefill }) => {
                       <label className="mono" style={{ display:'block', fontSize: 11, color:'var(--ink-soft)', marginBottom: 4 }}>
                         {t.transportPickupAddressLabel}
                       </label>
-                      <textarea
+                      <input
+                        ref={pickupInputRef}
+                        type="text"
                         value={pickupAddress}
-                        onChange={(e)=>{ setPickupAddress(e.target.value); setPickupAddressTouched(true); }}
+                        onChange={(e)=>{
+                          setPickupAddress(e.target.value);
+                          setPickupCoords(null); // typing invalidates coords until next pick
+                          setPickupAddressTouched(true);
+                        }}
                         onBlur={()=>setPickupAddressTouched(true)}
                         placeholder={t.transportPickupAddressPlaceholder}
-                        rows={2}
+                        autoComplete="off"
                         style={{
-                          width:'100%', padding: '8px 10px', borderRadius: 8,
+                          width:'100%', padding: '10px 12px', borderRadius: 8,
                           border: `1px solid ${pickupAddressTouched && !pickupAddress.trim() ? '#dc2626' : 'var(--line-strong)'}`,
-                          fontFamily: 'inherit', fontSize: 13, resize:'vertical',
+                          fontFamily: 'inherit', fontSize: 13,
                           background:'var(--bone)',
                         }}
                       />
                       {pickupAddressTouched && !pickupAddress.trim() && (
                         <div style={{ color:'#dc2626', fontSize: 11, marginTop: 4 }}>
                           {t.transportPickupAddressRequired}
+                        </div>
+                      )}
+                      {pickupCoords && (
+                        <div className="mono" style={{ fontSize: 10, color:'var(--ink-soft)', marginTop: 4 }}>
+                          <Icon d={icons.pin} size={9}/> {pickupCoords.lat.toFixed(5)}, {pickupCoords.lng.toFixed(5)}
                         </div>
                       )}
                     </div>
@@ -710,7 +766,10 @@ const TourDetail = ({ tourId, prefill }) => {
                     kind: 'transfer',
                     serviceType: isRoundTrip ? 'round_trip' : 'point_to_point',
                     roundTrip: isRoundTrip,
-                    origin: { address: pickupAddress.trim() },
+                    origin: {
+                      address: pickupAddress.trim(),
+                      ...(pickupCoords ? { lat: pickupCoords.lat, lng: pickupCoords.lng } : {}),
+                    },
                     destination: { address: opt.label?.[lang] || opt.vehicle?.name || 'Tour meeting point' },
                     pax: _pax,
                     luggage: 0,
