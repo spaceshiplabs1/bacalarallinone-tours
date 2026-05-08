@@ -13,6 +13,23 @@ const TourDetail = ({ tourId, prefill }) => {
     if (conv == null) return { amount: amt, currency: src || 'USD' };
     return { amount: Math.round(conv), currency: dst };
   };
+
+  // Ray-casting point-in-polygon for GeoJSON Polygon { type, coordinates: [[[lng,lat],...]] }.
+  // Uses the outer ring only (holes ignored — none in our seeded zones).
+  const _pointInPolygon = (lng, lat, geom) => {
+    if (!geom || geom.type !== 'Polygon' || !Array.isArray(geom.coordinates)) return true;
+    const ring = geom.coordinates[0];
+    if (!Array.isArray(ring) || ring.length < 3) return true;
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i];
+      const [xj, yj] = ring[j];
+      const intersect = ((yi > lat) !== (yj > lat)) &&
+        (lng < ((xj - xi) * (lat - yi)) / ((yj - yi) || 1e-12) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  };
   const tour = window.TOURS.find(x => x.id === tourId) || window.TOURS[0];
 
   // Hooks must run on every render in the same order — call them all up
@@ -34,6 +51,7 @@ const TourDetail = ({ tourId, prefill }) => {
   const [selectedTransport, setSelectedTransport] = useState(null);
   const [pickupAddress, setPickupAddress] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null); // {lat, lng} once a Place is picked
+  const [pickupOutOfZone, setPickupOutOfZone] = useState(false);
   const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
   const pickupInputRef = useRef(null);
 
@@ -63,12 +81,16 @@ const TourDetail = ({ tourId, prefill }) => {
         const text = place.formatted_address || place.name || '';
         if (text) setPickupAddress(text);
         if (place.geometry?.location) {
-          setPickupCoords({
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-          });
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          setPickupCoords({ lat, lng });
+          // Validate against the option's service area polygon if present.
+          // Ray-casting point-in-polygon over GeoJSON [lng,lat] rings.
+          const poly = selectedTransport?.serviceArea?.geometry;
+          setPickupOutOfZone(poly ? !_pointInPolygon(lng, lat, poly) : false);
         } else {
           setPickupCoords(null);
+          setPickupOutOfZone(false);
         }
       });
     }).catch((err) => {
@@ -156,7 +178,9 @@ const TourDetail = ({ tourId, prefill }) => {
   // mean the picker degrades gracefully if they haven't arrived yet.
   const cutoffHours = tour.schedules?.[0]?.cutoffHoursBefore ?? 24;
 
-  const transportAddressOk = !selectedTransport || pickupAddress.trim().length > 0;
+  const transportAddressOk =
+    !selectedTransport ||
+    (pickupAddress.trim().length > 0 && !pickupOutOfZone);
   const canBook = selDate && selTime && (tour.flat || adults > 0) && transportAddressOk;
 
   return (
@@ -618,7 +642,7 @@ const TourDetail = ({ tourId, prefill }) => {
                         type="radio"
                         name="transport-choice"
                         checked={selectedTransport === null}
-                        onChange={()=>{ setSelectedTransport(null); setPickupAddressTouched(false); }}
+                        onChange={()=>{ setSelectedTransport(null); setPickupAddressTouched(false); setPickupOutOfZone(false); }}
                         style={{ marginTop: 3 }}
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -636,19 +660,19 @@ const TourDetail = ({ tourId, prefill }) => {
                       const labelText = opt.label?.[lang] || opt.label?.en || opt.vehicle?.name || 'Pickup';
                       const descText = opt.description?.[lang] || opt.description?.en || '';
                       // Pick the right vehicle icon + accent color from
-                      // serviceType. Taxi gets the lucide taxi glyph in
-                      // the brand sun yellow so it stands out at a glance.
+                      // serviceType. Taxi gets the lucide taxi glyph on a
+                      // bright "real-taxi-yellow" tile that gently jiggles
+                      // on appear/hover (see .taxi-tile in styles.css).
                       const svc = opt.vehicle?.serviceType;
-                      const iconKey = svc === 'taxi' ? 'taxi' : svc === 'shuttle' ? 'bus' : 'van';
-                      const iconBg  = svc === 'taxi' ? 'var(--sun)'    : 'var(--bone-2)';
-                      const iconFg  = svc === 'taxi' ? 'var(--ink)'    : 'var(--ink-soft)';
+                      const isTaxi = svc === 'taxi';
+                      const iconKey = isTaxi ? 'taxi' : svc === 'shuttle' ? 'bus' : 'van';
                       return (
                         <label
                           key={opt.id}
                           className={`addon-row${isSel ? ' is-checked' : ''}`}
                           style={{
-                            display:'flex', alignItems:'flex-start', gap: 10,
-                            padding: '10px 12px',
+                            display:'flex', alignItems:'center', gap: 8,
+                            padding: '8px 10px',
                             border: `1px solid ${isSel ? 'var(--lagoon)' : 'var(--line)'}`,
                             background: isSel ? 'rgba(184,232,238,0.35)' : 'transparent',
                             borderRadius: 8, cursor:'pointer',
@@ -658,36 +682,28 @@ const TourDetail = ({ tourId, prefill }) => {
                             type="radio"
                             name="transport-choice"
                             checked={isSel}
-                            onChange={()=>{ setSelectedTransport(opt); setPickupAddressTouched(false); }}
-                            style={{ marginTop: 3 }}
+                            onChange={()=>{ setSelectedTransport(opt); setPickupAddressTouched(false); setPickupOutOfZone(false); }}
                           />
                           <div
                             aria-hidden
+                            className={isTaxi ? 'taxi-tile' : ''}
                             style={{
-                              width: 36, height: 36, borderRadius: 8,
-                              background: iconBg, color: iconFg,
+                              width: 30, height: 30, borderRadius: 7,
+                              background: isTaxi ? '#ffd11a' : 'var(--bone-2)',
+                              color: isTaxi ? '#1a1a1a' : 'var(--ink-soft)',
+                              boxShadow: isTaxi ? '0 1px 0 #b8901a, inset 0 -1px 0 rgba(0,0,0,0.06)' : 'none',
                               display:'flex', alignItems:'center', justifyContent:'center',
                               flexShrink: 0,
                             }}
                           >
-                            <Icon d={icons[iconKey]} size={20}/>
+                            <Icon d={icons[iconKey]} size={18}/>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display:'flex', alignItems:'center', gap: 6, flexWrap:'wrap' }}>
-                              <span style={{ fontSize: 13, fontWeight: 600 }}>{labelText}</span>
-                              {svc === 'taxi' && (
-                                <span style={{
-                                  fontSize: 9, fontFamily:'var(--font-mono)',
-                                  letterSpacing:'0.08em', textTransform:'uppercase',
-                                  background:'var(--sun)', color:'var(--ink)',
-                                  padding:'2px 6px', borderRadius: 4, fontWeight: 700,
-                                }}>Taxi</span>
-                              )}
-                            </div>
+                            <div style={{ fontSize: 13, fontWeight: 600 }}>{labelText}</div>
                             {descText && (
-                              <div style={{ fontSize: 11, color:'var(--ink-soft)', marginTop: 2 }}>{descText}</div>
+                              <div style={{ fontSize: 11, color:'var(--ink-soft)', marginTop: 1 }}>{descText}</div>
                             )}
-                            <div className="mono" style={{ fontSize: 10, color:'var(--ink-soft)', marginTop: 4 }}>
+                            <div className="mono" style={{ fontSize: 10, color:'var(--ink-soft)', marginTop: 3 }}>
                               {dirLabel}
                               {info.vehicleCount > 1 && ` · ${info.vehicleCount}× (${cap} pax/v)`}
                             </div>
@@ -712,6 +728,7 @@ const TourDetail = ({ tourId, prefill }) => {
                         onChange={(e)=>{
                           setPickupAddress(e.target.value);
                           setPickupCoords(null); // typing invalidates coords until next pick
+                          setPickupOutOfZone(false);
                           setPickupAddressTouched(true);
                         }}
                         onBlur={()=>setPickupAddressTouched(true)}
@@ -719,7 +736,11 @@ const TourDetail = ({ tourId, prefill }) => {
                         autoComplete="off"
                         style={{
                           width:'100%', padding: '10px 12px', borderRadius: 8,
-                          border: `1px solid ${pickupAddressTouched && !pickupAddress.trim() ? '#dc2626' : 'var(--line-strong)'}`,
+                          border: `1px solid ${
+                            pickupOutOfZone || (pickupAddressTouched && !pickupAddress.trim())
+                              ? '#dc2626'
+                              : 'var(--line-strong)'
+                          }`,
                           fontFamily: 'inherit', fontSize: 13,
                           background:'var(--bone)',
                         }}
@@ -729,9 +750,18 @@ const TourDetail = ({ tourId, prefill }) => {
                           {t.transportPickupAddressRequired}
                         </div>
                       )}
-                      {pickupCoords && (
+                      {pickupOutOfZone && (
+                        <div style={{ color:'#dc2626', fontSize: 11, marginTop: 4 }}>
+                          {t.transportOutOfZone?.replace('{zone}', selectedTransport?.serviceArea?.name || '')
+                            || (lang==='en'
+                              ? `That address is outside the pickup area (${selectedTransport?.serviceArea?.name || 'service zone'}). Pick a closer hotel or address.`
+                              : `Esa dirección está fuera de la zona de recogida (${selectedTransport?.serviceArea?.name || 'zona de servicio'}). Elige un hotel o dirección más cercana.`)}
+                        </div>
+                      )}
+                      {pickupCoords && !pickupOutOfZone && (
                         <div className="mono" style={{ fontSize: 10, color:'var(--ink-soft)', marginTop: 4 }}>
                           <Icon d={icons.pin} size={9}/> {pickupCoords.lat.toFixed(5)}, {pickupCoords.lng.toFixed(5)}
+                          {selectedTransport?.serviceArea?.name && ` · ${lang==='en'?'in':'en'} ${selectedTransport.serviceArea.name}`}
                         </div>
                       )}
                     </div>
