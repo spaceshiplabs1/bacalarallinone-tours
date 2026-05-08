@@ -890,3 +890,137 @@ label.field > .mono { display: block; color: var(--ink-soft); margin-bottom: 6px
 /* Cart drawer already uses min(420px, 100vw) — good.       */
 /* Lightbox image uses vw/vh — good.                        */
 /* Map debug page gets rg-sidebar treatment via page.       */
+
+/* ─────────────────────────────────────── editorial landings */
+.landing-article { padding-top: 0; }
+
+/* Outer column allows wide media (tour cards, maps, pull-quotes); inner
+   prose stays narrower for comfortable reading line-length. */
+.landing-column {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.landing-prose {
+  font-size: 19px;
+  line-height: 1.65;
+  color: var(--ink);
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.landing-prose p { margin: 0 0 22px; }
+.landing-prose h2 {
+  font-family: 'Bricolage Grotesque', var(--display-font, sans-serif);
+  font-size: 34px;
+  line-height: 1.15;
+  margin: 56px 0 18px;
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+.landing-prose h3 {
+  font-family: 'Bricolage Grotesque', var(--display-font, sans-serif);
+  font-size: 24px;
+  line-height: 1.22;
+  margin: 36px 0 12px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+.landing-prose ul,
+.landing-prose ol { margin: 0 0 22px; padding-left: 1.4em; }
+.landing-prose li { margin: 6px 0; }
+.landing-prose strong { font-weight: 700; }
+.landing-prose em { font-style: italic; }
+.landing-prose a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(0,0,0,0.28);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 160ms ease;
+  cursor: pointer;
+}
+.landing-prose a:hover { text-decoration-color: var(--ink); }
+.landing-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 28px 0;
+  display: block;
+}
+.landing-prose blockquote {
+  border-left: 4px solid var(--line, #e3e0d8);
+  padding: 4px 0 4px 18px;
+  margin: 28px 0;
+  color: var(--ink-soft, #6b6457);
+  font-style: italic;
+}
+.landing-prose hr {
+  border: 0;
+  border-top: 1px solid var(--line, #e3e0d8);
+  margin: 44px auto;
+  width: 80px;
+}
+.landing-prose code {
+  background: rgba(0,0,0,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Drop-cap on the very first paragraph of the article. */
+.landing-prose.has-dropcap > p:first-of-type::first-letter {
+  font-family: 'Bricolage Grotesque', var(--display-font, sans-serif);
+  font-size: 4.6em;
+  line-height: 0.86;
+  float: left;
+  margin: 8px 12px 0 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Pull-quote rendered from {{quote:author|text}} markers. */
+.landing-pullquote {
+  max-width: 780px;
+  margin: 48px auto;
+  padding: 16px 0 16px 24px;
+  border-left: 4px solid var(--clay, #c4651e);
+  font-family: 'Bricolage Grotesque', var(--display-font, sans-serif);
+  font-size: 24px;
+  line-height: 1.35;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.landing-pullquote p { margin: 0; }
+.landing-pullquote cite {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Static map embedded mid-article. */
+.landing-map {
+  max-width: 880px;
+  margin: 36px auto;
+}
+
+/* Inline horizontal tour card: stacks below 720px so the image goes on top. */
+@media (max-width: 720px) {
+  .tour-inline { grid-template-columns: 1fr !important; }
+  .tour-inline > div:first-child { min-height: 220px !important; }
+}
+
+@media (max-width: 720px) {
+  .landing-prose { font-size: 17px; }
+  .landing-prose h2 { font-size: 28px; margin: 40px 0 14px; }
+  .landing-prose h3 { font-size: 20px; margin: 28px 0 10px; }
+  .landing-pullquote { font-size: 20px; padding-left: 18px; }
+  .landing-prose.has-dropcap > p:first-of-type::first-letter { font-size: 3.8em; }
+}

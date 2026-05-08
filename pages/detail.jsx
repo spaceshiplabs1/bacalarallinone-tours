@@ -53,6 +53,10 @@ const TourDetail = ({ tourId, prefill }) => {
   const [pickupCoords, setPickupCoords] = useState(null); // {lat, lng} once a Place is picked
   const [pickupOutOfZone, setPickupOutOfZone] = useState(false);
   const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
+  // Selected TourRate (variant). Tours with one rate ignore this. The default
+  // rate (isDefault=true, falling back to rates[0]) is selected on mount once
+  // ensureDetail() populates tour.rates.
+  const [selectedRateId, setSelectedRateId] = useState(null);
   const pickupInputRef = useRef(null);
 
   // Bind Google Places Autocomplete to the pickup input once the
@@ -102,6 +106,16 @@ const TourDetail = ({ tourId, prefill }) => {
     };
   }, [selectedTransport]);
 
+  // Seed selectedRateId from the default rate once tour.rates is populated
+  // (ensureDetail() runs async, so the list arrives after the first render).
+  useEffect(() => {
+    if (selectedRateId) return;
+    const ratesList = Array.isArray(tour?.rates) ? tour.rates : [];
+    if (ratesList.length === 0) return;
+    const def = ratesList.find((r) => r && r.isDefault) || ratesList[0];
+    if (def?.id) setSelectedRateId(def.id);
+  }, [tour?.rates?.length]);
+
   // window.TOURS may be empty during the initial paint (data-api hasn't
   // populated it yet). Render a tiny shell rather than crashing on
   // tour.title[lang] / tour.audience etc. further down.
@@ -113,8 +127,33 @@ const TourDetail = ({ tourId, prefill }) => {
     );
   }
 
-  const _adultPrice = _convPrice(tour.priceAdult, tour.defaultCurrency);
-  const _kidPrice = _convPrice(tour.priceKid, tour.defaultCurrency);
+  // ── Rate resolution ──
+  // Tours with a single TourRate behave like before (ignore the selector).
+  // Tours with multiple rates (e.g., 8AM special / 3HR standard / 4HR sunset)
+  // expose a pill selector. The default rate is the one with isDefault=true,
+  // or rates[0] otherwise.
+  const _ratesList = Array.isArray(tour.rates) ? tour.rates : [];
+  const _defaultRate =
+    _ratesList.find((r) => r && r.isDefault) || _ratesList[0] || null;
+  const _activeRate =
+    _ratesList.find((r) => r && r.id === selectedRateId) || _defaultRate;
+  // Source-currency cents for the active rate. Falls back to tour.basePrice
+  // semantics (priceAdult is already cents/100 from data-api.js) so the
+  // single-rate path stays untouched.
+  const _activePriceUnit = _activeRate?.priceUnit || tour.priceUnit;
+  const _activeCurrency = _activeRate?.defaultCurrency || tour.defaultCurrency;
+  const _activeAdult = _activeRate
+    ? Math.round(
+        (_activeRate.priceUnit === 'per_booking'
+          ? _activeRate.bookingPriceCents ?? 0
+          : _activeRate.adultPriceCents ?? 0) / 100,
+      )
+    : tour.priceAdult;
+  const _activeKid = _activeRate
+    ? Math.round((_activeRate.childPriceCents ?? 0) / 100)
+    : tour.priceKid;
+  const _adultPrice = _convPrice(_activeAdult, _activeCurrency);
+  const _kidPrice = _convPrice(_activeKid, _activeCurrency);
   const hasPickups = Array.isArray(tour.pickupPoints) && tour.pickupPoints.length > 1;
   const pickup = (Array.isArray(tour.pickupPoints) && tour.pickupPoints[pickupIdx]) || null;
   const pickupSurcharge = pickup?.surcharge || 0;
@@ -165,9 +204,17 @@ const TourDetail = ({ tourId, prefill }) => {
   const _pax = Math.max(1, (Number(adults) || 0) + (Number(kids) || 0));
   const _transportInfo = _transportTotalInTourCurrency(selectedTransport, _pax);
   const _transportSubtotal = _transportInfo.cents / 100;
-  const total = (tour.flat
-    ? tour.priceAdult + Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0)*1,0)
-    : adults * tour.priceAdult + kids * (tour.priceKid||0) + (adults+kids) * Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0),0)
+  // per_booking tours (private boats, charters): the rate IS the floor for
+  // the whole booking — don't multiply by adults. Add-ons are still per-pax.
+  // tour.flat (transfer category) keeps its existing flat-van semantics.
+  const _addonsPerPax = Object.keys(addons)
+    .filter((k) => addons[k])
+    .reduce((a, k) => a + (addonList.find((x) => x.k === k)?.price || 0), 0);
+  const _isFlatBooking = tour.flat || _activePriceUnit === 'per_booking';
+  const total = (
+    _isFlatBooking
+      ? _activeAdult + (adults + kids) * _addonsPerPax
+      : adults * _activeAdult + kids * (_activeKid || 0) + (adults + kids) * _addonsPerPax
   ) + pickupSurcharge + _transportSubtotal;
 
   const tourReviews = window.REVIEWS.filter(r => r.tour === tour.id).concat(window.REVIEWS.filter(r => r.tour !== tour.id).slice(0,2));
@@ -186,14 +233,43 @@ const TourDetail = ({ tourId, prefill }) => {
   const hasTimeSlots = Array.isArray(tour.times) && tour.times.length > 0;
   const canBook = selDate && (!hasTimeSlots || selTime) && (tour.flat || adults > 0) && transportAddressOk;
 
+  // SEO — push tour-specific copy + JSON-LD into the SeoOutlet. The outlet
+  // applies registry defaults for everything we don't pass.
+  const _seoImage = (window.tourPhoto && window.tourPhoto(tour)) || null;
+  const _seoCtx = window.tagcSchema.ctxFor(
+    { page: 'detail', params: { tourId: tour.id } },
+    _seoImage
+  );
+  const _seoTitle = `${tour.title?.[lang] || tour.title?.en || ''} — bacalarallinone.tours`;
+  const _seoDescription = tour.tagline?.[lang] || tour.metaDescription?.[lang] || '';
+  const _seoTourName = tour.title?.[lang] || tour.title?.en || '';
+  const _seoJsonLd = [
+    window.tagcSchema.tourLd(tour, lang, _seoCtx),
+    window.tagcSchema.breadcrumbLd([
+      { name: lang === 'es' ? 'Inicio' : 'Home',  url: window.SEO_SITE.origin + '/' },
+      { name: lang === 'es' ? 'Tours'  : 'Tours', url: window.SEO_SITE.origin + '/tours' },
+      { name: _seoTourName,                       url: _seoCtx.url },
+    ]),
+  ].filter(Boolean);
+
   return (
     <div className="fade-in">
-      {/* Breadcrumb + back */}
-      <div className="container" style={{ paddingTop: 20, paddingBottom: 8, display:'flex', alignItems:'center', gap: 10 }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('catalog')}>
-          <Icon d={icons.chevronLeft} size={14}/> {t.navTours}
-        </button>
-        <span className="mono" style={{ color:'var(--ink-soft)' }}>/ {tour.phLabel}</span>
+      <window.PageSeo
+        title={_seoTitle}
+        description={_seoDescription}
+        image={_seoImage}
+        type="product"
+        jsonLd={_seoJsonLd}
+      />
+      {/* Breadcrumb — mirrors the JSON-LD BreadcrumbList pushed via PageSeo. */}
+      <div className="container">
+        <window.Breadcrumbs
+          items={[
+            { label: lang === 'es' ? 'Inicio' : 'Home', page: 'home' },
+            { label: lang === 'es' ? 'Tours' : 'Tours', page: 'catalog' },
+            { label: _seoTourName }
+          ]}
+        />
       </div>
 
       {/* Gallery + header. Layout adapts to gallery length so a tour
@@ -489,11 +565,11 @@ const TourDetail = ({ tourId, prefill }) => {
                   <div className="mono" style={{ color:'var(--ink-soft)' }}>
                     {tour.flat
                       ? t.perVan
-                      : tour.priceUnit === 'per_booking'
+                      : _activePriceUnit === 'per_booking'
                         ? (t.perGroup || t.perVan)
                         : t.perPerson}
                   </div>
-                  {tour.priceKid > 0 && tour.priceUnit !== 'per_booking' && (
+                  {_activeKid > 0 && _activePriceUnit !== 'per_booking' && (
                     <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 12, marginTop: 4 }}>
                       {lang==='en' ? 'Child' : 'Niño'}
                       {tour.childMinAge != null && tour.childMaxAge != null
@@ -511,6 +587,68 @@ const TourDetail = ({ tourId, prefill }) => {
               </div>
 
               <div style={{ height: 1, background:'var(--line)', margin: '20px 0' }}/>
+
+              {/* Rate selector — only when the tour has more than one variant
+                  (e.g., 8AM special / 3HR standard / 4HR sunset). Single-rate
+                  tours skip this; they always run on the default rate. */}
+              {_ratesList.length > 1 && (
+                <div style={{ marginBottom: 18 }}>
+                  <div className="mono" style={{ color: 'var(--ink-soft)', marginBottom: 8 }}>
+                    {t.rateLabel || (lang === 'es' ? 'Tarifa' : 'Rate')}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {_ratesList.map((r) => {
+                      const cents =
+                        r.priceUnit === 'per_booking'
+                          ? r.bookingPriceCents ?? 0
+                          : r.adultPriceCents ?? 0;
+                      const dollars = Math.round(cents / 100);
+                      const conv = _convPrice(dollars, r.defaultCurrency || tour.defaultCurrency);
+                      const isActive = r.id === (_activeRate?.id ?? null);
+                      const minutes = r.durationMinutes;
+                      const hours = minutes ? Math.round(minutes / 60) : null;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => setSelectedRateId(r.id)}
+                          aria-pressed={isActive}
+                          style={{
+                            padding: '10px 14px',
+                            borderRadius: 12,
+                            border: isActive
+                              ? '1.5px solid var(--ink)'
+                              : '1px solid var(--line)',
+                            background: isActive ? 'var(--ink)' : 'var(--bone)',
+                            color: isActive ? 'var(--bone)' : 'var(--ink)',
+                            cursor: 'pointer',
+                            font: 'inherit',
+                            textAlign: 'left',
+                            minWidth: 140,
+                            transition: 'background 140ms ease, color 140ms ease',
+                          }}
+                        >
+                          <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>
+                            {r.label || (hours ? `${hours} hr` : (lang === 'es' ? 'Tarifa' : 'Rate'))}
+                          </div>
+                          <div
+                            className="mono"
+                            style={{
+                              fontSize: 11,
+                              opacity: 0.78,
+                              marginTop: 4,
+                              letterSpacing: '0.02em',
+                            }}
+                          >
+                            ${conv.amount} {conv.currency}
+                            {r.priceUnit !== 'per_booking' ? ` / ${lang === 'es' ? 'p' : 'pp'}` : ''}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Pickup selector */}
               {hasPickups && (
@@ -795,6 +933,8 @@ const TourDetail = ({ tourId, prefill }) => {
                     date: selDate, time: selTime,
                     subtotal: tourSubtotal,
                     pickup,
+                    rateId: _activeRate?.id || null,
+                    rateLabel: _activeRate?.label || null,
                   };
                   if (!selectedTransport) return [tourLine];
                   const opt = selectedTransport;

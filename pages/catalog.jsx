@@ -8,15 +8,14 @@ const Catalog = ({ initialFilter }) => {
   const [searchFocused, setSearchFocused] = useState(false);
   // Tracks the live window.TOURS reference so the filtered useMemo below
   // re-runs when data-api.js swaps the placeholder for the real catalog.
-  // data-api.js dispatches a `hashchange` event after the swap, which the
-  // App-level router already listens to — but the Catalog's useMemo deps
-  // don't change, so we need our own signal here. Bumping a counter on
-  // hashchange forces the memo to recompute against the new window.TOURS.
+  // data-api.js dispatches a `popstate` event after the swap; the Catalog's
+  // useMemo deps don't change otherwise, so we bump a counter to force the
+  // memo to recompute against the new window.TOURS.
   const [toursTick, setToursTick] = useState(0);
   useEffect(() => {
     const onChange = () => setToursTick((n) => n + 1);
-    window.addEventListener('hashchange', onChange);
-    return () => window.removeEventListener('hashchange', onChange);
+    window.addEventListener('popstate', onChange);
+    return () => window.removeEventListener('popstate', onChange);
   }, []);
 
   const filters = [
@@ -58,8 +57,22 @@ const Catalog = ({ initialFilter }) => {
   const stillLoading =
     window.TOURS.length === 1 && window.TOURS[0].id === '__loading__';
 
+  // SEO — breadcrumb + ItemList of visible (non-loading) tours.
+  const _seoCtx = window.tagcSchema.ctxFor({ page: 'catalog', params: {} });
+  const _seoVisible = window.TOURS.filter(
+    (t) => t.id !== '__loading__' && t.slug !== '__loading__'
+  );
+  const _seoJsonLd = [
+    window.tagcSchema.breadcrumbLd([
+      { name: lang === 'es' ? 'Inicio' : 'Home', url: window.SEO_SITE.origin + '/' },
+      { name: lang === 'es' ? 'Tours' : 'Tours', url: _seoCtx.url },
+    ]),
+    window.tagcSchema.itemListLd(_seoVisible, { ..._seoCtx, locale: lang }),
+  ].filter(Boolean);
+
   return (
     <div className="fade-in">
+      <window.PageSeo jsonLd={_seoJsonLd} />
       {/* Hero — mirrors the shuttle page: tall, with two backgrounds
           cross-fading every 7s (reuses .transfers-hero-bg keyframes) and
           a dark overlay so the headline stays legible. */}

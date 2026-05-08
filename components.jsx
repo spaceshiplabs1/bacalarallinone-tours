@@ -461,11 +461,36 @@ window.WaveDebug = WaveDebug;
 const Header = ({ current }) => {
   const { t, lang, setLang, navigate, cartCount, openCart, displayCurrency, setDisplayCurrency } = useT();
   const [open, setOpen] = useState(false);
+  const [guidesOpen, setGuidesOpen] = useState(false);
+  const guidesRef = useRef(null);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [open]);
+
+  // Close the guides dropdown on outside-click + Escape.
+  useEffect(() => {
+    if (!guidesOpen) return;
+    const onClick = (e) => {
+      if (guidesRef.current && !guidesRef.current.contains(e.target)) setGuidesOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setGuidesOpen(false); };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [guidesOpen]);
+
+  const guides = (window.tagcLandings && window.tagcLandings.manifest && window.tagcLandings.manifest[lang]) || [];
+
+  const goLanding = (slug) => {
+    setOpen(false);
+    setGuidesOpen(false);
+    navigate('landing', { slug, locale: lang });
+  };
 
   const go = (key) => { setOpen(false); navigate(key); };
 
@@ -494,6 +519,75 @@ const Header = ({ current }) => {
         </a>
         <nav className="header-nav-desktop" style={{ display:'flex', gap: 28, alignItems:'center' }}>
           {link('catalog',   t.navTours,     'compass')}
+          {guides.length > 0 && (
+            <div ref={guidesRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="nav-link"
+                aria-haspopup="menu"
+                aria-expanded={guidesOpen}
+                onClick={() => setGuidesOpen((o) => !o)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  margin: 0,
+                  font: 'inherit',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontWeight: 500,
+                  borderBottom: '2px solid transparent'
+                }}
+              >
+                <span>{t.navGuides || (lang === 'es' ? 'Guías' : 'Guides')}</span>
+                <Icon d={icons.chevronDown} size={14}/>
+              </button>
+              {guidesOpen && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    left: -12,
+                    minWidth: 240,
+                    background: 'var(--bone)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 12,
+                    boxShadow: '0 12px 32px rgba(0,0,0,0.10)',
+                    padding: 6,
+                    zIndex: 60
+                  }}
+                >
+                  {guides.map((g) => (
+                    <button
+                      key={g.slug}
+                      role="menuitem"
+                      onClick={() => goLanding(g.slug)}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        background: 'none',
+                        border: 'none',
+                        padding: '10px 12px',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        color: 'var(--ink)',
+                        font: 'inherit'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.05)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {link('map',       t.navMap,       'pin')}
           {link('port',      t.navPort,      'ship')}
           {link('transfers', t.navTransfers, 'bus')}
@@ -584,6 +678,35 @@ const Header = ({ current }) => {
                 <Icon d={icons.arrow} size={16}/>
               </button>
             ))}
+
+            {guides.length > 0 && (
+              <div style={{ paddingTop: 18 }}>
+                <div className="mono" style={{
+                  fontSize: 11, letterSpacing: '0.14em', opacity: 0.55,
+                  padding: '6px 4px 10px', textTransform: 'uppercase'
+                }}>
+                  {t.navGuides || (lang === 'es' ? 'Guías' : 'Guides')}
+                </div>
+                {guides.map((g) => (
+                  <button
+                    key={g.slug}
+                    onClick={() => goLanding(g.slug)}
+                    style={{
+                      textAlign: 'left', padding: '14px 4px', background: 'transparent',
+                      border: 'none', borderBottom: '1px solid var(--line)',
+                      fontSize: 17, fontWeight: 500, color: 'var(--ink-soft)',
+                      fontFamily: 'Bricolage Grotesque, sans-serif',
+                      cursor: 'pointer', width: '100%', display: 'flex',
+                      justifyContent: 'space-between', alignItems: 'center'
+                    }}
+                  >
+                    <span>{g.label}</span>
+                    <Icon d={icons.arrow} size={14}/>
+                  </button>
+                ))}
+              </div>
+            )}
+
             <button className="btn btn-primary btn-lg" style={{ width:'100%', marginTop: 24 }} onClick={() => go('catalog')}>
               {t.bookNow}
             </button>
@@ -944,6 +1067,83 @@ const TourCard = ({ tour, onClick, compact = false }) => {
   );
 };
 window.TourCard = TourCard;
+
+// Horizontal variant for inline-in-article use on landings. Image left,
+// content right, single-line title + short description + price + CTA.
+const TourCardHorizontal = ({ tour, onClick }) => {
+  const { t, lang, navigate, displayCurrency } = useT();
+  if (!tour) return null;
+  const price = priceForDisplay(tour, displayCurrency);
+  const tagline = tour.tagline?.[lang] || tour.shortDescription?.[lang] || '';
+  const handleClick = onClick || (() => navigate('detail', { tourId: tour.id }));
+  return (
+    <a
+      onClick={(e) => { e.preventDefault(); handleClick(); }}
+      href={'/tour/' + (tour.slug || tour.id)}
+      className="tour-inline fade-in"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '240px 1fr',
+        gap: 0,
+        background: 'var(--bone)',
+        border: '1px solid var(--line)',
+        borderRadius: 16,
+        overflow: 'hidden',
+        textDecoration: 'none',
+        color: 'inherit',
+        margin: '36px 0',
+        boxShadow: '0 1px 0 rgba(0,0,0,0.02)',
+        transition: 'box-shadow 200ms ease, transform 200ms ease'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.10)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '0 1px 0 rgba(0,0,0,0.02)';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
+    >
+      <div style={{ position: 'relative', minHeight: 180, background: '#0c1a2a' }}>
+        <img
+          src={window.tourPhoto(tour)}
+          alt=""
+          loading="lazy"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      </div>
+      <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 10 }}>
+        <div>
+          <h3 className="display" style={{ margin: 0, fontSize: 22, lineHeight: 1.18 }}>
+            {tour.title?.[lang] || tour.title?.en || ''}
+          </h3>
+          {tagline && (
+            <p style={{
+              margin: '8px 0 0', fontSize: 14, lineHeight: 1.5,
+              color: 'var(--ink-soft)',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+            }}>{tagline}</p>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div className="display" style={{ fontSize: 22 }}>
+            ${price.amount} <span style={{ fontSize: 12, opacity: 0.7, fontWeight: 500 }}>{price.currency}</span>
+            {tour.priceUnit !== 'per_booking' && (
+              <span className="mono" style={{ fontSize: 11, color: 'var(--ink-soft)', marginLeft: 6 }}>
+                / {lang === 'es' ? 'p' : 'pp'}
+              </span>
+            )}
+          </div>
+          <span className="mono" style={{ fontSize: 12, color: 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {t.viewTour || (lang === 'es' ? 'Ver tour' : 'View tour')}
+            <Icon d={icons.arrow} size={12}/>
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+};
+window.TourCardHorizontal = TourCardHorizontal;
 
 // Skeleton tile that mirrors TourCard's footprint while the catalog
 // is still loading. Matches the 4:5 aspect ratio + 16px radius so
@@ -1361,17 +1561,23 @@ const WAWidget = () => {
 };
 window.WAWidget = WAWidget;
 
-// ───────────────────────────────────────────── SEO head
-// Dynamic <title>, <meta>, Open Graph, Twitter, canonical, and JSON-LD per route.
-// Reads from tour data fields — no hand-written final copy here, just plumbing.
-const SEO_SITE = {
-  name: 'bacalarallinone.tours',
-  origin: 'https://bacalarallinone.tours',
-  defaultOg: './images/hero-lagoon-1600.webp',
-};
+// ───────────────────────────────────────────── SEO
+// Architecture:
+//   <PageSeo titleKey="..." description="..." image={...} jsonLd={[...]} />
+//     - Pages render this inline with their data. Pushes into a tiny store.
+//   <SeoOutlet />
+//     - Single mounted renderer at the App root. Subscribes to the store +
+//       route, applies all <head> mutations in one pass.
+//
+// Defaults come from window.SEO_SITE / window.SEO_META (lib/seo-meta.js).
+// JSON-LD builders come from window.tagcSchema (lib/schema.js).
 
 const setMeta = (selector, attr, value) => {
   let el = document.head.querySelector(selector);
+  if (value == null || value === '') {
+    if (el) el.removeAttribute(attr);
+    return;
+  }
   if (!el) {
     el = document.createElement('meta');
     const [, k, v] = selector.match(/\[(\w+)="([^"]+)"\]/) || [];
@@ -1380,9 +1586,16 @@ const setMeta = (selector, attr, value) => {
   }
   el.setAttribute(attr, value);
 };
-const setLink = (rel, href) => {
-  let el = document.head.querySelector(`link[rel="${rel}"]`);
-  if (!el) { el = document.createElement('link'); el.setAttribute('rel', rel); document.head.appendChild(el); }
+const setLink = (rel, href, opts = {}) => {
+  // Multiple link[rel=alternate] are fine; key by hreflang when present.
+  const key = opts.hreflang ? `link[rel="${rel}"][hreflang="${opts.hreflang}"]` : `link[rel="${rel}"]`;
+  let el = document.head.querySelector(key);
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    if (opts.hreflang) el.setAttribute('hreflang', opts.hreflang);
+    document.head.appendChild(el);
+  }
   el.setAttribute('href', href);
 };
 const setJsonLd = (id, data) => {
@@ -1397,112 +1610,209 @@ const setJsonLd = (id, data) => {
   el.textContent = JSON.stringify(data);
 };
 
-const routePath = (route) => {
-  if (!route || !route.page || route.page === 'home') return '/';
-  const p = route.params || {};
-  switch (route.page) {
-    case 'catalog':    return p.filter ? `/tours/${p.filter}` : '/tours';
-    case 'detail':     return p.tourId ? `/tour/${p.tourId}` : '/tour';
-    case 'booking':    return '/booking';
-    case 'port':       return '/port';
-    case 'transfers':  return '/transfers';
-    case 'map':        return p.focus ? `/map/${p.focus}` : '/map';
-    case 'map-debug':  return '/map-debug';
-    default:           return '/' + route.page;
-  }
+// Resolve a possibly-relative image path to an absolute URL, given an origin.
+const absUrl = (path, origin) => {
+  if (!path) return '';
+  if (/^https?:\/\//i.test(path)) return path;
+  try { return new URL(path, origin).href; } catch (_e) { return path; }
 };
 
-const SEOHead = () => {
-  const { lang, navigate } = useT();
-  // Re-read route on each render (pulled from app ctx via window; we don't have route in ctx)
-  // Easiest: subscribe to a lightweight store by reading window.__route that App pushes.
-  const [route, setRouteLocal] = useState(() => window.__route || { page: 'home', params: {} });
+// Tiny pub/sub: pages push their SEO override into window.__seoData; SeoOutlet
+// subscribes. We key by route key so concurrent mounts of two pages (rare,
+// but possible during transitions) don't fight.
+window.__seoData = window.__seoData || null;
+const setSeoData = (key, data) => {
+  if (data == null) {
+    if (window.__seoData && window.__seoData.__key === key) {
+      window.__seoData = null;
+      window.dispatchEvent(new Event('__seochange'));
+    }
+    return;
+  }
+  window.__seoData = { ...data, __key: key };
+  window.dispatchEvent(new Event('__seochange'));
+};
+
+// Pages render this inline. Returns null. Side effect: pushes to the store.
+//
+// Props (all optional, all merge over the registry default for the route):
+//   title, description, image, type ('website'|'article'|'product'),
+//   robots, alternates ({es,en}), jsonLd ([...] additional schema blocks).
+const PageSeo = (props) => {
+  const keyRef = useRef(null);
+  if (keyRef.current === null) {
+    keyRef.current = 'pageseo-' + Math.random().toString(36).slice(2);
+  }
+  // Stringify deps so we re-push when content changes (props are usually
+  // small + stable per render, so JSON.stringify is fine here).
+  const dep = JSON.stringify(props);
   useEffect(() => {
-    const handler = () => setRouteLocal(window.__route || { page: 'home', params: {} });
-    window.addEventListener('__routechange', handler);
-    handler();
-    return () => window.removeEventListener('__routechange', handler);
+    setSeoData(keyRef.current, props);
+    return () => setSeoData(keyRef.current, null);
+  }, [dep]);
+  return null;
+};
+window.PageSeo = PageSeo;
+
+// Apply the full meta set for the current route + lang + override.
+function applySeo(route, lang, override) {
+  const SITE = window.SEO_SITE || { name: '', origin: '', defaultOg: '', logo: '' };
+  const META = window.SEO_META || {};
+  const path = window.routeToPath(route);
+  const url = SITE.origin + path;
+  const htmlLang = lang === 'es' ? 'es' : 'en';
+  document.documentElement.setAttribute('lang', htmlLang);
+
+  // 1) Resolve copy: registry default → page override.
+  const baseEntry = (META[route.page] && META[route.page][htmlLang]) || {};
+  const title = (override && override.title) || baseEntry.title || SITE.name;
+  const description = (override && override.description) || baseEntry.description || '';
+  const image = (override && override.image) || baseEntry.image || SITE.defaultOg;
+  const type = (override && override.type) || baseEntry.type || 'website';
+  const robots = (override && override.robots) || baseEntry.robots || 'index,follow';
+  const ogImage = absUrl(image, SITE.origin);
+
+  // 2) Apply meta + canonical.
+  document.title = title;
+  setMeta('meta[name="description"]',         'content', description);
+  setMeta('meta[name="robots"]',              'content', robots);
+  setMeta('meta[property="og:title"]',        'content', title);
+  setMeta('meta[property="og:description"]',  'content', description);
+  setMeta('meta[property="og:url"]',          'content', url);
+  setMeta('meta[property="og:image"]',        'content', ogImage);
+  setMeta('meta[property="og:type"]',         'content', type);
+  setMeta('meta[property="og:locale"]',       'content', htmlLang === 'es' ? 'es_MX' : 'en_US');
+  setMeta('meta[property="og:locale:alternate"]', 'content', htmlLang === 'es' ? 'en_US' : 'es_MX');
+  setMeta('meta[name="twitter:title"]',       'content', title);
+  setMeta('meta[name="twitter:description"]', 'content', description);
+  setMeta('meta[name="twitter:image"]',       'content', ogImage);
+  setLink('canonical', url);
+
+  // 3) og:image dimensions — only emit when we know them (default OG image).
+  const isDefaultImage = (image === SITE.defaultOg);
+  setMeta('meta[property="og:image:width"]',  'content', isDefaultImage ? '1600' : '');
+  setMeta('meta[property="og:image:height"]', 'content', isDefaultImage ? '900'  : '');
+
+  // 4) Hreflang alternates. For routes where ES + EN share a URL (currently
+  // every route except editorial landings) both hreflangs point to the same
+  // URL; that still correctly signals language equivalence to crawlers.
+  // x-default → ES, since Bacalar is the primary market.
+  const alternates = (override && override.alternates) || { es: url, en: url };
+  setLink('alternate', alternates.es, { hreflang: 'es' });
+  setLink('alternate', alternates.en, { hreflang: 'en' });
+  setLink('alternate', alternates.es, { hreflang: 'x-default' });
+
+  // 5) Always-on JSON-LD: Organization + WebSite (with SearchAction).
+  // These give crawlers enough to surface a brand panel + sitelinks search.
+  if (window.tagcSchema) {
+    setJsonLd('organization', window.tagcSchema.organizationLd(SITE));
+    setJsonLd('website',      window.tagcSchema.websiteLd(SITE, htmlLang));
+  }
+
+  // 6) Per-page JSON-LD pushed via override.jsonLd. Clear known IDs first so
+  // navigating away from a page doesn't leave stale schema blocks behind.
+  const blocks = (override && Array.isArray(override.jsonLd)) ? override.jsonLd : [];
+  ['tour', 'article', 'breadcrumb', 'breadcrumblist', 'itemlist'].forEach((id) => setJsonLd(id, null));
+  blocks.forEach((block, i) => {
+    if (!block) return;
+    const raw = block['@type'] ? String(block['@type']).toLowerCase() : 'page-' + i;
+    // Map TouristTrip → 'tour', BreadcrumbList → 'breadcrumb' for consistency.
+    const id = raw === 'touristtrip' ? 'tour'
+             : raw === 'breadcrumblist' ? 'breadcrumb'
+             : raw;
+    setJsonLd(id, block);
+  });
+}
+
+// Single mounted renderer. App renders <SeoOutlet/> once.
+const SeoOutlet = () => {
+  const { lang } = useT();
+  const [route, setRouteLocal] = useState(() => window.__route || { page: 'home', params: {} });
+  const [override, setOverride] = useState(window.__seoData);
+
+  useEffect(() => {
+    const onRoute = () => setRouteLocal(window.__route || { page: 'home', params: {} });
+    const onSeo = () => setOverride(window.__seoData);
+    window.addEventListener('__routechange', onRoute);
+    window.addEventListener('__seochange', onSeo);
+    onRoute();
+    return () => {
+      window.removeEventListener('__routechange', onRoute);
+      window.removeEventListener('__seochange', onSeo);
+    };
   }, []);
 
   useEffect(() => {
-    const path = routePath(route);
-    const url = `${SEO_SITE.origin}${path}`;
-    const htmlLang = lang === 'es' ? 'es' : 'en';
-    document.documentElement.setAttribute('lang', htmlLang);
-
-    let title = SEO_SITE.name;
-    let description = '';
-    let ogImage = SEO_SITE.defaultOg;
-    let ogType = 'website';
-    let jsonLd = null;
-
-    const TOURS = window.TOURS || [];
-    if (route.page === 'detail') {
-      const tour = TOURS.find(x => x.id === route.params?.tourId);
-      if (tour) {
-        title = `${tour.title[lang]} — ${SEO_SITE.name}`;
-        description = tour.tagline?.[lang] || '';
-        ogImage = (window.tourPhoto && window.tourPhoto(tour)) || ogImage;
-        ogType = 'product';
-        jsonLd = {
-          '@context': 'https://schema.org',
-          '@type': 'TouristTrip',
-          name: tour.title[lang],
-          description,
-          image: url.replace(path, '') + (ogImage.startsWith('./') ? ogImage.slice(1) : ogImage),
-          url,
-          touristType: tour.audience,
-          provider: { '@type': 'TravelAgency', name: SEO_SITE.name, url: SEO_SITE.origin },
-          offers: {
-            '@type': 'Offer',
-            priceCurrency: tour.defaultCurrency || 'USD',
-            price: tour.priceAdult,
-            availability: tour.isRequestOnly
-              ? 'https://schema.org/InStoreOnly'
-              : 'https://schema.org/InStock',
-            url
-          },
-          aggregateRating: tour.rating && tour.reviews ? {
-            '@type': 'AggregateRating',
-            ratingValue: tour.rating,
-            reviewCount: tour.reviews,
-            bestRating: 5,
-            worstRating: 1
-          } : undefined
-        };
-      }
-    } else if (route.page === 'catalog') {
-      title = `${lang === 'en' ? 'Tours & adventures' : 'Tours y aventuras'} — ${SEO_SITE.name}`;
-      description = '';
-    } else if (route.page === 'port') {
-      title = `${lang === 'en' ? 'Cruise port tours' : 'Tours de puerto'} — ${SEO_SITE.name}`;
-    } else if (route.page === 'transfers') {
-      title = `${lang === 'en' ? 'Airport transfers' : 'Traslados aeropuerto'} — ${SEO_SITE.name}`;
-    } else if (route.page === 'map') {
-      title = `${lang === 'en' ? 'Destinations map' : 'Mapa de destinos'} — ${SEO_SITE.name}`;
-    } else if (route.page === 'booking') {
-      title = `${lang === 'en' ? 'Checkout' : 'Finalizar compra'} — ${SEO_SITE.name}`;
-    }
-
-    // Apply
-    document.title = title;
-    setMeta('meta[name="description"]', 'content', description || (window.I18N?.[lang]?.heroSub || ''));
-    setMeta('meta[property="og:title"]',       'content', title);
-    setMeta('meta[property="og:description"]', 'content', description);
-    setMeta('meta[property="og:url"]',         'content', url);
-    setMeta('meta[property="og:image"]',       'content', ogImage);
-    setMeta('meta[property="og:type"]',        'content', ogType);
-    setMeta('meta[property="og:locale"]',      'content', htmlLang === 'es' ? 'es_MX' : 'en_US');
-    setMeta('meta[name="twitter:title"]',       'content', title);
-    setMeta('meta[name="twitter:description"]', 'content', description);
-    setMeta('meta[name="twitter:image"]',       'content', ogImage);
-    setLink('canonical', url);
-    setJsonLd('tour', jsonLd);
-  }, [route, lang]);
+    applySeo(route, lang, override);
+  }, [route, lang, override]);
 
   return null;
 };
-window.SEOHead = SEOHead;
+window.SeoOutlet = SeoOutlet;
+// Back-compat: index.html still mounts <window.SEOHead/>.
+window.SEOHead = SeoOutlet;
+
+// ───────────────────────────────────────────── Breadcrumbs
+// Visible breadcrumb that should mirror the JSON-LD BreadcrumbList the page
+// is also pushing through PageSeo. Items shape:
+//   [{ label: 'Home', page: 'home', params: {} },
+//    { label: 'Tours', page: 'catalog' },
+//    { label: 'Sailing Tour' }]   // last item: no page → rendered as text
+const Breadcrumbs = ({ items }) => {
+  const { navigate } = useT();
+  if (!items || items.length === 0) return null;
+  return (
+    <nav
+      className="breadcrumbs"
+      aria-label="breadcrumb"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 6,
+        color: 'var(--ink-soft)',
+        fontSize: 13,
+        padding: '14px 0 4px'
+      }}
+    >
+      {items.map((item, i) => {
+        const last = i === items.length - 1;
+        const linkStyle = {
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          margin: 0,
+          color: 'inherit',
+          cursor: 'pointer',
+          textDecoration: 'underline',
+          textUnderlineOffset: 3,
+          textDecorationColor: 'rgba(0,0,0,0.18)',
+          font: 'inherit'
+        };
+        const node = last ? (
+          <span aria-current="page" style={{ color: 'var(--ink)' }}>{item.label}</span>
+        ) : item.page ? (
+          <button onClick={() => navigate(item.page, item.params || {})} style={linkStyle}>
+            {item.label}
+          </button>
+        ) : (
+          <a href={item.href || '/'} style={linkStyle}>{item.label}</a>
+        );
+        return (
+          <React.Fragment key={i}>
+            {node}
+            {!last && (
+              <span aria-hidden="true" style={{ opacity: 0.55, display: 'inline-flex', alignItems: 'center' }}>
+                <Icon d={icons.chevron} size={11}/>
+              </span>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </nav>
+  );
+};
+window.Breadcrumbs = Breadcrumbs;
 
 // ───────────────────────────────────────────── lightbox / fullscreen gallery
 // Strip derivative suffix so we show the highest-quality master.

@@ -373,10 +373,10 @@
       }
       tour._detailLoaded = true;
       // Force a re-render so newly-arrived gallery / times / etc. show up.
-      // App re-renders on `hashchange` (not __routechange). Dispatching
-      // hashchange with the URL unchanged re-runs the route handler and
-      // setRoute(parseHash()) returns a fresh object → React re-renders.
-      window.dispatchEvent(new Event("hashchange"));
+      // App re-renders on `popstate`. Dispatching it with the URL unchanged
+      // re-runs the route handler and setRoute(parseLocation()) returns a
+      // fresh object → React re-renders.
+      window.dispatchEvent(new Event("popstate"));
     } catch (e) {
       console.warn("[tagc] tour detail load failed:", tour.slug, e);
     }
@@ -415,10 +415,10 @@
   loadCatalog()
     .then((list) => {
       window.TOURS = list;
-      // App re-renders on `hashchange` (not __routechange). Dispatching
-      // hashchange with the URL unchanged re-runs the route handler and
-      // setRoute(parseHash()) returns a fresh object → React re-renders.
-      window.dispatchEvent(new Event("hashchange"));
+      // App re-renders on `popstate`. Dispatching it with the URL unchanged
+      // re-runs the route handler and setRoute(parseLocation()) returns a
+      // fresh object → React re-renders.
+      window.dispatchEvent(new Event("popstate"));
     })
     .catch((err) => {
       console.error("[tagc] catalog load failed:", err);

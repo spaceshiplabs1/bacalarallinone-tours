@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<base href="/"/>
 <title>bacalarallinone.tours — Bacalar, Mahahual, Mayan Riviera</title>
 
 <!-- Generic meta (overridden dynamically by <SEOHead/> per route) -->
@@ -42,20 +43,26 @@
 <body>
 <div id="root"></div>
 
+<script src="lib/routes.js"></script>
+<script src="lib/schema.js"></script>
+<script src="lib/seo-meta.js"></script>
+<script src="lib/landings.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
 <script src="data-api.js"></script>
 <script src="cart-api.js"></script>
 <script src="i18n.js"></script>
 <script type="text/babel" src="photos.jsx"></script>
 <script type="text/babel" src="artwork.jsx"></script>
-<script type="text/babel" src="components.jsx?v=3"></script>
+<script type="text/babel" src="components.jsx?v=8"></script>
 <script type="text/babel" src="pages/home.jsx"></script>
-<script type="text/babel" src="pages/catalog.jsx"></script>
-<script type="text/babel" src="pages/detail.jsx?v=6"></script>
+<script type="text/babel" src="pages/catalog.jsx?v=2"></script>
+<script type="text/babel" src="pages/detail.jsx?v=10"></script>
 <script type="text/babel" src="pages/booking.jsx"></script>
 <script type="text/babel" src="pages/thanks.jsx"></script>
 <script type="text/babel" src="pages/port.jsx"></script>
 <script type="text/babel" src="pages/port_transfers_map.jsx"></script>
 <script type="text/babel" src="pages/map_debug.jsx"></script>
+<script type="text/babel" src="pages/landing.jsx?v=3"></script>
 
 <script type="text/babel">
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -69,55 +76,13 @@ const App = () => {
   const saved = (() => { try { return JSON.parse(localStorage.getItem(loadKey)) || {}; } catch(e) { return {}; } })();
 
   // ── Router ────────────────────────────────────────────────────────────────
-  // URL shape (uses hash so any static server works without rewrites):
-  //   #/                         → home
-  //   #/tours                    → catalog
-  //   #/tours/:filter            → catalog filtered
-  //   #/tour/:slugOrId           → detail
-  //   #/booking                  → booking
-  //   #/port                     → port flow
-  //   #/transfers                → transfers
-  //   #/map                      → map
-  //   #/map/:focus               → map with selected pin
-  //   #/map-debug                → pin calibration
-  const parseHash = () => {
-    const h = (window.location.hash || '#/').replace(/^#/, '') || '/';
-    const seg = h.split('/').filter(Boolean);
-    const q = window.location.search ? Object.fromEntries(new URLSearchParams(window.location.search)) : {};
-    if (seg.length === 0)                           return { page: 'home',      params: { ...q } };
-    if (seg[0] === 'tours')                         return { page: 'catalog',   params: { ...q, filter: seg[1] } };
-    if (seg[0] === 'tour')                          return { page: 'detail',    params: { ...q, tourId: seg[1] } };
-    if (seg[0] === 'booking')                       return { page: 'booking',   params: { ...q } };
-    if (seg[0] === 'thanks')                        return { page: 'thanks',    params: { ...q } };
-    if (seg[0] === 'port')                          return { page: 'port',      params: { ...q } };
-    if (seg[0] === 'transfers')                     return { page: 'transfers', params: { ...q } };
-    if (seg[0] === 'map' && seg[1] === 'debug')     return { page: 'map-debug', params: { ...q } };
-    if (seg[0] === 'map')                           return { page: 'map',       params: { ...q, focus: seg[1] } };
-    if (seg[0] === 'map-debug')                     return { page: 'map-debug', params: { ...q } };
-    return { page: seg[0] || 'home', params: { ...q } };
-  };
-  const routeToHash = (r) => {
-    if (!r || !r.page || r.page === 'home') return '#/';
-    const p = r.params || {};
-    switch (r.page) {
-      case 'catalog':    return p.filter ? `#/tours/${p.filter}` : '#/tours';
-      case 'detail':     return p.tourId ? `#/tour/${p.tourId}` : '#/tour';
-      case 'booking':    return '#/booking';
-      case 'thanks':     return '#/thanks';
-      case 'port':       return '#/port';
-      case 'transfers':  return '#/transfers';
-      case 'map':        return p.focus ? `#/map/${p.focus}` : '#/map';
-      case 'map-debug':  return '#/map-debug';
-      default:           return '#/' + r.page;
-    }
-  };
-
-  // Non-URL params (things that don't round-trip well: cart, prefillDate, total, etc.)
-  // We stash them per-navigation in memory; they vanish on reload which is fine.
+  // Route table lives in lib/routes.js so it's shared with SEO + redirect shim.
+  // Non-URL params (things that don't round-trip well: cart, prefillDate, total,
+  // etc.) we stash per-navigation in memory; they vanish on reload which is fine.
   const navMemoryRef = React.useRef({});
   const mergeMemory = (r) => ({
     ...r,
-    params: { ...(navMemoryRef.current[routeToHash(r)] || {}), ...(r.params || {}) }
+    params: { ...(navMemoryRef.current[window.routeToPath(r)] || {}), ...(r.params || {}) }
   });
 
   const [lang, setLangState] = React.useState(saved.lang || TWEAK_DEFAULTS.lang);
@@ -129,11 +94,7 @@ const App = () => {
     saved.displayCurrency || null
   );
   const [theme, setThemeState] = React.useState(TWEAK_DEFAULTS.theme); // tropical only
-  const [route, setRoute] = React.useState(() => {
-    // URL hash wins on load; fall back to persisted route
-    if (window.location.hash && window.location.hash.length > 1) return parseHash();
-    return saved.route || { page: 'home', params: {} };
-  });
+  const [route, setRoute] = React.useState(() => window.parseLocation());
   const [cart, setCartState] = React.useState(Array.isArray(saved.cart) ? saved.cart : []);
   const [cartOpen, setCartOpen] = React.useState(false);
   const [favorites, setFavoritesState] = React.useState(Array.isArray(saved.favorites) ? saved.favorites : []);
@@ -206,11 +167,12 @@ const App = () => {
 
   const navigate = (page, params = {}) => {
     const r = { page, params };
-    const hash = routeToHash(r);
+    const path = window.routeToPath(r);
     // Stash non-URL params (cart, prefillDate, prefillTime, pickup, etc.) in memory
-    navMemoryRef.current[hash] = params;
-    if (window.location.hash !== hash) {
-      window.history.pushState(null, '', hash);
+    navMemoryRef.current[path] = params;
+    const fullPath = path + window.location.search;
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, '', fullPath);
     }
     setRoute(r);
     persist({ route: r });
@@ -219,26 +181,18 @@ const App = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  // Browser back/forward + external hash changes → sync state
+  // Browser back/forward → sync state. Also re-fired by data-api after async
+  // catalog/detail loads so the current page re-renders with fresh data.
   React.useEffect(() => {
-    const onHash = () => {
-      const r = mergeMemory(parseHash());
+    const onPopState = () => {
+      const r = mergeMemory(window.parseLocation());
       setRoute(r);
       persist({ route: r });
       window.__route = r;
       window.dispatchEvent(new Event('__routechange'));
     };
-    window.addEventListener('hashchange', onHash);
-    window.addEventListener('popstate',   onHash);
-    // Ensure the URL reflects the initial route (if loaded from localStorage)
-    const expected = routeToHash(route);
-    if (window.location.hash !== expected) {
-      window.history.replaceState(null, '', expected);
-    }
-    return () => {
-      window.removeEventListener('hashchange', onHash);
-      window.removeEventListener('popstate',   onHash);
-    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   // Publish current route on each change so SEOHead can pick it up
@@ -291,6 +245,7 @@ const App = () => {
     case 'transfers': page = <window.Transfers/>; break;
     case 'map': page = <window.MapPage focus={route.params?.focus}/>; break;
     case 'map-debug': page = <window.MapDebug/>; break;
+    case 'landing': page = <window.Landing slug={route.params?.slug} locale={route.params?.locale}/>; break;
     default: page = <window.Home/>;
   }
 
