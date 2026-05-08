@@ -179,6 +179,16 @@
         qty: Number(a.qty) || 1,
         unitPrice: Math.max(0, Math.round(Number(a.unitPrice) * 100)),
       }));
+    // Coords are optional now: airport-style transfers still pass them
+    // (map picker), zone-based taxi pickups skip them since the customer
+    // only types an address. The webhook only copies addresses anyway.
+    const buildPoint = (p) => {
+      if (!p) return { address: undefined };
+      const out = { address: p.address || undefined };
+      if (p.lat != null && Number.isFinite(Number(p.lat))) out.lat = Number(p.lat);
+      if (p.lng != null && Number.isFinite(Number(p.lng))) out.lng = Number(p.lng);
+      return out;
+    };
     return {
       type: "shuttle_transfer",
       description,
@@ -188,16 +198,8 @@
       currency,
       details: {
         serviceType: t.serviceType || "point_to_point",
-        origin: {
-          address: t.origin?.address || undefined,
-          lat: Number(t.origin.lat),
-          lng: Number(t.origin.lng),
-        },
-        destination: {
-          address: t.destination?.address || undefined,
-          lat: Number(t.destination.lat),
-          lng: Number(t.destination.lng),
-        },
+        origin: buildPoint(t.origin),
+        destination: buildPoint(t.destination),
         pax: Number(t.pax) || 1,
         luggage: Number(t.luggage) || 0,
         vehicleId: t.vehicleId,

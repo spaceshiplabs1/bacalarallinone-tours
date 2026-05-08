@@ -32,6 +32,39 @@ const TourDetail = ({ tourId, prefill }) => {
   const pickup = (Array.isArray(tour.pickupPoints) && tour.pickupPoints[pickupIdx]) || null;
   const pickupSurcharge = pickup?.surcharge || 0;
 
+  // Optional transport options attached to this tour (e.g., round-trip
+  // taxi pickup from any hotel inside a service zone). selectedTransport
+  // = null means "no pickup, customer goes to the meeting point".
+  const transportOptions = Array.isArray(tour.transportOptions) ? tour.transportOptions : [];
+  const [selectedTransport, setSelectedTransport] = useState(null);
+  const [pickupAddress, setPickupAddress] = useState('');
+  const [pickupAddressTouched, setPickupAddressTouched] = useState(false);
+
+  // Convert a transport option's price (in option.pricing.currency, cents)
+  // into the tour's default currency so the cart total can stay in a
+  // single currency. Falls back to source amount if FX is missing.
+  const _transportTotalInTourCurrency = (opt, pax) => {
+    if (!opt) return { cents: 0, vehicleCount: 0 };
+    const cap = opt.vehicle?.passengerCapacity || 1;
+    const vehicleCount = Math.max(1, Math.ceil(pax / cap));
+    const baseCents = (opt.defaultDirection === 'round_trip'
+      ? (opt.pricing?.priceRoundTrip ?? opt.pricing?.priceOneWay)
+      : opt.pricing?.priceOneWay) || 0;
+    const totalSrcCents = baseCents * vehicleCount;
+    const srcCurrency = opt.pricing?.currency || 'USD';
+    const dstCurrency = tour.defaultCurrency || 'USD';
+    if (srcCurrency === dstCurrency) {
+      return { cents: totalSrcCents, vehicleCount };
+    }
+    const conv = window.tagcConvertPrice
+      ? window.tagcConvertPrice(totalSrcCents, srcCurrency, dstCurrency)
+      : null;
+    return {
+      cents: conv == null ? totalSrcCents : Math.round(conv),
+      vehicleCount,
+    };
+  };
+
   const gallery = window.tourGallery(tour);
 
   const addonList = [
@@ -44,10 +77,13 @@ const TourDetail = ({ tourId, prefill }) => {
   // TourZonePrice rows with paxCategory='infant' the price calc will
   // need updating, but for now they're a manifest-only count for the
   // operator (so they know how many car seats / how full the boat is).
+  const _pax = Math.max(1, (Number(adults) || 0) + (Number(kids) || 0));
+  const _transportInfo = _transportTotalInTourCurrency(selectedTransport, _pax);
+  const _transportSubtotal = _transportInfo.cents / 100;
   const total = (tour.flat
     ? tour.priceAdult + Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0)*1,0)
     : adults * tour.priceAdult + kids * (tour.priceKid||0) + (adults+kids) * Object.keys(addons).filter(k=>addons[k]).reduce((a,k)=>a+(addonList.find(x=>x.k===k)?.price||0),0)
-  ) + pickupSurcharge;
+  ) + pickupSurcharge + _transportSubtotal;
 
   const tourReviews = window.REVIEWS.filter(r => r.tour === tour.id).concat(window.REVIEWS.filter(r => r.tour !== tour.id).slice(0,2));
 
@@ -57,7 +93,8 @@ const TourDetail = ({ tourId, prefill }) => {
   // mean the picker degrades gracefully if they haven't arrived yet.
   const cutoffHours = tour.schedules?.[0]?.cutoffHoursBefore ?? 24;
 
-  const canBook = selDate && selTime && (tour.flat || adults > 0);
+  const transportAddressOk = !selectedTransport || pickupAddress.trim().length > 0;
+  const canBook = selDate && selTime && (tour.flat || adults > 0) && transportAddressOk;
 
   return (
     <div className="fade-in">
@@ -490,20 +527,185 @@ const TourDetail = ({ tourId, prefill }) => {
                 </div>
               </div>
 
+              {/* Optional transport. Each option is a route_price priced
+                  by a vendor (e.g., Taxis Bacalar). Selecting one unlocks
+                  a free-text pickup address required before booking. */}
+              {transportOptions.length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <span className="mono" style={{ color:'var(--ink-soft)', display:'block', marginBottom: 8 }}>
+                    {t.transportSection}
+                  </span>
+                  <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
+                    {/* "No transport" choice — tour pickup zones aren't
+                        used for these tours; the customer goes to the
+                        meeting point on their own. */}
+                    <label
+                      className={`addon-row${selectedTransport === null ? ' is-checked' : ''}`}
+                      style={{
+                        display:'flex', alignItems:'flex-start', gap: 10,
+                        padding: '10px 12px',
+                        border: `1px solid ${selectedTransport === null ? 'var(--lagoon)' : 'var(--line)'}`,
+                        background: selectedTransport === null ? 'rgba(184,232,238,0.35)' : 'transparent',
+                        borderRadius: 8, cursor:'pointer',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="transport-choice"
+                        checked={selectedTransport === null}
+                        onChange={()=>{ setSelectedTransport(null); setPickupAddressTouched(false); }}
+                        style={{ marginTop: 3 }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600 }}>{t.transportNone}</div>
+                        <div style={{ fontSize: 11, color:'var(--ink-soft)', marginTop: 2 }}>{t.transportNoneSub}</div>
+                      </div>
+                      <span className="mono" style={{ color:'var(--ink-soft)' }}>{t.transportFree}</span>
+                    </label>
+
+                    {transportOptions.map((opt) => {
+                      const isSel = selectedTransport?.id === opt.id;
+                      const cap = opt.vehicle?.passengerCapacity || 1;
+                      const info = _transportTotalInTourCurrency(opt, _pax);
+                      const dirLabel = opt.defaultDirection === 'round_trip' ? t.transportRoundTrip : t.transportOneWay;
+                      const labelText = opt.label?.[lang] || opt.label?.en || opt.vehicle?.name || 'Pickup';
+                      const descText = opt.description?.[lang] || opt.description?.en || '';
+                      return (
+                        <label
+                          key={opt.id}
+                          className={`addon-row${isSel ? ' is-checked' : ''}`}
+                          style={{
+                            display:'flex', alignItems:'flex-start', gap: 10,
+                            padding: '10px 12px',
+                            border: `1px solid ${isSel ? 'var(--lagoon)' : 'var(--line)'}`,
+                            background: isSel ? 'rgba(184,232,238,0.35)' : 'transparent',
+                            borderRadius: 8, cursor:'pointer',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="transport-choice"
+                            checked={isSel}
+                            onChange={()=>{ setSelectedTransport(opt); setPickupAddressTouched(false); }}
+                            style={{ marginTop: 3 }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600 }}>{labelText}</div>
+                            {descText && (
+                              <div style={{ fontSize: 11, color:'var(--ink-soft)', marginTop: 2 }}>{descText}</div>
+                            )}
+                            <div className="mono" style={{ fontSize: 10, color:'var(--ink-soft)', marginTop: 4 }}>
+                              {dirLabel}
+                              {info.vehicleCount > 1 && ` · ${info.vehicleCount}× (${cap} pax/v)`}
+                            </div>
+                          </div>
+                          <span className="mono" style={{ color:'var(--ink-soft)' }}>
+                            +${(info.cents / 100).toLocaleString()}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {selectedTransport && (
+                    <div style={{ marginTop: 10 }}>
+                      <label className="mono" style={{ display:'block', fontSize: 11, color:'var(--ink-soft)', marginBottom: 4 }}>
+                        {t.transportPickupAddressLabel}
+                      </label>
+                      <textarea
+                        value={pickupAddress}
+                        onChange={(e)=>{ setPickupAddress(e.target.value); setPickupAddressTouched(true); }}
+                        onBlur={()=>setPickupAddressTouched(true)}
+                        placeholder={t.transportPickupAddressPlaceholder}
+                        rows={2}
+                        style={{
+                          width:'100%', padding: '8px 10px', borderRadius: 8,
+                          border: `1px solid ${pickupAddressTouched && !pickupAddress.trim() ? '#dc2626' : 'var(--line-strong)'}`,
+                          fontFamily: 'inherit', fontSize: 13, resize:'vertical',
+                          background:'var(--bone)',
+                        }}
+                      />
+                      {pickupAddressTouched && !pickupAddress.trim() && (
+                        <div style={{ color:'#dc2626', fontSize: 11, marginTop: 4 }}>
+                          {t.transportPickupAddressRequired}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Total */}
               <div style={{ marginTop: 18, padding: 14, background:'var(--ink)', color:'var(--bone)', borderRadius: 10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <span className="mono" style={{ opacity: 0.8 }}>{t.total}</span>
                 <span className="display" style={{ fontSize: 28 }}>${total.toLocaleString()}</span>
               </div>
 
-              <button disabled={!canBook} className="btn btn-sun btn-lg" style={{ width:'100%', marginTop: 14, opacity: canBook ? 1 : 0.5 }}
-                onClick={() => navigate('booking', { tourId: tour.id, adults, kids, infants, addons, date: selDate, time: selTime, total, pickup })}>
-                {t.bookNowAlt || t.continue} <Icon d={icons.arrow} size={14}/>
-              </button>
-              <button disabled={!canBook} className="btn btn-outline" style={{ width:'100%', marginTop: 8, opacity: canBook ? 1 : 0.5 }}
-                onClick={() => addToCart({ tourId: tour.id, adults, kids, infants, addons, date: selDate, time: selTime, subtotal: total, pickup })}>
-                <Icon d={icons.bag} size={14}/> {t.addToCart}
-              </button>
+              {(() => {
+                // Build the cart lines for whichever button the customer
+                // clicks. When a transport option is selected we emit a
+                // separate `kind: 'transfer'` line so the cart drawer +
+                // backend can keep the items distinct.
+                const buildLines = () => {
+                  const tourSubtotal = total - _transportSubtotal;
+                  const tourLine = {
+                    tourId: tour.id,
+                    adults, kids, infants, addons,
+                    date: selDate, time: selTime,
+                    subtotal: tourSubtotal,
+                    pickup,
+                  };
+                  if (!selectedTransport) return [tourLine];
+                  const opt = selectedTransport;
+                  const isRoundTrip = opt.defaultDirection === 'round_trip';
+                  const transferLine = {
+                    kind: 'transfer',
+                    serviceType: isRoundTrip ? 'round_trip' : 'point_to_point',
+                    roundTrip: isRoundTrip,
+                    origin: { address: pickupAddress.trim() },
+                    destination: { address: opt.label?.[lang] || opt.vehicle?.name || 'Tour meeting point' },
+                    pax: _pax,
+                    luggage: 0,
+                    vehicleId: opt.vehicle.id,
+                    vehicleName: opt.vehicle.name,
+                    routePriceId: opt.pricing.routePriceId,
+                    addons: [],
+                    currency: tour.defaultCurrency || 'USD',
+                    subtotal: _transportSubtotal,
+                    _displayLabel: opt.label?.[lang] || opt.label?.en || opt.vehicle?.name,
+                    _displayDescription: opt.description?.[lang] || opt.description?.en,
+                    _vehicleCount: _transportInfo.vehicleCount,
+                    _tourId: tour.id,
+                  };
+                  return [tourLine, transferLine];
+                };
+                const onBookNow = () => {
+                  const lines = buildLines();
+                  if (lines.length > 1) {
+                    navigate('booking', { cart: lines });
+                  } else {
+                    navigate('booking', { tourId: tour.id, adults, kids, infants, addons, date: selDate, time: selTime, total, pickup });
+                  }
+                };
+                const onAddToCart = () => {
+                  const lines = buildLines();
+                  // Last addToCart opens the drawer; preceding ones stay silent
+                  // to avoid flicker.
+                  lines.forEach((line, i) => addToCart(line, { silent: i < lines.length - 1 }));
+                };
+                return (
+                  <>
+                    <button disabled={!canBook} className="btn btn-sun btn-lg" style={{ width:'100%', marginTop: 14, opacity: canBook ? 1 : 0.5 }}
+                      onClick={onBookNow}>
+                      {t.bookNowAlt || t.continue} <Icon d={icons.arrow} size={14}/>
+                    </button>
+                    <button disabled={!canBook} className="btn btn-outline" style={{ width:'100%', marginTop: 8, opacity: canBook ? 1 : 0.5 }}
+                      onClick={onAddToCart}>
+                      <Icon d={icons.bag} size={14}/> {t.addToCart}
+                    </button>
+                  </>
+                );
+              })()}
               <div style={{ textAlign:'center', marginTop: 10, fontSize: 11, color:'var(--ink-soft)' }}>
                 {lang==='en'?'Free cancellation up to 24hrs before':'Cancelación gratis 24hrs antes'}
               </div>

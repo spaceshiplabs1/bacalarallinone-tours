@@ -130,7 +130,18 @@ window.I18N = {
     pathScript: "where do we start?",
     featuredScript: "the crowd-pleasers",
     regionScript: "every shade of blue",
-    whyScript: "small team, big lagoon"
+    whyScript: "small team, big lagoon",
+    transportSection: "Optional transport",
+    transportNone: "No pickup — I'll meet at the meeting point",
+    transportNoneSub: "Get there on your own.",
+    transportFree: "Free",
+    transportRoundTrip: "Round-trip",
+    transportOneWay: "One-way",
+    transportPickupAddressLabel: "Pickup address",
+    transportPickupAddressPlaceholder: "Hotel name, street, references…",
+    transportPickupAddressRequired: "Please tell us where to pick you up.",
+    transportPerVehicle: "per vehicle",
+    transportTwoVehicles: "Up to {cap} pax per vehicle. {n} vehicles needed for {pax} guests."
   },
   es: {
     brand: "bacalartodoenuno",
@@ -262,7 +273,18 @@ window.I18N = {
     pathScript: "¿por dónde empezamos?",
     featuredScript: "los favoritos",
     regionScript: "cada tono de azul",
-    whyScript: "equipo pequeño, laguna grande"
+    whyScript: "equipo pequeño, laguna grande",
+    transportSection: "Transporte opcional",
+    transportNone: "Sin transporte — llego por mi cuenta al punto de encuentro",
+    transportNoneSub: "Tú llegas al lugar.",
+    transportFree: "Gratis",
+    transportRoundTrip: "Ida y vuelta",
+    transportOneWay: "Solo ida",
+    transportPickupAddressLabel: "Dirección de recogida",
+    transportPickupAddressPlaceholder: "Nombre del hotel, calle, referencias…",
+    transportPickupAddressRequired: "Indícanos dónde recogerte.",
+    transportPerVehicle: "por vehículo",
+    transportTwoVehicles: "Hasta {cap} personas por vehículo. Se necesitan {n} vehículos para {pax} pasajeros."
   }
 };
 

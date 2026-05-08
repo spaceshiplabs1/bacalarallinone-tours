@@ -41,16 +41,22 @@ const Booking = ({ booking }) => {
     if (submitState.submitting) return;
     setSubmitState({ submitting: true, error: null });
     try {
-      const cartLines = items.map((it) => ({
-        tourId: it.tourId,
-        date: it.date,
-        time: it.time,
-        adults: it.adults || 0,
-        kids: it.kids || 0,
-        infants: it.infants || 0,
-        pickup: it.pickup,
-        subtotal: Number(it.subtotal) || (Number(booking?.total) || 0),
-      }));
+      // Preserve all line fields (including `kind: 'transfer'` lines which
+      // carry vehicleId / routePriceId / pickup address) so cart-api can
+      // dispatch each item to the right shape.
+      const cartLines = items.map((it) => {
+        if (it.kind === 'transfer') return { ...it };
+        return {
+          tourId: it.tourId,
+          date: it.date,
+          time: it.time,
+          adults: it.adults || 0,
+          kids: it.kids || 0,
+          infants: it.infants || 0,
+          pickup: it.pickup,
+          subtotal: Number(it.subtotal) || (Number(booking?.total) || 0),
+        };
+      });
       const customer = {
         email: form.email,
         name: `${form.firstName} ${form.lastName}`.trim(),
@@ -213,6 +219,26 @@ const BookingSummary = ({ items, grandTotal, isCart }) => {
         </div>
         <div style={{ display:'flex', flexDirection:'column', gap: 14, maxHeight: 420, overflowY: 'auto' }}>
           {items.map((it, idx) => {
+            if (it.kind === 'transfer') {
+              return (
+                <div key={it.id || idx} style={{ display:'flex', gap: 10 }}>
+                  <div style={{ width: 60, height: 60, borderRadius: 8, overflow:'hidden', flexShrink: 0, background:'var(--bone-2)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--ink-soft)' }}>
+                    <Icon d={icons.pin} size={20}/>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}>
+                      {it._displayLabel || it.vehicleName || (lang==='en'?'Transport':'Transporte')}
+                    </div>
+                    {it.origin?.address && (
+                      <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 10, marginTop: 3 }}>
+                        <Icon d={icons.pin} size={9}/> {it.origin.address}
+                      </div>
+                    )}
+                    <div style={{ marginTop: 4, fontSize: 13, fontWeight: 600 }}>${Number(it.subtotal).toLocaleString()}</div>
+                  </div>
+                </div>
+              );
+            }
             const tr = window.TOURS.find(x => x.id === it.tourId);
             if (!tr) return null;
             return (

@@ -1732,6 +1732,44 @@ const CartDrawer = () => {
           ) : (
             <div style={{ display:'flex', flexDirection:'column', gap: 14 }}>
               {cart.map(item => {
+                // Transport / transfer line — companion to a tour line in
+                // the same cart. No image, just a service summary + price.
+                if (item.kind === 'transfer') {
+                  return (
+                    <div key={item.id} className="card" style={{ padding: 12, display:'flex', gap: 12 }}>
+                      <div style={{ width: 86, height: 86, borderRadius: 10, overflow:'hidden', flexShrink: 0, background:'var(--bone-2)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--ink-soft)' }}>
+                        <Icon d={icons.pin} size={28}/>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.2, marginBottom: 4 }}>
+                          {item._displayLabel || item.vehicleName || (lang==='en'?'Transport':'Transporte')}
+                        </div>
+                        {item._displayDescription && (
+                          <div style={{ fontSize: 11, color:'var(--ink-soft)', lineHeight: 1.3 }}>
+                            {item._displayDescription}
+                          </div>
+                        )}
+                        {item.origin?.address && (
+                          <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 10, marginTop: 4 }}>
+                            <Icon d={icons.pin} size={9}/> {item.origin.address}
+                          </div>
+                        )}
+                        {item._vehicleCount > 1 && (
+                          <div className="mono" style={{ color:'var(--ink-soft)', fontSize: 10, marginTop: 2 }}>
+                            {item._vehicleCount}× {item.vehicleName}
+                          </div>
+                        )}
+                        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginTop: 8 }}>
+                          <span className="display" style={{ fontSize: 18 }}>${Number(item.subtotal).toLocaleString()}</span>
+                          <button onClick={()=>removeFromCart(item.id)} title={t.remove}
+                            style={{ background:'transparent', border:'none', cursor:'pointer', color:'var(--ink-soft)', padding: 4 }}>
+                            <Icon d={icons.trash} size={14}/>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 const tour = window.TOURS.find(x => x.id === item.tourId);
                 if (!tour) return null;
                 return (

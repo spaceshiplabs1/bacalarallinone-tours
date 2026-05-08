@@ -352,6 +352,10 @@
             zoneId: z.id,
           }));
         }
+        // Optional transport options the tour exposes (e.g., taxi pickup
+        // from any hotel inside a service zone). Storefront converts the
+        // price client-side via window.tagcConvertPrice.
+        tour.transportOptions = en.transportOptions || [];
       }
       if (esRes.ok) {
         const es = await esRes.json();
